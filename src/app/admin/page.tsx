@@ -93,6 +93,7 @@ export default function AdminPage() {
     telegram: false,
     instapay: false,
     mobile: false,
+    email: false,
   });
   const [notifications, setNotifications] = useState<Notifications | null>(null);
   const [usesRemoteDb, setUsesRemoteDb] = useState(true);
@@ -171,7 +172,7 @@ export default function AdminPage() {
     await loadSettings();
   }
 
-  async function act(id: string, action: "confirm" | "reject" | "delete") {
+  async function act(id: string, action: "confirm" | "reject" | "delete" | "email") {
     if (action === "delete") {
       const ok = window.confirm("هتمسح الطلب ده نهائي؟ مش هيرجع تاني.");
       if (!ok) return;
@@ -186,7 +187,9 @@ export default function AdminPage() {
       setMessage(json.error || "حصل خطأ");
       return;
     }
-    setMessage(action === "delete" ? "اتمسح الطلب" : "");
+    setMessage(
+      action === "delete" ? "اتمسح الطلب" : action === "email" ? "اتبعت إيميل التأكيد للعميل" : ""
+    );
     await load();
   }
 
@@ -319,7 +322,7 @@ export default function AdminPage() {
         </div>
 
         <div style={{ marginBottom: 16, color: "#94A3B8" }}>
-          الربط: كاشير {integrations.kashier ? "✅" : "❌"} — ميتا CAPI {integrations.meta ? "✅" : "❌"} — إشعارات الموبايل {integrations.mobile ? "✅" : "❌"} — إنستاباي {integrations.instapay ? "✅" : "❌"}
+          الربط: كاشير {integrations.kashier ? "✅" : "❌"} — ميتا CAPI {integrations.meta ? "✅" : "❌"} — إشعارات الموبايل {integrations.mobile ? "✅" : "❌"} — إنستاباي {integrations.instapay ? "✅" : "❌"} — إيميل العملاء {integrations.email ? "✅" : "❌"}
         </div>
 
         {tab !== "analytics" ? (
@@ -464,6 +467,12 @@ export default function AdminPage() {
             <button className="buy-btn" disabled={saving}>
               {saving ? "جاري الحفظ..." : "حفظ إعدادات الدفع"}
             </button>
+            <p style={{ marginTop: 16 }}>
+              إيميل تأكيد الدفع بيتبعت لوحده بعد الدفع. عشان يشتغل حط في Vercel:
+              <code className="settings-code" dir="ltr">
+                SMTP_USER=ايميلك@gmail.com — SMTP_PASS=كلمة مرور التطبيقات من جوجل
+              </code>
+            </p>
           </form>
         ) : (
           <>
@@ -583,9 +592,16 @@ export default function AdminPage() {
                           </button>
                         </div>
                       ) : (
-                        <button className="danger-btn" onClick={() => act(order.id, "delete")}>
-                          مسح
-                        </button>
+                        <div style={{ display: "flex", gap: 6, marginTop: 8, flexWrap: "wrap" }}>
+                          {order.status === "paid" ? (
+                            <button className="ok-btn" onClick={() => act(order.id, "email")}>
+                              إعادة إرسال الإيميل
+                            </button>
+                          ) : null}
+                          <button className="danger-btn" onClick={() => act(order.id, "delete")}>
+                            مسح
+                          </button>
+                        </div>
                       )}
                     </td>
                   </tr>

@@ -52,5 +52,6 @@ describe("payment config merge", () => {
     assert.equal(cfg.kashier.mid, "MID-40746-226");
     assert.equal(cfg.kashier.mode, "live");
     assert.equal(kashierConfigured(cfg.kashier), false);
+    assert.match(cfg.deliveryUrl, /drive\.google\.com/);
   });
 });

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { isAdminRequest } from "@/lib/auth";
-import { getPaymentConfig, kashierConfigured } from "@/lib/config";
+import { getPaymentConfig, kashierConfigured, emailConfigured } from "@/lib/config";
 import { setSettings, usesRemoteDb } from "@/lib/db";
 import { getNotificationInfo, sanitizeNtfyTopic } from "@/lib/notify";
 
@@ -34,6 +34,7 @@ export async function GET() {
       instapay: Boolean(cfg.instapay.number),
       mobile: notifications.mobile,
       telegram: notifications.telegram,
+      email: emailConfigured(),
     },
     envOverrides: cfg.envOverrides,
     usesRemoteDb: usesRemoteDb(),
@@ -80,6 +81,7 @@ export async function POST(req: NextRequest) {
       instapay: Boolean(cfg.instapay.number),
       mobile: notifications.mobile,
       telegram: notifications.telegram,
+      email: emailConfigured(),
     },
     envOverrides: cfg.envOverrides,
     usesRemoteDb: usesRemoteDb(),
