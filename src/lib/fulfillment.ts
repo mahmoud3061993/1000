@@ -1,6 +1,6 @@
 import { sendCapiEvent } from "./capi";
 import { SITE_URL } from "./config";
-import { Order, markOrderPaid } from "./db";
+import { Order, markOrderPaid, nowIso, updateOrder } from "./db";
 import { sendPurchaseEmail } from "./email";
 import { notifyOrder } from "./notify";
 
@@ -40,7 +40,9 @@ export async function fulfillPaidOrder(
     },
   });
 
-  await sendPurchaseEmail(paid);
-  await notifyOrder("paid", paid);
-  return paid;
+  const sent = await sendPurchaseEmail(paid);
+  const result =
+    sent.ok ? (await updateOrder(paid.id, { email_sent_at: nowIso() })) || paid : paid;
+  await notifyOrder("paid", result);
+  return result;
 }

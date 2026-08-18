@@ -156,4 +156,33 @@ describe("order funnel and payment states", async () => {
     const url = db.resolveDatabaseUrl({ VERCEL: "1" });
     assert.equal(url.startsWith("file:/tmp/"), true);
   });
+
+  it("stores whether the purchase email was sent", async () => {
+    await db.createOrder({
+      session_id: "s-mail",
+      id: "o-mail",
+      name: "عميل",
+      email: "mail@b.com",
+      phone: "01000000003",
+      amount: 235,
+      currency: "EGP",
+      payment_method: "kashier",
+      status: "awaiting_payment",
+      kashier_order_id: null,
+      kashier_transaction_id: null,
+      instapay_screenshot: null,
+      purchase_event_id: null,
+      fbp: null,
+      fbc: null,
+      ip: null,
+      user_agent: null,
+      created_at: new Date().toISOString(),
+    });
+    const paid = await db.markOrderPaid("o-mail");
+    assert.equal(paid?.email_sent_at ?? null, null);
+    const stamped = await db.updateOrder("o-mail", { email_sent_at: "2026-08-18T10:00:00.000Z" });
+    assert.equal(stamped?.email_sent_at, "2026-08-18T10:00:00.000Z");
+    const listed = await db.listOrders({ status: "paid" });
+    assert.equal(listed.find((order) => order.id === "o-mail")?.email_sent_at, "2026-08-18T10:00:00.000Z");
+  });
 });
