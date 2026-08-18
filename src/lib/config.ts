@@ -73,7 +73,12 @@ export function mergePaymentConfig(
 }
 
 export async function getPaymentConfig(): Promise<PaymentConfig> {
-  return mergePaymentConfig(process.env, await getSettings());
+  try {
+    return mergePaymentConfig(process.env, await getSettings());
+  } catch (error) {
+    console.error("payment config falling back without database", error);
+    return mergePaymentConfig(process.env);
+  }
 }
 
 export const SITE_URL = (

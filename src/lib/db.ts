@@ -49,15 +49,22 @@ export type FunnelStats = {
 let db: Client | null = null;
 let migrated = false;
 
-function databaseUrl() {
-  if (process.env.TURSO_DATABASE_URL) return process.env.TURSO_DATABASE_URL;
-  if (process.env.LIBSQL_URL) return process.env.LIBSQL_URL;
-  const file = process.env.APP_DB_PATH || path.join(process.cwd(), "data", "app.db");
+export function resolveDatabaseUrl(env: NodeJS.Dict<string> = process.env) {
+  if (env.TURSO_DATABASE_URL) return env.TURSO_DATABASE_URL;
+  if (env.LIBSQL_URL) return env.LIBSQL_URL;
+  const onVercel = env.VERCEL === "1";
+  const file =
+    env.APP_DB_PATH ||
+    (onVercel ? path.join("/tmp", "elkousy-app.db") : path.join(process.cwd(), "data", "app.db"));
   if (!file.startsWith("file:")) {
     fs.mkdirSync(path.dirname(file), { recursive: true });
     return `file:${file}`;
   }
   return file;
+}
+
+function databaseUrl() {
+  return resolveDatabaseUrl();
 }
 
 async function migrate(database: Client) {
