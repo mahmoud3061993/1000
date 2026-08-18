@@ -22,8 +22,9 @@ const STATUS_AR: Record<string, string> = {
   rejected: "مرفوض",
 };
 
-export function formatOrderMessage(kind: "trying" | "pending" | "paid" | "failed", order: NotifyOrder) {
+export function formatOrderMessage(kind: "lead" | "trying" | "pending" | "paid" | "failed", order: NotifyOrder) {
   const titles = {
+    lead: "طلب جديد — العميل ملأ بياناته",
     trying: "بيحاول يدفع دلوقتي",
     pending: "طلب إنستاباي جديد — محتاج مراجعة",
     paid: "تم الدفع بنجاح",

@@ -51,5 +51,8 @@ describe("admin order actions and mobile alerts", () => {
     const pending = formatOrderMessage("pending", order({}));
     assert.match(pending, /إنستاباي/);
     assert.match(pending, /01017420379/);
+    const lead = formatOrderMessage("lead", order({ status: "awaiting_payment", payment_method: "kashier" }));
+    assert.match(lead, /ملأ بياناته/);
+    assert.match(lead, /كاشير/);
   });
 });
