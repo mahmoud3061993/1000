@@ -36,6 +36,17 @@ type PaymentSettings = {
   kashier_mode: "live" | "test";
   product_delivery_url: string;
   whatsapp_number: string;
+  ntfy_topic: string;
+};
+
+type Notifications = {
+  topic: string;
+  subscribeUrl: string;
+  appUrl: string;
+  androidApp: string;
+  iosApp: string;
+  telegram: boolean;
+  mobile: boolean;
 };
 
 const STATUS_AR: Record<string, string> = {
@@ -56,6 +67,7 @@ const emptySettings: PaymentSettings = {
   kashier_mode: "live",
   product_delivery_url: "",
   whatsapp_number: "",
+  ntfy_topic: "",
 };
 
 export default function AdminPage() {
@@ -72,7 +84,9 @@ export default function AdminPage() {
     meta: false,
     telegram: false,
     instapay: false,
+    mobile: false,
   });
+  const [notifications, setNotifications] = useState<Notifications | null>(null);
   const [usesRemoteDb, setUsesRemoteDb] = useState(true);
   const [settings, setSettings] = useState<PaymentSettings>(emptySettings);
   const [envOverrides, setEnvOverrides] = useState({
@@ -95,6 +109,7 @@ export default function AdminPage() {
     setStats(json.stats);
     setOrders(json.orders);
     setIntegrations(json.integrations);
+    if (json.notifications) setNotifications(json.notifications);
     setUsesRemoteDb(Boolean(json.usesRemoteDb));
     setChecking(false);
   }
@@ -112,8 +127,10 @@ export default function AdminPage() {
       kashier_mode: json.settings.kashier_mode === "test" ? "test" : "live",
       product_delivery_url: json.settings.product_delivery_url || "",
       whatsapp_number: json.settings.whatsapp_number || "",
+      ntfy_topic: json.settings.ntfy_topic || json.notifications?.topic || "",
     });
     setEnvOverrides(json.envOverrides || envOverrides);
+    if (json.notifications) setNotifications(json.notifications);
     if (json.integrations) {
       setIntegrations((prev) => ({ ...prev, ...json.integrations }));
     }
@@ -160,10 +177,21 @@ export default function AdminPage() {
     await load();
   }
 
-  async function testTelegram() {
+  async function testNotify() {
     const res = await fetch("/api/admin/test-telegram", { method: "POST" });
     const json = await res.json();
-    setMessage(json.ok ? "تم إرسال تجربة الإشعار على تيليجرام" : json.error || "فشل الإرسال");
+    setMessage(json.ok ? json.message || "تم إرسال تجربة الإشعار على الموبايل" : json.error || "فشل الإرسال");
+  }
+
+  async function copyTopic() {
+    const topic = notifications?.topic || settings.ntfy_topic;
+    if (!topic) return;
+    try {
+      await navigator.clipboard.writeText(topic);
+      setMessage("اتنسخ اسم قناة الإشعار");
+    } catch {
+      setMessage(topic);
+    }
   }
 
   async function saveSettings(e: React.FormEvent) {
@@ -181,6 +209,7 @@ export default function AdminPage() {
         kashier_mode: settings.kashier_mode,
         product_delivery_url: settings.product_delivery_url,
         whatsapp_number: settings.whatsapp_number,
+        ntfy_topic: settings.ntfy_topic,
       }),
     });
     const json = await res.json();
@@ -233,7 +262,7 @@ export default function AdminPage() {
             <p style={{ color: "#94A3B8" }}>كل الزيارات والطلبات وحالة الدفع في مكان واحد.</p>
           </div>
           <div style={{ display: "flex", gap: 8 }}>
-            <button className="ghost-btn" onClick={testTelegram}>
+            <button className="ghost-btn" onClick={testNotify}>
               تجربة إشعار الموبايل
             </button>
             <button
@@ -248,7 +277,20 @@ export default function AdminPage() {
           </div>
         </div>
 
-        {message ? <div className={message.includes("اتحفظت") ? "form-ok" : "form-error"}>{message}</div> : null}
+        {message ? (
+          <div
+            className={
+              message.includes("اتحفظت") ||
+              message.includes("اتبعت") ||
+              message.includes("اتنسخ") ||
+              message.includes("تم إرسال")
+                ? "form-ok"
+                : "form-error"
+            }
+          >
+            {message}
+          </div>
+        ) : null}
 
         <div className="admin-tabs">
           <button className={tab === "settings" ? "active" : ""} onClick={() => setTab("settings")}>
@@ -260,8 +302,42 @@ export default function AdminPage() {
         </div>
 
         <div style={{ marginBottom: 16, color: "#94A3B8" }}>
-          الربط: كاشير {integrations.kashier ? "✅" : "❌"} — ميتا CAPI {integrations.meta ? "✅" : "❌"} — تيليجرام {integrations.telegram ? "✅" : "❌"} — إنستاباي {integrations.instapay ? "✅" : "❌"}
+          الربط: كاشير {integrations.kashier ? "✅" : "❌"} — ميتا CAPI {integrations.meta ? "✅" : "❌"} — إشعارات الموبايل {integrations.mobile ? "✅" : "❌"} — إنستاباي {integrations.instapay ? "✅" : "❌"}
         </div>
+
+        <section className="settings-card notify-card">
+          <h2>إشعارات الموبايل مباشرة</h2>
+          <p>
+            من غير تيليجرام. الإشعار هيظهر على التليفون زي إشعار الواتساب. افتح اللينك من الموبايل واسمح بالإشعارات، أو نزّل تطبيق ntfy المجاني.
+          </p>
+          <ol className="notify-steps">
+            <li>افتح اللينك ده <strong>من الموبايل</strong> واسمح بالإشعارات</li>
+            <li>لو آيفون: نزّل تطبيق ntfy وبعدين اضغط تفعيل</li>
+            <li>ارجع هنا واضغط تجربة الإشعار</li>
+          </ol>
+          <div className="notify-actions">
+            <a
+              className="buy-btn"
+              href={notifications?.subscribeUrl || "#"}
+              target="_blank"
+              rel="noreferrer"
+            >
+              تفعيل إشعارات الموبايل
+            </a>
+            <button type="button" className="ghost-btn" onClick={testNotify}>
+              تجربة الإشعار
+            </button>
+            <a className="ghost-btn" href={notifications?.androidApp} target="_blank" rel="noreferrer">
+              تطبيق أندرويد
+            </a>
+            <a className="ghost-btn" href={notifications?.iosApp} target="_blank" rel="noreferrer">
+              تطبيق آيفون
+            </a>
+            <button type="button" className="ghost-btn" onClick={copyTopic}>
+              نسخ القناة
+            </button>
+          </div>
+        </section>
 
         {tab === "settings" ? (
           <form className="settings-card" onSubmit={saveSettings}>
@@ -345,6 +421,15 @@ export default function AdminPage() {
                   value={settings.product_delivery_url}
                   onChange={(e) => setSettings({ ...settings, product_delivery_url: e.target.value })}
                   placeholder="https://drive.google.com/..."
+                  dir="ltr"
+                />
+              </div>
+              <div className="field settings-wide">
+                <label>قناة إشعار الموبايل (اختياري)</label>
+                <input
+                  value={settings.ntfy_topic}
+                  onChange={(e) => setSettings({ ...settings, ntfy_topic: e.target.value })}
+                  placeholder="elkousy-xxxxx"
                   dir="ltr"
                 />
               </div>

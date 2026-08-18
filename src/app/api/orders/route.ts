@@ -5,7 +5,7 @@ import { createOrder, insertEvent, type PaymentMethod } from "@/lib/db";
 import { buildKashierHppUrl } from "@/lib/kashier";
 import { clientIp, getOrCreateSessionId, userAgent } from "@/lib/request";
 import { fileToDataUrl, validateScreenshotFile } from "@/lib/screenshot";
-import { notifyOrder } from "@/lib/telegram";
+import { notifyOrder } from "@/lib/notify";
 
 export const runtime = "nodejs";
 

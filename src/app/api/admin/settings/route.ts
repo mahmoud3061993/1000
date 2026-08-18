@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { isAdminRequest } from "@/lib/auth";
 import { getPaymentConfig, kashierConfigured } from "@/lib/config";
 import { setSettings, usesRemoteDb } from "@/lib/db";
+import { getNotificationInfo, sanitizeNtfyTopic } from "@/lib/notify";
 
 export const runtime = "nodejs";
 
@@ -14,6 +15,7 @@ export async function GET() {
     return NextResponse.json({ ok: false, error: "unauthorized" }, { status: 401 });
   }
   const cfg = await getPaymentConfig();
+  const notifications = await getNotificationInfo();
   return NextResponse.json({
     ok: true,
     settings: {
@@ -24,10 +26,14 @@ export async function GET() {
       kashier_mode: cfg.kashier.mode,
       product_delivery_url: cfg.deliveryUrl,
       whatsapp_number: cfg.whatsapp,
+      ntfy_topic: notifications.topic,
     },
+    notifications,
     integrations: {
       kashier: kashierConfigured(cfg.kashier),
       instapay: Boolean(cfg.instapay.number),
+      mobile: notifications.mobile,
+      telegram: notifications.telegram,
     },
     envOverrides: cfg.envOverrides,
     usesRemoteDb: usesRemoteDb(),
@@ -54,6 +60,9 @@ export async function POST(req: NextRequest) {
   if ("whatsapp_number" in body) {
     patch.whatsapp_number = asString(body.whatsapp_number).replace(/\D/g, "");
   }
+  if ("ntfy_topic" in body) {
+    patch.ntfy_topic = sanitizeNtfyTopic(asString(body.ntfy_topic));
+  }
 
   const apiKey = asString(body.kashier_api_key);
   if (apiKey) {
@@ -62,11 +71,15 @@ export async function POST(req: NextRequest) {
 
   await setSettings(patch);
   const cfg = await getPaymentConfig();
+  const notifications = await getNotificationInfo();
   return NextResponse.json({
     ok: true,
+    notifications,
     integrations: {
       kashier: kashierConfigured(cfg.kashier),
       instapay: Boolean(cfg.instapay.number),
+      mobile: notifications.mobile,
+      telegram: notifications.telegram,
     },
     envOverrides: cfg.envOverrides,
     usesRemoteDb: usesRemoteDb(),

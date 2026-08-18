@@ -1,7 +1,7 @@
 import { sendCapiEvent } from "./capi";
 import { SITE_URL } from "./config";
 import { Order, markOrderPaid } from "./db";
-import { notifyOrder } from "./telegram";
+import { notifyOrder } from "./notify";
 
 export async function fulfillPaidOrder(
   order: Order,

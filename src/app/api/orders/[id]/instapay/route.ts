@@ -3,7 +3,7 @@ import { sendCapiEvent } from "@/lib/capi";
 import { SITE_URL } from "@/lib/config";
 import { getOrder, insertEvent, updateOrder } from "@/lib/db";
 import { fileToDataUrl, validateScreenshotFile } from "@/lib/screenshot";
-import { notifyOrder } from "@/lib/telegram";
+import { notifyOrder } from "@/lib/notify";
 
 export const runtime = "nodejs";
 
