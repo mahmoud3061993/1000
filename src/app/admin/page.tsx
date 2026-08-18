@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import AdminAnalytics from "@/components/AdminAnalytics";
 
 type Order = {
   id: string;
@@ -74,7 +75,7 @@ export default function AdminPage() {
   const [password, setPassword] = useState("");
   const [authed, setAuthed] = useState(false);
   const [checking, setChecking] = useState(true);
-  const [tab, setTab] = useState<"orders" | "settings">("settings");
+  const [tab, setTab] = useState<"orders" | "settings" | "analytics">("analytics");
   const [stats, setStats] = useState<Stats | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);
   const [status, setStatus] = useState("all");
@@ -293,11 +294,14 @@ export default function AdminPage() {
         ) : null}
 
         <div className="admin-tabs">
-          <button className={tab === "settings" ? "active" : ""} onClick={() => setTab("settings")}>
-            إعدادات الدفع
+          <button className={tab === "analytics" ? "active" : ""} onClick={() => setTab("analytics")}>
+            تحليل
           </button>
           <button className={tab === "orders" ? "active" : ""} onClick={() => setTab("orders")}>
             الطلبات
+          </button>
+          <button className={tab === "settings" ? "active" : ""} onClick={() => setTab("settings")}>
+            إعدادات الدفع
           </button>
         </div>
 
@@ -305,39 +309,43 @@ export default function AdminPage() {
           الربط: كاشير {integrations.kashier ? "✅" : "❌"} — ميتا CAPI {integrations.meta ? "✅" : "❌"} — إشعارات الموبايل {integrations.mobile ? "✅" : "❌"} — إنستاباي {integrations.instapay ? "✅" : "❌"}
         </div>
 
-        <section className="settings-card notify-card">
-          <h2>إشعارات الموبايل مباشرة</h2>
-          <p>
-            من غير تيليجرام. الإشعار هيظهر على التليفون زي إشعار الواتساب. افتح اللينك من الموبايل واسمح بالإشعارات، أو نزّل تطبيق ntfy المجاني.
-          </p>
-          <ol className="notify-steps">
-            <li>افتح اللينك ده <strong>من الموبايل</strong> واسمح بالإشعارات</li>
-            <li>لو آيفون: نزّل تطبيق ntfy وبعدين اضغط تفعيل</li>
-            <li>ارجع هنا واضغط تجربة الإشعار</li>
-          </ol>
-          <div className="notify-actions">
-            <a
-              className="buy-btn"
-              href={notifications?.subscribeUrl || "#"}
-              target="_blank"
-              rel="noreferrer"
-            >
-              تفعيل إشعارات الموبايل
-            </a>
-            <button type="button" className="ghost-btn" onClick={testNotify}>
-              تجربة الإشعار
-            </button>
-            <a className="ghost-btn" href={notifications?.androidApp} target="_blank" rel="noreferrer">
-              تطبيق أندرويد
-            </a>
-            <a className="ghost-btn" href={notifications?.iosApp} target="_blank" rel="noreferrer">
-              تطبيق آيفون
-            </a>
-            <button type="button" className="ghost-btn" onClick={copyTopic}>
-              نسخ القناة
-            </button>
-          </div>
-        </section>
+        {tab !== "analytics" ? (
+          <section className="settings-card notify-card">
+            <h2>إشعارات الموبايل مباشرة</h2>
+            <p>
+              من غير تيليجرام. الإشعار هيظهر على التليفون زي إشعار الواتساب. افتح اللينك من الموبايل واسمح بالإشعارات، أو نزّل تطبيق ntfy المجاني.
+            </p>
+            <ol className="notify-steps">
+              <li>افتح اللينك ده <strong>من الموبايل</strong> واسمح بالإشعارات</li>
+              <li>لو آيفون: نزّل تطبيق ntfy وبعدين اضغط تفعيل</li>
+              <li>ارجع هنا واضغط تجربة الإشعار</li>
+            </ol>
+            <div className="notify-actions">
+              <a
+                className="buy-btn"
+                href={notifications?.subscribeUrl || "#"}
+                target="_blank"
+                rel="noreferrer"
+              >
+                تفعيل إشعارات الموبايل
+              </a>
+              <button type="button" className="ghost-btn" onClick={testNotify}>
+                تجربة الإشعار
+              </button>
+              <a className="ghost-btn" href={notifications?.androidApp} target="_blank" rel="noreferrer">
+                تطبيق أندرويد
+              </a>
+              <a className="ghost-btn" href={notifications?.iosApp} target="_blank" rel="noreferrer">
+                تطبيق آيفون
+              </a>
+              <button type="button" className="ghost-btn" onClick={copyTopic}>
+                نسخ القناة
+              </button>
+            </div>
+          </section>
+        ) : null}
+
+        {tab === "analytics" ? <AdminAnalytics /> : null}
 
         {tab === "settings" ? (
           <form className="settings-card" onSubmit={saveSettings}>

@@ -1,0 +1,118 @@
+import assert from "node:assert/strict";
+import { describe, it } from "node:test";
+import {
+  addCalendarDays,
+  buildAnalyticsReport,
+  cairoYmd,
+  parseAnalyticsPeriod,
+  percentChange,
+  periodRange,
+} from "../src/lib/analytics";
+
+describe("admin analytics periods", () => {
+  const now = new Date("2026-08-18T15:00:00.000Z");
+
+  it("parses day/week/month and defaults to week", () => {
+    assert.equal(parseAnalyticsPeriod("day"), "day");
+    assert.equal(parseAnalyticsPeriod("month"), "month");
+    assert.equal(parseAnalyticsPeriod("nope"), "week");
+  });
+
+  it("uses Cairo calendar days for today, 7 days, and 30 days", () => {
+    const today = cairoYmd(now);
+    const day = periodRange("day", now);
+    assert.equal(day.days, 1);
+    assert.equal(day.fromYmd, today);
+    assert.equal(day.toYmdExclusive, addCalendarDays(today, 1));
+
+    const week = periodRange("week", now);
+    assert.equal(week.days, 7);
+    assert.equal(week.fromYmd, addCalendarDays(today, -6));
+    assert.equal(week.previousTo, week.from);
+
+    const month = periodRange("month", now);
+    assert.equal(month.days, 30);
+    assert.equal(month.fromYmd, addCalendarDays(today, -29));
+  });
+
+  it("counts closed orders, waiting payments, and income in the selected window", () => {
+    const range = periodRange("week", now);
+    const inCurrent = new Date(Date.parse(range.from) + 2 * 60 * 60 * 1000).toISOString();
+    const inPrevious = new Date(Date.parse(range.previousFrom) + 2 * 60 * 60 * 1000).toISOString();
+    const report = buildAnalyticsReport({
+      period: "week",
+      now,
+      openPipeline: 2,
+      visits: [
+        { session_id: "s1", created_at: inCurrent },
+        { session_id: "s1", created_at: inCurrent },
+        { session_id: "s2", created_at: inCurrent },
+        { session_id: "s9", created_at: inPrevious },
+      ],
+      orders: [
+        {
+          id: "paid-now",
+          status: "paid",
+          payment_method: "kashier",
+          amount: 235,
+          created_at: inCurrent,
+          paid_at: inCurrent,
+        },
+        {
+          id: "paid-later",
+          status: "paid",
+          payment_method: "instapay",
+          amount: 235,
+          created_at: inPrevious,
+          paid_at: inCurrent,
+        },
+        {
+          id: "waiting",
+          status: "awaiting_payment",
+          payment_method: "kashier",
+          amount: 235,
+          created_at: inCurrent,
+          paid_at: null,
+        },
+        {
+          id: "review",
+          status: "pending_review",
+          payment_method: "instapay",
+          amount: 235,
+          created_at: inCurrent,
+          paid_at: null,
+        },
+        {
+          id: "old-paid",
+          status: "paid",
+          payment_method: "kashier",
+          amount: 235,
+          created_at: inPrevious,
+          paid_at: inPrevious,
+        },
+      ],
+    });
+
+    assert.equal(report.current.closed, 2);
+    assert.equal(report.current.income, 470);
+    assert.equal(report.current.waiting, 2);
+    assert.equal(report.current.pendingReview, 1);
+    assert.equal(report.current.leads, 3);
+    assert.equal(report.current.uniqueVisitors, 2);
+    assert.equal(report.current.instapayClosed, 1);
+    assert.equal(report.current.kashierClosed, 1);
+    assert.equal(report.previous.closed, 1);
+    assert.equal(report.previous.income, 235);
+    assert.equal(report.change.income, 100);
+    assert.equal(report.openPipeline, 2);
+    assert.equal(report.series.length, 7);
+    assert.match(report.insight, /اتقفل 2 طلب/);
+    assert.match(report.insight, /470/);
+  });
+
+  it("treats a jump from zero as 100 percent", () => {
+    assert.equal(percentChange(10, 0), 100);
+    assert.equal(percentChange(0, 0), 0);
+    assert.equal(percentChange(50, 100), -50);
+  });
+});
