@@ -62,7 +62,7 @@ export default function AdminPage() {
   const [password, setPassword] = useState("");
   const [authed, setAuthed] = useState(false);
   const [checking, setChecking] = useState(true);
-  const [tab, setTab] = useState<"orders" | "settings">("settings");
+  const [tab, setTab] = useState<"orders" | "settings">("orders");
   const [stats, setStats] = useState<Stats | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);
   const [status, setStatus] = useState("all");
@@ -123,6 +123,14 @@ export default function AdminPage() {
   useEffect(() => {
     load().then(() => loadSettings());
   }, []);
+
+  useEffect(() => {
+    if (!authed) return;
+    const timer = setInterval(() => {
+      load(status, q);
+    }, 20000);
+    return () => clearInterval(timer);
+  }, [authed, status, q]);
 
   const conversion = useMemo(() => {
     if (!stats || !stats.uniqueVisitors) return "0%";
@@ -250,22 +258,59 @@ export default function AdminPage() {
 
         {message ? <div className={message.includes("اتحفظت") ? "form-ok" : "form-error"}>{message}</div> : null}
 
+        <div className="admin-integrations">
+          <span className={integrations.kashier ? "on" : "off"}>كاشير {integrations.kashier ? "شغال" : "مش متصل"}</span>
+          <span className={integrations.meta ? "on" : "off"}>ميتا CAPI {integrations.meta ? "شغال" : "مش متصل"}</span>
+          <span className={integrations.instapay ? "on" : "off"}>إنستاباي {integrations.instapay ? "شغال" : "مش متصل"}</span>
+          <span className={integrations.telegram ? "on" : "off"}>تيليجرام {integrations.telegram ? "شغال" : "مش متصل"}</span>
+        </div>
+
+        {!usesRemoteDb ? (
+          <div className="form-error">
+            الإحصائيات والطلبات ممكن تتصفر بين الزيارات لأن الموقع على Vercel من غير قاعدة بيانات ثابتة. عشان الأرقام تثبت، نربط Turso.
+          </div>
+        ) : null}
+
+        <div className="stats">
+          <div className="stat">
+            عدد الدخول
+            <b>{stats?.visits ?? 0}</b>
+            <small>{stats?.uniqueVisitors ?? 0} زائر مختلف</small>
+          </div>
+          <div className="stat">
+            ملأ البيانات
+            <b>{stats?.formFilled ?? 0}</b>
+          </div>
+          <div className="stat">
+            بيحاول يدفع
+            <b>{stats?.tryingToPay ?? 0}</b>
+            <small>{stats?.pendingReview ?? 0} إنستاباي مستني مراجعة</small>
+          </div>
+          <div className="stat">
+            دفعوا
+            <b>{stats?.paid ?? 0}</b>
+            <small>
+              {stats?.revenue ?? 0} جنيه — تحويل {conversion}
+            </small>
+          </div>
+          <div className="stat">
+            فشل / مرفوض
+            <b>{stats?.failed ?? 0}</b>
+          </div>
+        </div>
+
         <div className="admin-tabs">
-          <button className={tab === "settings" ? "active" : ""} onClick={() => setTab("settings")}>
-            إعدادات الدفع
-          </button>
           <button className={tab === "orders" ? "active" : ""} onClick={() => setTab("orders")}>
             الطلبات
           </button>
-        </div>
-
-        <div style={{ marginBottom: 16, color: "#94A3B8" }}>
-          الربط: كاشير {integrations.kashier ? "✅" : "❌"} — ميتا CAPI {integrations.meta ? "✅" : "❌"} — تيليجرام {integrations.telegram ? "✅" : "❌"} — إنستاباي {integrations.instapay ? "✅" : "❌"}
+          <button className={tab === "settings" ? "active" : ""} onClick={() => setTab("settings")}>
+            إعدادات الدفع
+          </button>
         </div>
 
         {tab === "settings" ? (
           <form className="settings-card" onSubmit={saveSettings}>
-            <h2>تفعيل الدفع عشان تجرب الطلب</h2>
+            <h2>إعدادات الدفع</h2>
             <p>
               حط رقم إنستاباي ومفاتيح كاشير هنا. إنستاباي هيظهر للعميل عشان يحوّل ويرفع سكرين ويدوس «دفعت». الفيزا والمحفظة هتروح على كاشير.
             </p>
@@ -355,30 +400,6 @@ export default function AdminPage() {
           </form>
         ) : (
           <>
-            <div className="stats">
-              <div className="stat">
-                عدد الدخول
-                <b>{stats?.visits ?? 0}</b>
-                <small>{stats?.uniqueVisitors ?? 0} زائر مختلف</small>
-              </div>
-              <div className="stat">
-                ملأ البيانات
-                <b>{stats?.formFilled ?? 0}</b>
-              </div>
-              <div className="stat">
-                بيحاول يدفع
-                <b>{stats?.tryingToPay ?? 0}</b>
-                <small>{stats?.pendingReview ?? 0} إنستاباي مستني مراجعة</small>
-              </div>
-              <div className="stat">
-                دفعوا
-                <b>{stats?.paid ?? 0}</b>
-                <small>
-                  {stats?.revenue ?? 0} جنيه — تحويل {conversion}
-                </small>
-              </div>
-            </div>
-
             <div className="toolbar">
               <input
                 className="admin-search"
