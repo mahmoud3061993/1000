@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { KASHIER } from "@/lib/config";
+import { getPaymentConfig } from "@/lib/config";
 import { getOrder, updateOrder } from "@/lib/db";
 import { fulfillPaidOrder } from "@/lib/fulfillment";
 import {
@@ -20,7 +20,8 @@ export async function GET(req: NextRequest) {
   const search = req.nextUrl.searchParams;
   const fields = readCallbackFields(search);
   const orderId = fields.merchantOrderId || fields.orderId;
-  const valid = validateKashierCallbackSignature(search, KASHIER.apiKey);
+  const cfg = await getPaymentConfig();
+  const valid = validateKashierCallbackSignature(search, cfg.kashier.apiKey);
 
   if (!orderId) {
     return redirectTo("/thank-you?error=missing_order", req);

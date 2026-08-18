@@ -72,4 +72,16 @@ describe("order funnel and payment states", async () => {
     assert.equal(stats.pendingReview, 1);
     assert.equal(stats.revenue, 235);
   });
+
+  it("stores admin payment settings for Instapay and Kashier", async () => {
+    await db.setSettings({
+      instapay_number: "01017420379",
+      kashier_mid: "MID-22-22",
+      kashier_api_key: "k-secret",
+    });
+    const stored = await db.getSettings();
+    assert.equal(stored.instapay_number, "01017420379");
+    assert.equal(stored.kashier_mid, "MID-22-22");
+    assert.equal(stored.kashier_api_key, "k-secret");
+  });
 });

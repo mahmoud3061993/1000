@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { sendCapiEvent } from "@/lib/capi";
 import { SITE_URL } from "@/lib/config";
 import { getOrder, insertEvent, updateOrder } from "@/lib/db";
+import { fileToDataUrl, validateScreenshotFile } from "@/lib/screenshot";
 import { notifyOrder } from "@/lib/telegram";
 
 export const runtime = "nodejs";
@@ -19,26 +20,12 @@ export async function POST(
   }
 
   const form = await req.formData();
-  const file = form.get("screenshot");
-  if (!(file instanceof File) || file.size < 10_000) {
-    return NextResponse.json(
-      { ok: false, error: "ارفع سكرين شوت واضح لإيصال التحويل" },
-      { status: 400 }
-    );
-  }
-  if (file.size > 4 * 1024 * 1024) {
-    return NextResponse.json({ ok: false, error: "الصورة أكبر من 4 ميجا" }, { status: 400 });
+  const screenshot = validateScreenshotFile(form.get("screenshot"));
+  if (!screenshot.ok) {
+    return NextResponse.json({ ok: false, error: screenshot.error }, { status: 400 });
   }
 
-  const allowed = ["image/jpeg", "image/png", "image/webp", "image/jpg"];
-  if (file.type && !allowed.includes(file.type)) {
-    return NextResponse.json({ ok: false, error: "الصيغة المسموحة: JPG أو PNG" }, { status: 400 });
-  }
-
-  const buffer = Buffer.from(await file.arrayBuffer());
-  const mime = file.type || "image/jpeg";
-  const dataUrl = `data:${mime};base64,${buffer.toString("base64")}`;
-
+  const dataUrl = await fileToDataUrl(screenshot.file);
   const updated = (await updateOrder(order.id, {
     status: "pending_review",
     instapay_screenshot: dataUrl,

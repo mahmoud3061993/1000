@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { KASHIER } from "@/lib/config";
+import { getPaymentConfig } from "@/lib/config";
 import { getOrder, updateOrder } from "@/lib/db";
 import { fulfillPaidOrder } from "@/lib/fulfillment";
 import { isKashierSuccess, validateKashierWebhookSignature } from "@/lib/kashier";
@@ -14,7 +14,8 @@ export async function POST(req: NextRequest) {
     req.headers.get("kashier-signature") ||
     "";
 
-  const valid = validateKashierWebhookSignature(raw, signature, KASHIER.apiKey);
+  const cfg = await getPaymentConfig();
+  const valid = validateKashierWebhookSignature(raw, signature, cfg.kashier.apiKey);
   let payload: Record<string, unknown> = {};
   try {
     payload = JSON.parse(raw || "{}");

@@ -9,66 +9,83 @@ export function CheckoutForm({
   instapayNumber,
   instapayName,
   kashierReady,
+  price = 235,
 }: {
   instapayNumber: string;
   instapayName: string;
   kashierReady: boolean;
+  price?: number;
 }) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
-  const [method, setMethod] = useState<Method>(kashierReady ? "kashier" : "instapay");
-  const [orderId, setOrderId] = useState("");
+  const [method, setMethod] = useState<Method>(
+    kashierReady ? "kashier" : instapayNumber ? "instapay" : "kashier"
+  );
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [copied, setCopied] = useState(false);
   const [file, setFile] = useState<File | null>(null);
+  const [preview, setPreview] = useState("");
 
-  const canSubmit = useMemo(() => name && email && phone && !busy, [name, email, phone, busy]);
+  const canSubmit = useMemo(() => {
+    if (!name || !email || !phone || busy) return false;
+    if (method === "instapay") return Boolean(instapayNumber && file);
+    return kashierReady;
+  }, [name, email, phone, busy, method, instapayNumber, file, kashierReady]);
+
+  function pickFile(next: File | null) {
+    setFile(next);
+    if (preview) URL.revokeObjectURL(preview);
+    setPreview(next ? URL.createObjectURL(next) : "");
+  }
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
     setBusy(true);
     try {
-      if (method === "instapay" && orderId) {
-        if (!file) {
-          setError("ارفع سكرين شوت التحويل من إنستاباي");
-          setBusy(false);
-          return;
-        }
-        const data = new FormData();
-        data.set("screenshot", file);
-        const res = await fetch(`/api/orders/${orderId}/instapay`, { method: "POST", body: data });
-        const json = await res.json();
-        if (!res.ok || !json.ok) {
-          setError(json.error || "حصل خطأ في رفع الإيصال");
-          setBusy(false);
-          return;
-        }
-        window.location.href = json.redirect;
+      if (method === "instapay" && !file) {
+        setError("ارفع سكرين شوت التحويل من إنستاباي وبعدين دوس دفعت");
+        setBusy(false);
         return;
       }
 
       const cookies = getMetaCookies();
       const leadEventId = crypto.randomUUID();
       const checkoutEventId = crypto.randomUUID();
+      const payEventId = crypto.randomUUID();
       firePixel("Lead", { content_name: "+1000 Canva Ads" }, leadEventId);
-      firePixel("InitiateCheckout", { value: 235, currency: "EGP" }, checkoutEventId);
+      firePixel("InitiateCheckout", { value: price, currency: "EGP" }, checkoutEventId);
+      firePixel("AddPaymentInfo", { value: price, currency: "EGP" }, payEventId);
 
-      const res = await fetch("/api/orders", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name,
-          email,
-          phone,
-          method,
-          leadEventId,
-          checkoutEventId,
-          ...cookies,
-        }),
-      });
+      const common = {
+        name,
+        email,
+        phone,
+        method,
+        leadEventId,
+        checkoutEventId,
+        payEventId,
+        ...cookies,
+      };
+
+      let res: Response;
+      if (method === "instapay" && file) {
+        const data = new FormData();
+        Object.entries(common).forEach(([key, value]) => {
+          if (value) data.set(key, String(value));
+        });
+        data.set("screenshot", file);
+        res = await fetch("/api/orders", { method: "POST", body: data });
+      } else {
+        res = await fetch("/api/orders", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(common),
+        });
+      }
+
       const json = await res.json();
       if (!res.ok || !json.ok) {
         setError(json.error || "حصل خطأ، جرّب تاني");
@@ -81,8 +98,7 @@ export function CheckoutForm({
         return;
       }
 
-      setOrderId(json.orderId);
-      setBusy(false);
+      window.location.href = json.redirect || `/thank-you?order=${json.orderId}&pending=1`;
     } catch {
       setError("حصل خطأ في الاتصال");
       setBusy(false);
@@ -93,13 +109,18 @@ export function CheckoutForm({
     <section id="order-form" className="checkout-wrap">
       <h2 className="checkout-title">+1000 winning conversion ads canva editable templates</h2>
       <div className="checkout-price">
-        <strong>235 ج.م</strong>
+        <strong>{price} ج.م</strong>
         <s>2870 ج.م</s>
       </div>
       <div className="checkout-box">
         <h3>يرجى ادخال معلوماتك لإكمال الطلب</h3>
         <form onSubmit={submit}>
           {error ? <div className="form-error">{error}</div> : null}
+          {!kashierReady && !instapayNumber ? (
+            <div className="form-error">
+              الدفع مش متظبط لسه. من لوحة الأدمن حط رقم إنستاباي أو مفاتيح كاشير.
+            </div>
+          ) : null}
           <div className="field">
             <label>الاسم</label>
             <input value={name} onChange={(e) => setName(e.target.value)} required placeholder="اسمك بالكامل" />
@@ -121,7 +142,7 @@ export function CheckoutForm({
               disabled={!kashierReady}
             >
               فيزا / محفظة
-              <small>{kashierReady ? "دفع فوري عبر كاشير" : "كاشير مش متظبط لسه"}</small>
+              <small>{kashierReady ? "دفع فوري عبر كاشير" : "كاشير مش متظبط لسه — من الأدمن"}</small>
             </button>
             <button
               type="button"
@@ -130,14 +151,14 @@ export function CheckoutForm({
               disabled={!instapayNumber}
             >
               إنستاباي
-              <small>حول وابعت سكرين شوت</small>
+              <small>{instapayNumber ? "حوّل وارفع السكرين ودوس دفعت" : "ضيف رقم إنستاباي من الأدمن"}</small>
             </button>
           </div>
 
-          {method === "instapay" && orderId ? (
+          {method === "instapay" && instapayNumber ? (
             <div className="instapay-box">
-              <div>حوّل {235} جنيه إنستاباي على:</div>
-              <div>{instapayName}</div>
+              <div className="instapay-steps">حوّل {price} جنيه إنستاباي، ارفع سكرين التحويل، وبعدين دوس دفعت.</div>
+              {instapayName ? <div>{instapayName}</div> : null}
               <code>{instapayNumber}</code>
               <button
                 type="button"
@@ -154,23 +175,28 @@ export function CheckoutForm({
                 <input
                   type="file"
                   accept="image/*"
-                  onChange={(e) => setFile(e.target.files?.[0] || null)}
+                  onChange={(e) => pickFile(e.target.files?.[0] || null)}
                   required
                 />
               </div>
+              {preview ? (
+                <img src={preview} alt="سكرين التحويل" className="screenshot-preview" />
+              ) : null}
             </div>
           ) : null}
 
           <div className="total-row">
             <span>الاجمالي</span>
-            <span>235 ج.م</span>
+            <span>{price} ج.م</span>
           </div>
           <button className="buy-btn" disabled={!canSubmit}>
             {busy
-              ? "جاري التحويل..."
-              : method === "instapay" && orderId
-                ? "رفع الإيصال وإرسال الطلب"
-                : "اشتري الملف دلوقتي"}
+              ? method === "kashier"
+                ? "جاري التحويل لكاشير..."
+                : "جاري إرسال الإيصال..."
+              : method === "instapay"
+                ? "دفعت"
+                : "ادفع بفيزا أو محفظة"}
           </button>
         </form>
       </div>

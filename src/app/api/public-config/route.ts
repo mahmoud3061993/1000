@@ -1,9 +1,12 @@
 import { NextResponse } from "next/server";
-import { PRODUCT } from "@/lib/config";
+import { PRODUCT, getPaymentConfig } from "@/lib/config";
 
-export function GET() {
+export const dynamic = "force-dynamic";
+
+export async function GET() {
+  const cfg = await getPaymentConfig();
   return NextResponse.json({
-    deliveryUrl: PRODUCT.deliveryUrl,
+    deliveryUrl: cfg.deliveryUrl || PRODUCT.deliveryUrl,
     price: PRODUCT.price,
     currency: PRODUCT.currency,
   });

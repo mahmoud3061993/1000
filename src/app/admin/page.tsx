@@ -27,6 +27,17 @@ type Stats = {
   revenue: number;
 };
 
+type PaymentSettings = {
+  instapay_number: string;
+  instapay_name: string;
+  kashier_mid: string;
+  kashier_api_key: string;
+  kashier_api_key_set: boolean;
+  kashier_mode: "live" | "test";
+  product_delivery_url: string;
+  whatsapp_number: string;
+};
+
 const STATUS_AR: Record<string, string> = {
   form_filled: "ملأ البيانات",
   awaiting_payment: "بيحاول يدفع",
@@ -36,10 +47,22 @@ const STATUS_AR: Record<string, string> = {
   rejected: "مرفوض",
 };
 
+const emptySettings: PaymentSettings = {
+  instapay_number: "",
+  instapay_name: "",
+  kashier_mid: "",
+  kashier_api_key: "",
+  kashier_api_key_set: false,
+  kashier_mode: "live",
+  product_delivery_url: "",
+  whatsapp_number: "",
+};
+
 export default function AdminPage() {
   const [password, setPassword] = useState("");
   const [authed, setAuthed] = useState(false);
   const [checking, setChecking] = useState(true);
+  const [tab, setTab] = useState<"orders" | "settings">("settings");
   const [stats, setStats] = useState<Stats | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);
   const [status, setStatus] = useState("all");
@@ -50,6 +73,14 @@ export default function AdminPage() {
     telegram: false,
     instapay: false,
   });
+  const [usesRemoteDb, setUsesRemoteDb] = useState(true);
+  const [settings, setSettings] = useState<PaymentSettings>(emptySettings);
+  const [envOverrides, setEnvOverrides] = useState({
+    instapay: false,
+    kashier: false,
+    deliveryUrl: false,
+  });
+  const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
 
   async function load(nextStatus = status, nextQ = q) {
@@ -64,11 +95,33 @@ export default function AdminPage() {
     setStats(json.stats);
     setOrders(json.orders);
     setIntegrations(json.integrations);
+    setUsesRemoteDb(Boolean(json.usesRemoteDb));
     setChecking(false);
   }
 
+  async function loadSettings() {
+    const res = await fetch("/api/admin/settings");
+    if (!res.ok) return;
+    const json = await res.json();
+    setSettings({
+      instapay_number: json.settings.instapay_number || "",
+      instapay_name: json.settings.instapay_name || "",
+      kashier_mid: json.settings.kashier_mid || "",
+      kashier_api_key: "",
+      kashier_api_key_set: Boolean(json.settings.kashier_api_key_set),
+      kashier_mode: json.settings.kashier_mode === "test" ? "test" : "live",
+      product_delivery_url: json.settings.product_delivery_url || "",
+      whatsapp_number: json.settings.whatsapp_number || "",
+    });
+    setEnvOverrides(json.envOverrides || envOverrides);
+    if (json.integrations) {
+      setIntegrations((prev) => ({ ...prev, ...json.integrations }));
+    }
+    if (typeof json.usesRemoteDb === "boolean") setUsesRemoteDb(json.usesRemoteDb);
+  }
+
   useEffect(() => {
-    load();
+    load().then(() => loadSettings());
   }, []);
 
   const conversion = useMemo(() => {
@@ -90,6 +143,7 @@ export default function AdminPage() {
     }
     setMessage("");
     await load();
+    await loadSettings();
   }
 
   async function act(id: string, action: "confirm" | "reject") {
@@ -110,6 +164,35 @@ export default function AdminPage() {
     const res = await fetch("/api/admin/test-telegram", { method: "POST" });
     const json = await res.json();
     setMessage(json.ok ? "تم إرسال تجربة الإشعار على تيليجرام" : json.error || "فشل الإرسال");
+  }
+
+  async function saveSettings(e: React.FormEvent) {
+    e.preventDefault();
+    setSaving(true);
+    setMessage("");
+    const res = await fetch("/api/admin/settings", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        instapay_number: settings.instapay_number,
+        instapay_name: settings.instapay_name,
+        kashier_mid: settings.kashier_mid,
+        kashier_api_key: settings.kashier_api_key,
+        kashier_mode: settings.kashier_mode,
+        product_delivery_url: settings.product_delivery_url,
+        whatsapp_number: settings.whatsapp_number,
+      }),
+    });
+    const json = await res.json();
+    setSaving(false);
+    if (!res.ok || !json.ok) {
+      setMessage(json.error || "فشل حفظ الإعدادات");
+      return;
+    }
+    setMessage("اتحفظت إعدادات الدفع. ارجع للصفحة الرئيسية وجرّب الطلب.");
+    setSettings((prev) => ({ ...prev, kashier_api_key: "" }));
+    await load();
+    await loadSettings();
   }
 
   if (checking) {
@@ -165,119 +248,222 @@ export default function AdminPage() {
           </div>
         </div>
 
-        {message ? <div className="form-error">{message}</div> : null}
+        {message ? <div className={message.includes("اتحفظت") ? "form-ok" : "form-error"}>{message}</div> : null}
 
-        <div className="stats">
-          <div className="stat">
-            عدد الدخول
-            <b>{stats?.visits ?? 0}</b>
-            <small>{stats?.uniqueVisitors ?? 0} زائر مختلف</small>
-          </div>
-          <div className="stat">
-            ملأ البيانات
-            <b>{stats?.formFilled ?? 0}</b>
-          </div>
-          <div className="stat">
-            بيحاول يدفع
-            <b>{stats?.tryingToPay ?? 0}</b>
-            <small>{stats?.pendingReview ?? 0} إنستاباي مستني مراجعة</small>
-          </div>
-          <div className="stat">
-            دفعوا
-            <b>{stats?.paid ?? 0}</b>
-            <small>
-              {stats?.revenue ?? 0} جنيه — تحويل {conversion}
-            </small>
-          </div>
+        <div className="admin-tabs">
+          <button className={tab === "settings" ? "active" : ""} onClick={() => setTab("settings")}>
+            إعدادات الدفع
+          </button>
+          <button className={tab === "orders" ? "active" : ""} onClick={() => setTab("orders")}>
+            الطلبات
+          </button>
         </div>
 
         <div style={{ marginBottom: 16, color: "#94A3B8" }}>
           الربط: كاشير {integrations.kashier ? "✅" : "❌"} — ميتا CAPI {integrations.meta ? "✅" : "❌"} — تيليجرام {integrations.telegram ? "✅" : "❌"} — إنستاباي {integrations.instapay ? "✅" : "❌"}
         </div>
 
-        <div className="toolbar">
-          <input
-            className="admin-search"
-            placeholder="بحث بالاسم أو الموبايل أو الإيميل"
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") load(status, q);
-            }}
-          />
-          <select
-            className="admin-filter"
-            value={status}
-            onChange={(e) => {
-              setStatus(e.target.value);
-              load(e.target.value, q);
-            }}
-          >
-            <option value="all">كل الحالات</option>
-            <option value="form_filled">ملأ البيانات</option>
-            <option value="awaiting_payment">بيحاول يدفع</option>
-            <option value="pending_review">قيد المراجعة</option>
-            <option value="paid">تم الدفع</option>
-            <option value="failed">فشل</option>
-            <option value="rejected">مرفوض</option>
-          </select>
-          <button className="ghost-btn" onClick={() => load(status, q)}>
-            تحديث
-          </button>
-        </div>
+        {tab === "settings" ? (
+          <form className="settings-card" onSubmit={saveSettings}>
+            <h2>تفعيل الدفع عشان تجرب الطلب</h2>
+            <p>
+              حط رقم إنستاباي ومفاتيح كاشير هنا. إنستاباي هيظهر للعميل عشان يحوّل ويرفع سكرين ويدوس «دفعت». الفيزا والمحفظة هتروح على كاشير.
+            </p>
+            {!usesRemoteDb ? (
+              <div className="form-error">
+                قاعدة البيانات لسه ملف محلي. على Vercel الإعدادات ممكن تضيع بين الطلبات. الأفضل تربط Turso أو تحط نفس القيم في Environment Variables.
+              </div>
+            ) : null}
+            {envOverrides.instapay || envOverrides.kashier ? (
+              <div className="form-ok">
+                في قيم متظبطة من Vercel Environment Variables وهتغلب اللي هتحفظه هنا.
+              </div>
+            ) : null}
 
-        <table className="admin-table">
-          <thead>
-            <tr>
-              <th>الطلب</th>
-              <th>العميل</th>
-              <th>الوسيلة</th>
-              <th>الحالة</th>
-              <th>التاريخ</th>
-              <th>إجراء</th>
-            </tr>
-          </thead>
-          <tbody>
-            {orders.map((order) => (
-              <tr key={order.id}>
-                <td>
-                  {order.id}
-                  <div>{order.amount} {order.currency}</div>
-                </td>
-                <td>
-                  <div>{order.name}</div>
-                  <div>{order.phone}</div>
-                  <div>{order.email}</div>
-                </td>
-                <td>{order.payment_method === "instapay" ? "إنستاباي" : "كاشير"}</td>
-                <td>
-                  <span className={`badge ${order.status}`}>{STATUS_AR[order.status] || order.status}</span>
-                </td>
-                <td>{new Date(order.created_at).toLocaleString("ar-EG")}</td>
-                <td>
-                  {order.instapay_screenshot ? (
-                    <a href={`/api/admin/orders/${order.id}/screenshot`} target="_blank" rel="noreferrer">
-                      السكرين
-                    </a>
-                  ) : null}
-                  {order.status === "pending_review" || order.status === "awaiting_payment" ? (
-                    <div style={{ display: "flex", gap: 6, marginTop: 8 }}>
-                      <button className="ok-btn" onClick={() => act(order.id, "confirm")}>
-                        تأكيد الدفع
-                      </button>
-                      {order.status === "pending_review" ? (
-                        <button className="danger-btn" onClick={() => act(order.id, "reject")}>
-                          رفض
-                        </button>
+            <div className="settings-grid">
+              <div className="field">
+                <label>رقم إنستاباي</label>
+                <input
+                  value={settings.instapay_number}
+                  onChange={(e) => setSettings({ ...settings, instapay_number: e.target.value })}
+                  placeholder="01xxxxxxxxx"
+                  dir="ltr"
+                />
+              </div>
+              <div className="field">
+                <label>اسم الحساب</label>
+                <input
+                  value={settings.instapay_name}
+                  onChange={(e) => setSettings({ ...settings, instapay_name: e.target.value })}
+                  placeholder="Mahmoud Elkousy"
+                />
+              </div>
+              <div className="field">
+                <label>كاشير Merchant ID</label>
+                <input
+                  value={settings.kashier_mid}
+                  onChange={(e) => setSettings({ ...settings, kashier_mid: e.target.value })}
+                  placeholder="MID-xx-xx"
+                  dir="ltr"
+                />
+              </div>
+              <div className="field">
+                <label>كاشير API Key {settings.kashier_api_key_set ? "(متسجل)" : ""}</label>
+                <input
+                  type="password"
+                  value={settings.kashier_api_key}
+                  onChange={(e) => setSettings({ ...settings, kashier_api_key: e.target.value })}
+                  placeholder={settings.kashier_api_key_set ? "سيب فاضي لو مش هتغيره" : "Payment API Key"}
+                  dir="ltr"
+                />
+              </div>
+              <div className="field">
+                <label>وضع كاشير</label>
+                <select
+                  className="admin-filter"
+                  value={settings.kashier_mode}
+                  onChange={(e) =>
+                    setSettings({ ...settings, kashier_mode: e.target.value === "test" ? "test" : "live" })
+                  }
+                >
+                  <option value="live">live</option>
+                  <option value="test">test</option>
+                </select>
+              </div>
+              <div className="field">
+                <label>واتساب</label>
+                <input
+                  value={settings.whatsapp_number}
+                  onChange={(e) => setSettings({ ...settings, whatsapp_number: e.target.value })}
+                  placeholder="201017420379"
+                  dir="ltr"
+                />
+              </div>
+              <div className="field settings-wide">
+                <label>لينك المكتبة بعد الدفع (Google Drive)</label>
+                <input
+                  value={settings.product_delivery_url}
+                  onChange={(e) => setSettings({ ...settings, product_delivery_url: e.target.value })}
+                  placeholder="https://drive.google.com/..."
+                  dir="ltr"
+                />
+              </div>
+            </div>
+            <button className="buy-btn" disabled={saving}>
+              {saving ? "جاري الحفظ..." : "حفظ إعدادات الدفع"}
+            </button>
+          </form>
+        ) : (
+          <>
+            <div className="stats">
+              <div className="stat">
+                عدد الدخول
+                <b>{stats?.visits ?? 0}</b>
+                <small>{stats?.uniqueVisitors ?? 0} زائر مختلف</small>
+              </div>
+              <div className="stat">
+                ملأ البيانات
+                <b>{stats?.formFilled ?? 0}</b>
+              </div>
+              <div className="stat">
+                بيحاول يدفع
+                <b>{stats?.tryingToPay ?? 0}</b>
+                <small>{stats?.pendingReview ?? 0} إنستاباي مستني مراجعة</small>
+              </div>
+              <div className="stat">
+                دفعوا
+                <b>{stats?.paid ?? 0}</b>
+                <small>
+                  {stats?.revenue ?? 0} جنيه — تحويل {conversion}
+                </small>
+              </div>
+            </div>
+
+            <div className="toolbar">
+              <input
+                className="admin-search"
+                placeholder="بحث بالاسم أو الموبايل أو الإيميل"
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") load(status, q);
+                }}
+              />
+              <select
+                className="admin-filter"
+                value={status}
+                onChange={(e) => {
+                  setStatus(e.target.value);
+                  load(e.target.value, q);
+                }}
+              >
+                <option value="all">كل الحالات</option>
+                <option value="form_filled">ملأ البيانات</option>
+                <option value="awaiting_payment">بيحاول يدفع</option>
+                <option value="pending_review">قيد المراجعة</option>
+                <option value="paid">تم الدفع</option>
+                <option value="failed">فشل</option>
+                <option value="rejected">مرفوض</option>
+              </select>
+              <button className="ghost-btn" onClick={() => load(status, q)}>
+                تحديث
+              </button>
+            </div>
+
+            <table className="admin-table">
+              <thead>
+                <tr>
+                  <th>الطلب</th>
+                  <th>العميل</th>
+                  <th>الوسيلة</th>
+                  <th>الحالة</th>
+                  <th>التاريخ</th>
+                  <th>إجراء</th>
+                </tr>
+              </thead>
+              <tbody>
+                {orders.map((order) => (
+                  <tr key={order.id}>
+                    <td>
+                      {order.id}
+                      <div>{order.amount} {order.currency}</div>
+                    </td>
+                    <td>
+                      <div>{order.name}</div>
+                      <div>{order.phone}</div>
+                      <div>{order.email}</div>
+                    </td>
+                    <td>{order.payment_method === "instapay" ? "إنستاباي" : "كاشير"}</td>
+                    <td>
+                      <span className={`badge ${order.status}`}>{STATUS_AR[order.status] || order.status}</span>
+                    </td>
+                    <td>{new Date(order.created_at).toLocaleString("ar-EG")}</td>
+                    <td>
+                      {order.instapay_screenshot ? (
+                        <a href={`/api/admin/orders/${order.id}/screenshot`} target="_blank" rel="noreferrer">
+                          السكرين
+                        </a>
                       ) : null}
-                    </div>
-                  ) : null}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        {orders.length === 0 ? <p>مفيش طلبات بالحالة دي.</p> : null}
+                      {order.status === "pending_review" || order.status === "awaiting_payment" ? (
+                        <div style={{ display: "flex", gap: 6, marginTop: 8 }}>
+                          <button className="ok-btn" onClick={() => act(order.id, "confirm")}>
+                            تأكيد الدفع
+                          </button>
+                          {order.status === "pending_review" ? (
+                            <button className="danger-btn" onClick={() => act(order.id, "reject")}>
+                              رفض
+                            </button>
+                          ) : null}
+                        </div>
+                      ) : null}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            {orders.length === 0 ? <p>مفيش طلبات بالحالة دي.</p> : null}
+          </>
+        )}
       </div>
     </div>
   );

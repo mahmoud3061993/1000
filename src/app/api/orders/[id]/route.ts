@@ -3,9 +3,11 @@ import { getOrder } from "@/lib/db";
 
 export const runtime = "nodejs";
 
-export async function GET(req: NextRequest) {
-  const id = req.nextUrl.searchParams.get("id") || "";
-  const order = await getOrder(id);
+export async function GET(
+  _req: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  const order = await getOrder(params.id);
   if (!order) {
     return NextResponse.json({ ok: false }, { status: 404 });
   }

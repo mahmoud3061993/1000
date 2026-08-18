@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { parseStoredScreenshot } from "../src/lib/screenshot";
+import { parseStoredScreenshot, validateScreenshotFile } from "../src/lib/screenshot";
 
 describe("screenshot storage for Vercel", () => {
   it("round-trips a data URL screenshot", () => {
@@ -14,5 +14,10 @@ describe("screenshot storage for Vercel", () => {
   it("returns null when empty", () => {
     assert.equal(parseStoredScreenshot(null), null);
     assert.equal(parseStoredScreenshot(""), null);
+  });
+
+  it("rejects missing or tiny screenshots", () => {
+    assert.equal(validateScreenshotFile(null).ok, false);
+    assert.equal(validateScreenshotFile("not-a-file").ok, false);
   });
 });
