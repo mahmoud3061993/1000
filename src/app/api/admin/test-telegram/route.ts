@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { isAdminRequest } from "@/lib/auth";
-import { notifyTelegram } from "@/lib/telegram";
-import { telegramConfigured } from "@/lib/config";
+import { notifyText } from "@/lib/notify";
 
 export const runtime = "nodejs";
 
@@ -9,12 +8,27 @@ export async function POST() {
   if (!isAdminRequest()) {
     return NextResponse.json({ ok: false, error: "unauthorized" }, { status: 401 });
   }
-  if (!telegramConfigured()) {
+  const result = await notifyText(
+    "تجربة إشعار من لوحة الأدمن — لو الرسالة دي ظهرت على الموبايل يبقى الإشعارات شغالة.",
+    {
+      title: "تجربة إشعار الموبايل",
+      priority: 5,
+      tags: ["bell"],
+    }
+  );
+  if (!result.ok) {
     return NextResponse.json(
-      { ok: false, error: "تيليجرام مش متظبط. حط TELEGRAM_BOT_TOKEN و TELEGRAM_CHAT_ID" },
-      { status: 400 }
+      {
+        ok: false,
+        error: "فشل إرسال الإشعار. جرّب تاني بعد شوية، ولو استمرت المشكلة افتح لينك التفعيل من الموبايل.",
+        channels: result,
+      },
+      { status: 502 }
     );
   }
-  const result = await notifyTelegram("تجربة إشعار من لوحة الأدمن — لو الرسالة دي وصلتك يبقى الربط تمام.");
-  return NextResponse.json({ ok: Boolean(result && "ok" in result ? result.ok : false) });
+  return NextResponse.json({
+    ok: true,
+    message: "اتبعت الإشعار على الموبايل. لو مش ظاهر، افتح لينك التفعيل من التليفون واسمح بالإشعارات.",
+    channels: result,
+  });
 }

@@ -3,7 +3,7 @@ import { isAdminRequest } from "@/lib/auth";
 import { getOrder, updateOrder } from "@/lib/db";
 import { fulfillPaidOrder } from "@/lib/fulfillment";
 import { canConfirmInstapay, canRejectInstapay } from "@/lib/orders";
-import { notifyTelegram } from "@/lib/telegram";
+import { notifyText } from "@/lib/notify";
 
 export const runtime = "nodejs";
 
@@ -33,8 +33,9 @@ export async function POST(
     return NextResponse.json({ ok: false, error: "مفيش حاجة تترفض" }, { status: 400 });
   }
   const rejected = await updateOrder(order.id, { status: "rejected" });
-  await notifyTelegram(
-    `طلب مرفوض بعد مراجعة إنستاباي\nالاسم: ${order.name}\nالموبايل: ${order.phone}\nرقم الطلب: ${order.id}`
+  await notifyText(
+    `طلب مرفوض بعد مراجعة إنستاباي\nالاسم: ${order.name}\nالموبايل: ${order.phone}\nرقم الطلب: ${order.id}`,
+    { title: "طلب إنستاباي مرفوض", priority: 4, tags: ["x"] }
   );
   return NextResponse.json({ ok: true, order: rejected });
 }

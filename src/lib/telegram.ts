@@ -86,9 +86,3 @@ export async function notifyTelegram(text: string, screenshot?: string | null) {
     return { skipped: false as const, ok: false as const };
   }
 }
-
-export async function notifyOrder(kind: "trying" | "pending" | "paid" | "failed", order: NotifyOrder) {
-  const screenshot =
-    kind === "pending" && order.instapay_screenshot ? order.instapay_screenshot : null;
-  return notifyTelegram(formatOrderMessage(kind, order), screenshot);
-}

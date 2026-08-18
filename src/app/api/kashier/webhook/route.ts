@@ -3,7 +3,7 @@ import { getPaymentConfig } from "@/lib/config";
 import { getOrder, updateOrder } from "@/lib/db";
 import { fulfillPaidOrder } from "@/lib/fulfillment";
 import { isKashierSuccess, validateKashierWebhookSignature } from "@/lib/kashier";
-import { notifyOrder } from "@/lib/telegram";
+import { notifyOrder } from "@/lib/notify";
 
 export const runtime = "nodejs";
 

@@ -7,7 +7,7 @@ import {
   readCallbackFields,
   validateKashierCallbackSignature,
 } from "@/lib/kashier";
-import { notifyOrder } from "@/lib/telegram";
+import { notifyOrder } from "@/lib/notify";
 
 export const runtime = "nodejs";
 

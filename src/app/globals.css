@@ -213,6 +213,35 @@ a { color: inherit; }
   color: #e8eef7;
 }
 
+.notify-card {
+  border-color: #54C7FF;
+}
+
+.notify-steps {
+  margin: 0 0 16px;
+  padding-right: 18px;
+  color: #cbd5e1;
+  line-height: 1.8;
+}
+
+.notify-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.notify-actions .buy-btn,
+.notify-actions .ghost-btn {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.notify-actions .ghost-btn {
+  line-height: 1.2;
+}
+
 .instapay-box {
   background: #fff;
   border: 1px solid #d7dbe3;
