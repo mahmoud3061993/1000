@@ -84,4 +84,9 @@ describe("order funnel and payment states", async () => {
     assert.equal(stored.kashier_mid, "MID-22-22");
     assert.equal(stored.kashier_api_key, "k-secret");
   });
+
+  it("uses /tmp for SQLite on Vercel when Turso is not configured", () => {
+    const url = db.resolveDatabaseUrl({ VERCEL: "1" });
+    assert.equal(url.startsWith("file:/tmp/"), true);
+  });
 });
