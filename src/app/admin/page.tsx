@@ -171,7 +171,11 @@ export default function AdminPage() {
     await loadSettings();
   }
 
-  async function act(id: string, action: "confirm" | "reject") {
+  async function act(id: string, action: "confirm" | "reject" | "delete") {
+    if (action === "delete") {
+      const ok = window.confirm("هتمسح الطلب ده نهائي؟ مش هيرجع تاني.");
+      if (!ok) return;
+    }
     const res = await fetch(`/api/admin/orders/${id}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -182,6 +186,7 @@ export default function AdminPage() {
       setMessage(json.error || "حصل خطأ");
       return;
     }
+    setMessage(action === "delete" ? "اتمسح الطلب" : "");
     await load();
   }
 
@@ -291,6 +296,7 @@ export default function AdminPage() {
               message.includes("اتحفظت") ||
               message.includes("اتبعت") ||
               message.includes("اتنسخ") ||
+              message.includes("اتمسح") ||
               message.includes("تم إرسال")
                 ? "form-ok"
                 : "form-error"
@@ -563,7 +569,7 @@ export default function AdminPage() {
                         </a>
                       ) : null}
                       {order.status === "pending_review" || order.status === "awaiting_payment" ? (
-                        <div style={{ display: "flex", gap: 6, marginTop: 8 }}>
+                        <div style={{ display: "flex", gap: 6, marginTop: 8, flexWrap: "wrap" }}>
                           <button className="ok-btn" onClick={() => act(order.id, "confirm")}>
                             تأكيد الدفع
                           </button>
@@ -572,8 +578,15 @@ export default function AdminPage() {
                               رفض
                             </button>
                           ) : null}
+                          <button className="danger-btn" onClick={() => act(order.id, "delete")}>
+                            مسح
+                          </button>
                         </div>
-                      ) : null}
+                      ) : (
+                        <button className="danger-btn" onClick={() => act(order.id, "delete")}>
+                          مسح
+                        </button>
+                      )}
                     </td>
                   </tr>
                 ))}

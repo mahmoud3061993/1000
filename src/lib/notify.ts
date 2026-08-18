@@ -4,7 +4,7 @@ import { getSettings } from "./db";
 import { fileNameForMime, parseStoredScreenshot } from "./screenshot";
 import { formatOrderMessage, notifyTelegram } from "./telegram";
 
-export type NotifyKind = "trying" | "pending" | "paid" | "failed";
+export type NotifyKind = "lead" | "trying" | "pending" | "paid" | "failed";
 
 type NotifyOrder = {
   id: string;
@@ -19,6 +19,7 @@ type NotifyOrder = {
 };
 
 const ORDER_TITLES: Record<NotifyKind, string> = {
+  lead: "طلب جديد — ملأ البيانات",
   trying: "بيحاول يدفع دلوقتي",
   pending: "طلب إنستاباي جديد — محتاج مراجعة",
   paid: "تم الدفع بنجاح",
@@ -26,6 +27,7 @@ const ORDER_TITLES: Record<NotifyKind, string> = {
 };
 
 const ORDER_TAGS: Record<NotifyKind, string[]> = {
+  lead: ["bust_in_silhouette", "bell"],
   trying: ["bell", "credit_card"],
   pending: ["warning", "camera"],
   paid: ["white_check_mark", "moneybag"],
@@ -180,7 +182,7 @@ export async function notifyOrder(kind: NotifyKind, order: NotifyOrder) {
   return notifyText(formatOrderMessage(kind, order), {
     title: ORDER_TITLES[kind],
     screenshot,
-    priority: kind === "paid" || kind === "pending" ? 5 : 4,
+    priority: kind === "paid" || kind === "pending" || kind === "lead" ? 5 : 4,
     tags: ORDER_TAGS[kind],
   });
 }

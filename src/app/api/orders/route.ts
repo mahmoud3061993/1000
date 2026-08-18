@@ -161,6 +161,8 @@ export async function POST(req: NextRequest) {
     created_at: new Date().toISOString(),
   });
 
+  await notifyOrder("lead", order);
+
   await insertEvent({ id: leadEventId, session_id: sessionId, order_id: orderId, name: "Lead" });
   await insertEvent({
     id: checkoutEventId,
@@ -211,7 +213,6 @@ export async function POST(req: NextRequest) {
   });
 
   if (method === "kashier") {
-    await notifyOrder("trying", order);
     const checkoutUrl = buildKashierHppUrl({
       orderId,
       amount: PRODUCT.price,

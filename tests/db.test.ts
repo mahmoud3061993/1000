@@ -125,6 +125,33 @@ describe("order funnel and payment states", async () => {
     assert.equal(listed.find((order) => order.id === "o-ad")?.utm_content, "video-1");
   });
 
+  it("deletes an old order from admin", async () => {
+    await db.createOrder({
+      session_id: "s-del",
+      id: "o-del",
+      name: "قديم",
+      email: "old@b.com",
+      phone: "01000000002",
+      amount: 235,
+      currency: "EGP",
+      payment_method: "kashier",
+      status: "failed",
+      kashier_order_id: null,
+      kashier_transaction_id: null,
+      instapay_screenshot: null,
+      purchase_event_id: null,
+      fbp: null,
+      fbc: null,
+      ip: null,
+      user_agent: null,
+      created_at: new Date().toISOString(),
+    });
+    assert.equal(Boolean(await db.getOrder("o-del")), true);
+    assert.equal(await db.deleteOrder("o-del"), true);
+    assert.equal(await db.getOrder("o-del"), undefined);
+    assert.equal(await db.deleteOrder("missing"), false);
+  });
+
   it("uses /tmp for SQLite on Vercel when Turso is not configured", () => {
     const url = db.resolveDatabaseUrl({ VERCEL: "1" });
     assert.equal(url.startsWith("file:/tmp/"), true);

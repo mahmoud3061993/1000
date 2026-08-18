@@ -334,6 +334,21 @@ export async function updateOrder(id: string, patch: Partial<Order>) {
   return getOrder(id);
 }
 
+export async function deleteOrder(id: string) {
+  const current = await getOrder(id);
+  if (!current) return false;
+  const database = await getDb();
+  await database.execute({
+    sql: `DELETE FROM events WHERE order_id = ?`,
+    args: [id],
+  });
+  await database.execute({
+    sql: `DELETE FROM orders WHERE id = ?`,
+    args: [id],
+  });
+  return true;
+}
+
 export async function getSessionAttribution(sessionId: string) {
   if (!sessionId) return null;
   const database = await getDb();
