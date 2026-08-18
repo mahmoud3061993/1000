@@ -45,4 +45,12 @@ describe("payment config merge", () => {
     const cfg = mergePaymentConfig({}, { kashier_mid: "MID-1-1" });
     assert.equal(kashierConfigured(cfg.kashier), false);
   });
+
+  it("falls back to the store Instapay number when nothing is configured", () => {
+    const cfg = mergePaymentConfig({}, {});
+    assert.equal(cfg.instapay.number, "01017420379");
+    assert.equal(cfg.kashier.mid, "MID-40746-226");
+    assert.equal(cfg.kashier.mode, "live");
+    assert.equal(kashierConfigured(cfg.kashier), false);
+  });
 });

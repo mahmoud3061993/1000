@@ -38,9 +38,17 @@ export function mergePaymentConfig(
   env: NodeJS.Dict<string>,
   stored: Record<string, string> = {}
 ): PaymentConfig {
-  const instapayNumber = firstNonEmpty(env.INSTAPAY_NUMBER, stored.instapay_number);
-  const instapayName = firstNonEmpty(env.INSTAPAY_NAME, stored.instapay_name);
-  const kashierMid = firstNonEmpty(env.KASHIER_MID, stored.kashier_mid);
+  const instapayNumber = firstNonEmpty(
+    env.INSTAPAY_NUMBER,
+    stored.instapay_number,
+    "01017420379"
+  );
+  const instapayName = firstNonEmpty(
+    env.INSTAPAY_NAME,
+    stored.instapay_name,
+    "mahmoud a i m"
+  );
+  const kashierMid = firstNonEmpty(env.KASHIER_MID, stored.kashier_mid, "MID-40746-226");
   const kashierApiKey = firstNonEmpty(env.KASHIER_API_KEY, stored.kashier_api_key);
   const modeRaw = firstNonEmpty(env.KASHIER_MODE, stored.kashier_mode, "live").toLowerCase();
   return {
@@ -83,12 +91,12 @@ export const WHATSAPP_NUMBER = (process.env.WHATSAPP_NUMBER || "201017420379").r
 );
 
 export const INSTAPAY = {
-  number: process.env.INSTAPAY_NUMBER || "",
-  name: process.env.INSTAPAY_NAME || "",
+  number: process.env.INSTAPAY_NUMBER || "01017420379",
+  name: process.env.INSTAPAY_NAME || "mahmoud a i m",
 };
 
 export const KASHIER = {
-  mid: process.env.KASHIER_MID || "",
+  mid: process.env.KASHIER_MID || "MID-40746-226",
   apiKey: process.env.KASHIER_API_KEY || "",
   mode: (process.env.KASHIER_MODE || "live") as "live" | "test",
 };
