@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import AdminAnalytics from "@/components/AdminAnalytics";
+import { formatAttribution } from "@/lib/attribution";
 
 type Order = {
   id: string;
@@ -15,6 +16,12 @@ type Order = {
   created_at: string;
   paid_at: string | null;
   instapay_screenshot: string | null;
+  utm_source?: string | null;
+  utm_campaign?: string | null;
+  utm_content?: string | null;
+  utm_term?: string | null;
+  fbclid?: string | null;
+  fbc?: string | null;
 };
 
 type Stats = {
@@ -353,6 +360,12 @@ export default function AdminPage() {
             <p>
               حط رقم إنستاباي ومفاتيح كاشير هنا. إنستاباي هيظهر للعميل عشان يحوّل ويرفع سكرين ويدوس «دفعت». الفيزا والمحفظة هتروح على كاشير.
             </p>
+            <p>
+              عشان الأدمن يعرف كل طلب جاي من أنهي إعلان، في Ads Manager حط اللينك بالشكل ده:
+              <code className="settings-code" dir="ltr">
+                {"https://www.mahmoudelkousy.online/?utm_source=facebook&utm_medium=paid&utm_campaign={{campaign.name}}&utm_content={{ad.name}}&utm_term={{adset.name}}"}
+              </code>
+            </p>
             {!usesRemoteDb ? (
               <div className="form-error">
                 قاعدة البيانات لسه ملف محلي. على Vercel الإعدادات ممكن تضيع بين الطلبات. الأفضل تربط Turso أو تحط نفس القيم في Environment Variables.
@@ -475,7 +488,7 @@ export default function AdminPage() {
             <div className="toolbar">
               <input
                 className="admin-search"
-                placeholder="بحث بالاسم أو الموبايل أو الإيميل"
+                placeholder="بحث بالاسم أو الموبايل أو الإعلان"
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
                 onKeyDown={(e) => {
@@ -508,6 +521,7 @@ export default function AdminPage() {
                 <tr>
                   <th>الطلب</th>
                   <th>العميل</th>
+                  <th>الإعلان</th>
                   <th>الوسيلة</th>
                   <th>الحالة</th>
                   <th>التاريخ</th>
@@ -525,6 +539,17 @@ export default function AdminPage() {
                       <div>{order.name}</div>
                       <div>{order.phone}</div>
                       <div>{order.email}</div>
+                    </td>
+                    <td>
+                      {(() => {
+                        const source = formatAttribution(order);
+                        return (
+                          <>
+                            <div>{source.title}</div>
+                            <div style={{ color: "#94A3B8" }}>{source.detail}</div>
+                          </>
+                        );
+                      })()}
                     </td>
                     <td>{order.payment_method === "instapay" ? "إنستاباي" : "كاشير"}</td>
                     <td>

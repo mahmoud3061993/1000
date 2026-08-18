@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sendCapiEvent } from "@/lib/capi";
 import { PRODUCT, SITE_URL, getPaymentConfig, kashierConfigured } from "@/lib/config";
-import { createOrder, insertEvent, type PaymentMethod } from "@/lib/db";
+import { createOrder, getSessionAttribution, insertEvent, type PaymentMethod } from "@/lib/db";
+import { mergeAttribution, parseAttribution } from "@/lib/attribution";
 import { buildKashierHppUrl } from "@/lib/kashier";
 import { clientIp, getOrCreateSessionId, userAgent } from "@/lib/request";
 import { fileToDataUrl, validateScreenshotFile } from "@/lib/screenshot";
@@ -29,6 +30,12 @@ type OrderPayload = {
   payEventId: string;
   fbp: string;
   fbc: string;
+  utm_source: string;
+  utm_medium: string;
+  utm_campaign: string;
+  utm_content: string;
+  utm_term: string;
+  fbclid: string;
   screenshot: FormDataEntryValue | null;
 };
 
@@ -47,6 +54,12 @@ async function readPayload(req: NextRequest): Promise<OrderPayload> {
       payEventId: String(form.get("payEventId") || ""),
       fbp: String(form.get("fbp") || ""),
       fbc: String(form.get("fbc") || ""),
+      utm_source: String(form.get("utm_source") || ""),
+      utm_medium: String(form.get("utm_medium") || ""),
+      utm_campaign: String(form.get("utm_campaign") || ""),
+      utm_content: String(form.get("utm_content") || ""),
+      utm_term: String(form.get("utm_term") || ""),
+      fbclid: String(form.get("fbclid") || ""),
       screenshot: form.get("screenshot"),
     };
   }
@@ -63,6 +76,12 @@ async function readPayload(req: NextRequest): Promise<OrderPayload> {
     payEventId: String(body.payEventId || ""),
     fbp: String(body.fbp || ""),
     fbc: String(body.fbc || ""),
+    utm_source: String(body.utm_source || ""),
+    utm_medium: String(body.utm_medium || ""),
+    utm_campaign: String(body.utm_campaign || ""),
+    utm_content: String(body.utm_content || ""),
+    utm_term: String(body.utm_term || ""),
+    fbclid: String(body.fbclid || ""),
     screenshot: null,
   };
 }
@@ -112,6 +131,8 @@ export async function POST(req: NextRequest) {
   const leadEventId = payload.leadEventId || crypto.randomUUID();
   const checkoutEventId = payload.checkoutEventId || crypto.randomUUID();
   const purchaseEventId = crypto.randomUUID();
+  const fromVisit = await getSessionAttribution(sessionId);
+  const attribution = mergeAttribution(parseAttribution(payload as unknown as Record<string, unknown>), fromVisit);
 
   const order = await createOrder({
     id: orderId,
@@ -127,8 +148,14 @@ export async function POST(req: NextRequest) {
     kashier_transaction_id: null,
     instapay_screenshot: screenshotDataUrl,
     purchase_event_id: purchaseEventId,
-    fbp: payload.fbp || null,
-    fbc: payload.fbc || null,
+    fbp: payload.fbp || fromVisit?.fbp || null,
+    fbc: payload.fbc || fromVisit?.fbc || null,
+    utm_source: attribution.utm_source || null,
+    utm_medium: attribution.utm_medium || null,
+    utm_campaign: attribution.utm_campaign || null,
+    utm_content: attribution.utm_content || null,
+    utm_term: attribution.utm_term || null,
+    fbclid: attribution.fbclid || null,
     ip,
     user_agent: ua,
     created_at: new Date().toISOString(),

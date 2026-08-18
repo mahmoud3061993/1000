@@ -108,6 +108,7 @@ describe("admin analytics periods", () => {
     assert.equal(report.series.length, 7);
     assert.match(report.insight, /اتقفل 2 طلب/);
     assert.match(report.insight, /470/);
+    assert.equal(report.sources.length >= 1, true);
   });
 
   it("treats a jump from zero as 100 percent", () => {

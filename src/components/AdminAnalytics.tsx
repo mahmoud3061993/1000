@@ -179,6 +179,37 @@ export default function AdminAnalytics() {
           </tbody>
         </table>
       </div>
+
+      <div className="settings-card">
+        <h2>حسب الإعلان</h2>
+        <p>كل إعلان أو حملة جاب كام طلب ودخل كام في الفترة دي.</p>
+        <table className="admin-table">
+          <thead>
+            <tr>
+              <th>الإعلان</th>
+              <th>طلبات</th>
+              <th>اتقفلت</th>
+              <th>واقفة</th>
+              <th>الدخل</th>
+            </tr>
+          </thead>
+          <tbody>
+            {(report?.sources || []).map((source) => (
+              <tr key={`${source.title}-${source.detail}`}>
+                <td>
+                  <div>{source.title}</div>
+                  <div style={{ color: "#94A3B8" }}>{source.detail}</div>
+                </td>
+                <td>{source.leads}</td>
+                <td>{source.closed}</td>
+                <td>{source.waiting}</td>
+                <td>{money(source.income)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {report && report.sources.length === 0 ? <p>مفيش بيانات إعلانات في الفترة دي.</p> : null}
+      </div>
     </div>
   );
 }

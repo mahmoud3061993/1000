@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { firePixel, getMetaCookies } from "./TrackingBoot";
+import { firePixel, getTrackingContext } from "./TrackingBoot";
 
 type Method = "kashier" | "instapay";
 
@@ -51,7 +51,7 @@ export function CheckoutForm({
         return;
       }
 
-      const cookies = getMetaCookies();
+      const cookies = getTrackingContext();
       const leadEventId = crypto.randomUUID();
       const checkoutEventId = crypto.randomUUID();
       const payEventId = crypto.randomUUID();
