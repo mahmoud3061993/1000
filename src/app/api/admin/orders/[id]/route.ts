@@ -16,7 +16,7 @@ export async function POST(
   }
   const body = await req.json().catch(() => ({}));
   const action = body.action === "reject" ? "reject" : "confirm";
-  const order = getOrder(params.id);
+  const order = await getOrder(params.id);
   if (!order) {
     return NextResponse.json({ ok: false, error: "الطلب غير موجود" }, { status: 404 });
   }
@@ -32,7 +32,7 @@ export async function POST(
   if (!canRejectInstapay(order)) {
     return NextResponse.json({ ok: false, error: "مفيش حاجة تترفض" }, { status: 400 });
   }
-  const rejected = updateOrder(order.id, { status: "rejected" });
+  const rejected = await updateOrder(order.id, { status: "rejected" });
   await notifyTelegram(
     `طلب مرفوض بعد مراجعة إنستاباي\nالاسم: ${order.name}\nالموبايل: ${order.phone}\nرقم الطلب: ${order.id}`
   );

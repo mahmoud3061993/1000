@@ -1,4 +1,3 @@
-import path from "path";
 import { sendCapiEvent } from "./capi";
 import { SITE_URL } from "./config";
 import { Order, markOrderPaid } from "./db";
@@ -13,7 +12,7 @@ export async function fulfillPaidOrder(
   }
 
   const purchaseEventId = order.purchase_event_id || crypto.randomUUID();
-  const paid = markOrderPaid(order.id, {
+  const paid = await markOrderPaid(order.id, {
     purchase_event_id: purchaseEventId,
     ...extra,
   });
@@ -42,8 +41,4 @@ export async function fulfillPaidOrder(
 
   await notifyOrder("paid", paid);
   return paid;
-}
-
-export function screenshotPath(filename: string) {
-  return path.join(process.cwd(), "data", "uploads", filename);
 }

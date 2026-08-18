@@ -13,8 +13,8 @@ export async function GET(req: NextRequest) {
   const q = req.nextUrl.searchParams.get("q") || "";
   return NextResponse.json({
     ok: true,
-    stats: getFunnelStats(),
-    orders: listOrders({ status, q }),
+    stats: await getFunnelStats(),
+    orders: await listOrders({ status, q }),
     integrations: {
       kashier: kashierConfigured(),
       meta: metaConfigured(),

@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: false, error: "missing order" }, { status: 400 });
   }
 
-  const order = getOrder(merchantOrderId);
+  const order = await getOrder(merchantOrderId);
   if (!order) {
     return NextResponse.json({ ok: false, error: "order not found" }, { status: 404 });
   }
@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
   }
 
   if (order.status !== "paid") {
-    const failed = updateOrder(order.id, { status: "failed" })!;
+    const failed = (await updateOrder(order.id, { status: "failed" }))!;
     await notifyOrder("failed", failed);
   }
   return NextResponse.json({ ok: true });

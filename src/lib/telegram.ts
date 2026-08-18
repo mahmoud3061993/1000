@@ -1,4 +1,5 @@
 import { TELEGRAM } from "./config";
+import { fileNameForMime, parseStoredScreenshot } from "./screenshot";
 
 type NotifyOrder = {
   id: string;
@@ -42,19 +43,22 @@ export function formatOrderMessage(kind: "trying" | "pending" | "paid" | "failed
   ].join("\n");
 }
 
-export async function notifyTelegram(text: string, imagePath?: string | null) {
+export async function notifyTelegram(text: string, screenshot?: string | null) {
   if (!TELEGRAM.botToken || !TELEGRAM.chatId) {
     return { skipped: true as const };
   }
 
   try {
-    if (imagePath) {
-      const fs = await import("fs");
-      const file = fs.readFileSync(imagePath);
+    const parsed = parseStoredScreenshot(screenshot || null);
+    if (parsed) {
       const form = new FormData();
       form.set("chat_id", TELEGRAM.chatId);
       form.set("caption", text.slice(0, 1000));
-      form.set("photo", new Blob([new Uint8Array(file)]), "screenshot.jpg");
+      form.set(
+        "photo",
+        new Blob([new Uint8Array(parsed.buffer)], { type: parsed.mime }),
+        fileNameForMime(parsed.mime)
+      );
       const res = await fetch(`https://api.telegram.org/bot${TELEGRAM.botToken}/sendPhoto`, {
         method: "POST",
         body: form,

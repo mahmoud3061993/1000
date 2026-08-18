@@ -1,11 +1,6 @@
-import Database from "better-sqlite3";
 import fs from "fs";
 import path from "path";
-
-const DATA_DIR = path.join(process.cwd(), "data");
-const DB_PATH = process.env.APP_DB_PATH || path.join(DATA_DIR, "app.db");
-
-let db: Database.Database | null = null;
+import { createClient, type Client } from "@libsql/client";
 
 export type OrderStatus =
   | "form_filled"
@@ -51,8 +46,22 @@ export type FunnelStats = {
   revenue: number;
 };
 
-function migrate(database: Database.Database) {
-  database.exec(`
+let db: Client | null = null;
+let migrated = false;
+
+function databaseUrl() {
+  if (process.env.TURSO_DATABASE_URL) return process.env.TURSO_DATABASE_URL;
+  if (process.env.LIBSQL_URL) return process.env.LIBSQL_URL;
+  const file = process.env.APP_DB_PATH || path.join(process.cwd(), "data", "app.db");
+  if (!file.startsWith("file:")) {
+    fs.mkdirSync(path.dirname(file), { recursive: true });
+    return `file:${file}`;
+  }
+  return file;
+}
+
+async function migrate(database: Client) {
+  await database.executeMultiple(`
     CREATE TABLE IF NOT EXISTS visits (
       id TEXT PRIMARY KEY,
       session_id TEXT NOT NULL,
@@ -105,12 +114,17 @@ function migrate(database: Database.Database) {
   `);
 }
 
-export function getDb() {
-  if (db) return db;
-  fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
-  db = new Database(DB_PATH);
-  db.pragma("journal_mode = WAL");
-  migrate(db);
+export async function getDb() {
+  if (!db) {
+    db = createClient({
+      url: databaseUrl(),
+      authToken: process.env.TURSO_AUTH_TOKEN,
+    });
+  }
+  if (!migrated) {
+    await migrate(db);
+    migrated = true;
+  }
   return db;
 }
 
@@ -118,7 +132,7 @@ export function nowIso() {
   return new Date().toISOString();
 }
 
-export function insertVisit(visit: {
+export async function insertVisit(visit: {
   id: string;
   session_id: string;
   ip?: string | null;
@@ -130,146 +144,169 @@ export function insertVisit(visit: {
   utm_campaign?: string | null;
   referrer?: string | null;
 }) {
-  getDb()
-    .prepare(
-      `INSERT INTO visits (id, session_id, ip, user_agent, fbp, fbc, utm_source, utm_medium, utm_campaign, referrer, created_at)
-       VALUES (@id, @session_id, @ip, @user_agent, @fbp, @fbc, @utm_source, @utm_medium, @utm_campaign, @referrer, @created_at)`
-    )
-    .run({
-      ...visit,
-      ip: visit.ip || null,
-      user_agent: visit.user_agent || null,
-      fbp: visit.fbp || null,
-      fbc: visit.fbc || null,
-      utm_source: visit.utm_source || null,
-      utm_medium: visit.utm_medium || null,
-      utm_campaign: visit.utm_campaign || null,
-      referrer: visit.referrer || null,
-      created_at: nowIso(),
-    });
+  const database = await getDb();
+  await database.execute({
+    sql: `INSERT INTO visits (id, session_id, ip, user_agent, fbp, fbc, utm_source, utm_medium, utm_campaign, referrer, created_at)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    args: [
+      visit.id,
+      visit.session_id,
+      visit.ip || null,
+      visit.user_agent || null,
+      visit.fbp || null,
+      visit.fbc || null,
+      visit.utm_source || null,
+      visit.utm_medium || null,
+      visit.utm_campaign || null,
+      visit.referrer || null,
+      nowIso(),
+    ],
+  });
 }
 
-export function createOrder(order: Omit<Order, "updated_at" | "paid_at"> & { paid_at?: string | null }) {
-  const row = {
-    ...order,
-    payment_method: order.payment_method,
-    kashier_order_id: order.kashier_order_id,
-    kashier_transaction_id: order.kashier_transaction_id,
-    instapay_screenshot: order.instapay_screenshot,
-    purchase_event_id: order.purchase_event_id,
-    fbp: order.fbp,
-    fbc: order.fbc,
-    ip: order.ip,
-    user_agent: order.user_agent,
-    updated_at: nowIso(),
-    paid_at: order.paid_at || null,
-  };
-  getDb()
-    .prepare(
-      `INSERT INTO orders (
+export async function createOrder(
+  order: Omit<Order, "updated_at" | "paid_at"> & { paid_at?: string | null }
+) {
+  const database = await getDb();
+  await database.execute({
+    sql: `INSERT INTO orders (
         id, session_id, name, email, phone, amount, currency, payment_method, status,
         kashier_order_id, kashier_transaction_id, instapay_screenshot, purchase_event_id,
         fbp, fbc, ip, user_agent, created_at, updated_at, paid_at
-      ) VALUES (
-        @id, @session_id, @name, @email, @phone, @amount, @currency, @payment_method, @status,
-        @kashier_order_id, @kashier_transaction_id, @instapay_screenshot, @purchase_event_id,
-        @fbp, @fbc, @ip, @user_agent, @created_at, @updated_at, @paid_at
-      )`
-    )
-    .run(row);
-  return getOrder(order.id)!;
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    args: [
+      order.id,
+      order.session_id,
+      order.name,
+      order.email,
+      order.phone,
+      order.amount,
+      order.currency,
+      order.payment_method,
+      order.status,
+      order.kashier_order_id,
+      order.kashier_transaction_id,
+      order.instapay_screenshot,
+      order.purchase_event_id,
+      order.fbp,
+      order.fbc,
+      order.ip,
+      order.user_agent,
+      order.created_at,
+      nowIso(),
+      order.paid_at || null,
+    ],
+  });
+  return (await getOrder(order.id))!;
 }
 
-export function updateOrder(id: string, patch: Partial<Order>) {
-  const current = getOrder(id);
+export async function updateOrder(id: string, patch: Partial<Order>) {
+  const current = await getOrder(id);
   if (!current) return null;
   const next = { ...current, ...patch, id, updated_at: nowIso() };
-  getDb()
-    .prepare(
-      `UPDATE orders SET
-        session_id=@session_id, name=@name, email=@email, phone=@phone, amount=@amount,
-        currency=@currency, payment_method=@payment_method, status=@status,
-        kashier_order_id=@kashier_order_id, kashier_transaction_id=@kashier_transaction_id,
-        instapay_screenshot=@instapay_screenshot, purchase_event_id=@purchase_event_id,
-        fbp=@fbp, fbc=@fbc, ip=@ip, user_agent=@user_agent, created_at=@created_at,
-        updated_at=@updated_at, paid_at=@paid_at
-      WHERE id=@id`
-    )
-    .run(next);
+  const database = await getDb();
+  await database.execute({
+    sql: `UPDATE orders SET
+        session_id=?, name=?, email=?, phone=?, amount=?,
+        currency=?, payment_method=?, status=?,
+        kashier_order_id=?, kashier_transaction_id=?,
+        instapay_screenshot=?, purchase_event_id=?,
+        fbp=?, fbc=?, ip=?, user_agent=?, created_at=?,
+        updated_at=?, paid_at=?
+      WHERE id=?`,
+    args: [
+      next.session_id,
+      next.name,
+      next.email,
+      next.phone,
+      next.amount,
+      next.currency,
+      next.payment_method,
+      next.status,
+      next.kashier_order_id,
+      next.kashier_transaction_id,
+      next.instapay_screenshot,
+      next.purchase_event_id,
+      next.fbp,
+      next.fbc,
+      next.ip,
+      next.user_agent,
+      next.created_at,
+      next.updated_at,
+      next.paid_at,
+      id,
+    ],
+  });
   return getOrder(id);
 }
 
-export function getOrder(id: string) {
-  return getDb().prepare(`SELECT * FROM orders WHERE id = ?`).get(id) as Order | undefined;
+export async function getOrder(id: string) {
+  const database = await getDb();
+  const result = await database.execute({
+    sql: `SELECT * FROM orders WHERE id = ?`,
+    args: [id],
+  });
+  return (result.rows[0] as unknown as Order | undefined) || undefined;
 }
 
-export function listOrders(filter?: { status?: string; q?: string }) {
+export async function listOrders(filter?: { status?: string; q?: string }) {
+  const args: Array<string> = [];
   let sql = `SELECT * FROM orders WHERE 1=1`;
-  const params: string[] = [];
   if (filter?.status && filter.status !== "all") {
     sql += ` AND status = ?`;
-    params.push(filter.status);
+    args.push(filter.status);
   }
   if (filter?.q) {
     sql += ` AND (name LIKE ? OR email LIKE ? OR phone LIKE ? OR id LIKE ?)`;
     const like = `%${filter.q}%`;
-    params.push(like, like, like, like);
+    args.push(like, like, like, like);
   }
   sql += ` ORDER BY created_at DESC LIMIT 500`;
-  return getDb().prepare(sql).all(...params) as Order[];
+  const database = await getDb();
+  const result = await database.execute({ sql, args });
+  return (result.rows as unknown as Order[]).map((row) => ({
+    ...row,
+    instapay_screenshot: row.instapay_screenshot ? "stored" : null,
+  }));
 }
 
-export function insertEvent(event: {
+export async function insertEvent(event: {
   id: string;
   session_id?: string | null;
   order_id?: string | null;
   name: string;
 }) {
-  getDb()
-    .prepare(
-      `INSERT INTO events (id, session_id, order_id, name, created_at)
-       VALUES (@id, @session_id, @order_id, @name, @created_at)`
-    )
-    .run({
-      ...event,
-      session_id: event.session_id || null,
-      order_id: event.order_id || null,
-      created_at: nowIso(),
-    });
+  const database = await getDb();
+  await database.execute({
+    sql: `INSERT INTO events (id, session_id, order_id, name, created_at)
+          VALUES (?, ?, ?, ?, ?)`,
+    args: [event.id, event.session_id || null, event.order_id || null, event.name, nowIso()],
+  });
 }
 
-export function getFunnelStats(): FunnelStats {
-  const database = getDb();
-  const visits = (database.prepare(`SELECT COUNT(*) as c FROM visits`).get() as { c: number }).c;
-  const uniqueVisitors = (
-    database.prepare(`SELECT COUNT(DISTINCT session_id) as c FROM visits`).get() as { c: number }
-  ).c;
-  const formFilled = (database.prepare(`SELECT COUNT(*) as c FROM orders`).get() as { c: number }).c;
-  const tryingToPay = (
-    database
-      .prepare(
-        `SELECT COUNT(*) as c FROM orders WHERE status IN ('awaiting_payment', 'pending_review')`
-      )
-      .get() as { c: number }
-  ).c;
-  const paid = (
-    database.prepare(`SELECT COUNT(*) as c FROM orders WHERE status = 'paid'`).get() as { c: number }
-  ).c;
-  const pendingReview = (
-    database
-      .prepare(`SELECT COUNT(*) as c FROM orders WHERE status = 'pending_review'`)
-      .get() as { c: number }
-  ).c;
-  const failed = (
-    database
-      .prepare(`SELECT COUNT(*) as c FROM orders WHERE status IN ('failed', 'rejected')`)
-      .get() as { c: number }
-  ).c;
-  const revenue = (
-    database
-      .prepare(`SELECT COALESCE(SUM(amount), 0) as c FROM orders WHERE status = 'paid'`)
-      .get() as { c: number }
-  ).c;
+async function count(sql: string, args: Array<string> = []) {
+  const database = await getDb();
+  const result = await database.execute({ sql, args });
+  return Number(result.rows[0]?.c || 0);
+}
+
+export async function getFunnelStats(): Promise<FunnelStats> {
+  const visits = await count(`SELECT COUNT(*) as c FROM visits`);
+  const uniqueVisitors = await count(`SELECT COUNT(DISTINCT session_id) as c FROM visits`);
+  const formFilled = await count(`SELECT COUNT(*) as c FROM orders`);
+  const tryingToPay = await count(
+    `SELECT COUNT(*) as c FROM orders WHERE status IN ('awaiting_payment', 'pending_review')`
+  );
+  const paid = await count(`SELECT COUNT(*) as c FROM orders WHERE status = 'paid'`);
+  const pendingReview = await count(
+    `SELECT COUNT(*) as c FROM orders WHERE status = 'pending_review'`
+  );
+  const failed = await count(
+    `SELECT COUNT(*) as c FROM orders WHERE status IN ('failed', 'rejected')`
+  );
+  const revenue = await count(
+    `SELECT COALESCE(SUM(amount), 0) as c FROM orders WHERE status = 'paid'`
+  );
 
   return {
     visits,
@@ -283,15 +320,16 @@ export function getFunnelStats(): FunnelStats {
   };
 }
 
-export function closeDb() {
+export async function closeDb() {
   if (db) {
     db.close();
     db = null;
+    migrated = false;
   }
 }
 
-export function markOrderPaid(id: string, extra?: Partial<Order>) {
-  const current = getOrder(id);
+export async function markOrderPaid(id: string, extra?: Partial<Order>) {
+  const current = await getOrder(id);
   if (!current) return null;
   if (current.status === "paid") {
     return current;

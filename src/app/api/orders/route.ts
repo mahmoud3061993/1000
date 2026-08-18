@@ -58,7 +58,7 @@ export async function POST(req: NextRequest) {
   const checkoutEventId = body.checkoutEventId || crypto.randomUUID();
   const purchaseEventId = crypto.randomUUID();
 
-  const order = createOrder({
+  const order = await createOrder({
     id: orderId,
     session_id: sessionId,
     name,
@@ -79,8 +79,8 @@ export async function POST(req: NextRequest) {
     created_at: new Date().toISOString(),
   });
 
-  insertEvent({ id: leadEventId, session_id: sessionId, order_id: orderId, name: "Lead" });
-  insertEvent({
+  await insertEvent({ id: leadEventId, session_id: sessionId, order_id: orderId, name: "Lead" });
+  await insertEvent({
     id: checkoutEventId,
     session_id: sessionId,
     order_id: orderId,
@@ -115,7 +115,7 @@ export async function POST(req: NextRequest) {
 
   if (method === "kashier") {
     const payEventId = body.payEventId || crypto.randomUUID();
-    insertEvent({
+    await insertEvent({
       id: payEventId,
       session_id: sessionId,
       order_id: orderId,
@@ -147,7 +147,7 @@ export async function POST(req: NextRequest) {
     });
   }
 
-  updateOrder(orderId, { status: "form_filled" });
+  await updateOrder(orderId, { status: "form_filled" });
   return NextResponse.json({
     ok: true,
     orderId,

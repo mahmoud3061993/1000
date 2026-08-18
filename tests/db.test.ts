@@ -10,15 +10,15 @@ process.env.APP_DB_PATH = path.join(tmpDir, "test.db");
 describe("order funnel and payment states", async () => {
   const db = await import("../src/lib/db");
 
-  after(() => {
-    db.closeDb();
+  after(async () => {
+    await db.closeDb();
     fs.rmSync(tmpDir, { recursive: true, force: true });
   });
 
-  it("counts visits, form fills, trying to pay, and paid orders", () => {
-    db.insertVisit({ id: "v1", session_id: "s1" });
-    db.insertVisit({ id: "v2", session_id: "s1" });
-    db.insertVisit({ id: "v3", session_id: "s2" });
+  it("counts visits, form fills, trying to pay, and paid orders", async () => {
+    await db.insertVisit({ id: "v1", session_id: "s1" });
+    await db.insertVisit({ id: "v2", session_id: "s1" });
+    await db.insertVisit({ id: "v3", session_id: "s2" });
 
     const base = {
       session_id: "s1",
@@ -38,20 +38,20 @@ describe("order funnel and payment states", async () => {
       created_at: new Date().toISOString(),
     } as const;
 
-    db.createOrder({
+    await db.createOrder({
       ...base,
       id: "o1",
       payment_method: "kashier",
       status: "awaiting_payment",
     });
-    db.createOrder({
+    await db.createOrder({
       ...base,
       id: "o2",
       session_id: "s2",
       payment_method: "instapay",
       status: "pending_review",
     });
-    db.createOrder({
+    await db.createOrder({
       ...base,
       id: "o3",
       session_id: "s3",
@@ -59,11 +59,11 @@ describe("order funnel and payment states", async () => {
       status: "form_filled",
     });
 
-    db.markOrderPaid("o1");
-    const again = db.markOrderPaid("o1");
+    await db.markOrderPaid("o1");
+    const again = await db.markOrderPaid("o1");
     assert.equal(again?.status, "paid");
 
-    const stats = db.getFunnelStats();
+    const stats = await db.getFunnelStats();
     assert.equal(stats.visits, 3);
     assert.equal(stats.uniqueVisitors, 2);
     assert.equal(stats.formFilled, 3);

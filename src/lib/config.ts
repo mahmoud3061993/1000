@@ -6,10 +6,14 @@ export const PRODUCT = {
   deliveryUrl: process.env.PRODUCT_DELIVERY_URL || "",
 };
 
-export const SITE_URL = (process.env.SITE_URL || "http://localhost:3000").replace(
-  /\/$/,
-  ""
-);
+export const SITE_URL = (
+  process.env.SITE_URL ||
+  (process.env.VERCEL_PROJECT_PRODUCTION_URL
+    ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+    : process.env.VERCEL_URL
+      ? `https://${process.env.VERCEL_URL}`
+      : "http://localhost:3000")
+).replace(/\/$/, "");
 
 export const WHATSAPP_NUMBER = (process.env.WHATSAPP_NUMBER || "201017420379").replace(
   /\D/g,

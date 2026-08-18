@@ -82,21 +82,66 @@ npm run dev
 
 بعد تأكيد إنستاباي بيتبعت `Purchase` لميتا ويظهر لينك المكتبة في صفحة الشكر.
 
-## النشر
+## الرفع على Vercel وربط mahmoudelkousy.online
 
-الموقع محتاج سيرفر Node فيه مساحة ثابتة لقاعدة SQLite (`data/app.db`) وصور الإنستاباي (`data/uploads`). مناسب لـ Railway / Render / VPS، مش مناسب لـ Vercel من غير قاعدة خارجية.
+Vercel مناسب للمشروع بعد ما قاعدة البيانات بقت Turso/libSQL (مش ملف محلي). رابط الإعلانات القديم `/products/1000` شغال كمان.
 
-```bash
-npm run build
-npm start
+### 1) قاعدة Turso المجانية (دقيقة أو اتنين)
+
+1. اعمل حساب على [turso.tech](https://turso.tech)
+2. أنشئ Database باسم `elkousy`
+3. انسخ:
+   - `TURSO_DATABASE_URL` (بتبدأ بـ `libsql://`)
+   - `TURSO_AUTH_TOKEN`
+
+### 2) ارفع المشروع على Vercel
+
+من [vercel.com/new](https://vercel.com/new) اختار ريبو `mahmoud3061993/1000` والفرع `cursor/landing-kashier-capi-admin-12bb` (أو `main` بعد الدمج).
+
+حط Environment Variables:
+
+```
+SITE_URL=https://www.mahmoudelkousy.online
+TURSO_DATABASE_URL=libsql://...
+TURSO_AUTH_TOKEN=...
+ADMIN_PASSWORD=...
+SESSION_SECRET=...
+KASHIER_MID=...
+KASHIER_API_KEY=...
+KASHIER_MODE=live
+INSTAPAY_NUMBER=...
+INSTAPAY_NAME=...
+META_PIXEL_ID=...
+META_CAPI_ACCESS_TOKEN=...
+TELEGRAM_BOT_TOKEN=...
+TELEGRAM_CHAT_ID=...
+PRODUCT_DELIVERY_URL=...
+WHATSAPP_NUMBER=201017420379
 ```
 
-أو Docker:
+### 3) ربط الدومين
 
-```bash
-docker build -t elkousy-1000 .
-docker run -p 3000:3000 --env-file .env.local -v $(pwd)/data:/app/data elkousy-1000
+في Vercel → Project → Settings → Domains ضيف:
+
+- `mahmoudelkousy.online`
+- `www.mahmoudelkousy.online`
+
+عند شركة الدومين (أو Cloudflare) غيّر الـ DNS من Easy Orders إلى Vercel:
+
 ```
+A      @      10.0.1.2
+CNAME  www    cname.vercel-dns.com
+```
+
+بعد ما الـ DNS يتحدث، الصفحة هتبقى:
+
+- https://www.mahmoudelkousy.online
+- https://www.mahmoudelkousy.online/products/1000
+- https://www.mahmoudelkousy.online/admin
+
+وWebhook كاشير:
+
+`https://www.mahmoudelkousy.online/api/kashier/webhook`
 
 ## الاختبار
 

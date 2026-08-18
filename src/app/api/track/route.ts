@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
   const ua = userAgent(req);
 
   if (eventName === "PageView") {
-    insertVisit({
+    await insertVisit({
       id: crypto.randomUUID(),
       session_id: sessionId,
       ip,
@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
     });
   }
 
-  insertEvent({
+  await insertEvent({
     id: eventId,
     session_id: sessionId,
     order_id: body.orderId || null,

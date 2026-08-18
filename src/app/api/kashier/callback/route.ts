@@ -26,7 +26,7 @@ export async function GET(req: NextRequest) {
     return redirectTo("/thank-you?error=missing_order", req);
   }
 
-  const order = getOrder(orderId);
+  const order = await getOrder(orderId);
   if (!order) {
     return redirectTo("/thank-you?error=order_not_found", req);
   }
@@ -44,7 +44,7 @@ export async function GET(req: NextRequest) {
     return redirectTo(`/thank-you?order=${paid?.id || order.id}`, req);
   }
 
-  const failed = updateOrder(order.id, { status: "failed" })!;
+  const failed = (await updateOrder(order.id, { status: "failed" }))!;
   await notifyOrder("failed", failed);
   return redirectTo(`/thank-you?order=${order.id}&error=failed`, req);
 }
