@@ -39,6 +39,7 @@ export type Order = {
   created_at: string;
   updated_at: string;
   paid_at: string | null;
+  email_sent_at?: string | null;
 };
 
 export type FunnelStats = {
@@ -126,7 +127,8 @@ async function migrate(database: Client) {
       user_agent TEXT,
       created_at TEXT NOT NULL,
       updated_at TEXT NOT NULL,
-      paid_at TEXT
+      paid_at TEXT,
+      email_sent_at TEXT
     );
 
     CREATE TABLE IF NOT EXISTS events (
@@ -157,6 +159,7 @@ async function migrate(database: Client) {
   await ensureColumn(database, "orders", "utm_content", "TEXT");
   await ensureColumn(database, "orders", "utm_term", "TEXT");
   await ensureColumn(database, "orders", "fbclid", "TEXT");
+  await ensureColumn(database, "orders", "email_sent_at", "TEXT");
 }
 
 export function usesRemoteDb() {
@@ -300,7 +303,7 @@ export async function updateOrder(id: string, patch: Partial<Order>) {
         instapay_screenshot=?, purchase_event_id=?,
         fbp=?, fbc=?, utm_source=?, utm_medium=?, utm_campaign=?, utm_content=?, utm_term=?, fbclid=?,
         ip=?, user_agent=?, created_at=?,
-        updated_at=?, paid_at=?
+        updated_at=?, paid_at=?, email_sent_at=?
       WHERE id=?`,
     args: [
       next.session_id,
@@ -328,6 +331,7 @@ export async function updateOrder(id: string, patch: Partial<Order>) {
       next.created_at,
       next.updated_at,
       next.paid_at,
+      next.email_sent_at ?? null,
       id,
     ],
   });

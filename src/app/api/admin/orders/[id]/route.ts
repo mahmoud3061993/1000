@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { isAdminRequest } from "@/lib/auth";
-import { getOrder, updateOrder, deleteOrder } from "@/lib/db";
+import { getOrder, updateOrder, deleteOrder, nowIso } from "@/lib/db";
 import { sendPurchaseEmail } from "@/lib/email";
 import { fulfillPaidOrder } from "@/lib/fulfillment";
 import { canConfirmInstapay, canRejectInstapay } from "@/lib/orders";
@@ -41,7 +41,8 @@ export async function POST(
         { status: 400 }
       );
     }
-    return NextResponse.json({ ok: true, emailed: true });
+    const updated = await updateOrder(order.id, { email_sent_at: nowIso() });
+    return NextResponse.json({ ok: true, emailed: true, order: updated });
   }
 
   if (action === "confirm") {

@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import AdminAnalytics from "@/components/AdminAnalytics";
 import { formatAttribution } from "@/lib/attribution";
+import { orderEmailStatus } from "@/lib/orders";
 
 type Order = {
   id: string;
@@ -16,6 +17,7 @@ type Order = {
   created_at: string;
   paid_at: string | null;
   instapay_screenshot: string | null;
+  email_sent_at?: string | null;
   utm_source?: string | null;
   utm_campaign?: string | null;
   utm_content?: string | null;
@@ -104,6 +106,7 @@ export default function AdminPage() {
     deliveryUrl: false,
   });
   const [saving, setSaving] = useState(false);
+  const [busyKey, setBusyKey] = useState("");
   const [message, setMessage] = useState("");
 
   async function load(nextStatus = status, nextQ = q) {
@@ -157,46 +160,68 @@ export default function AdminPage() {
 
   async function login(e: React.FormEvent) {
     e.preventDefault();
-    const res = await fetch("/api/admin/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ password }),
-    });
-    const json = await res.json();
-    if (!res.ok) {
-      setMessage(json.error || "فشل الدخول");
-      return;
-    }
+    if (busyKey) return;
+    setBusyKey("login");
     setMessage("");
-    await load();
-    await loadSettings();
+    try {
+      const res = await fetch("/api/admin/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password }),
+      });
+      const json = await res.json();
+      if (!res.ok) {
+        setMessage(json.error || "فشل الدخول");
+        return;
+      }
+      setMessage("");
+      await load();
+      await loadSettings();
+    } finally {
+      setBusyKey("");
+    }
   }
 
   async function act(id: string, action: "confirm" | "reject" | "delete" | "email") {
+    if (busyKey) return;
     if (action === "delete") {
       const ok = window.confirm("هتمسح الطلب ده نهائي؟ مش هيرجع تاني.");
       if (!ok) return;
     }
-    const res = await fetch(`/api/admin/orders/${id}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action }),
-    });
-    const json = await res.json();
-    if (!res.ok) {
-      setMessage(json.error || "حصل خطأ");
-      return;
+    const key = `${id}:${action}`;
+    setBusyKey(key);
+    setMessage("");
+    try {
+      const res = await fetch(`/api/admin/orders/${id}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action }),
+      });
+      const json = await res.json();
+      if (!res.ok) {
+        setMessage(json.error || "حصل خطأ");
+        return;
+      }
+      setMessage(
+        action === "delete" ? "اتمسح الطلب" : action === "email" ? "اتبعت إيميل التأكيد للعميل" : ""
+      );
+      await load();
+    } finally {
+      setBusyKey("");
     }
-    setMessage(
-      action === "delete" ? "اتمسح الطلب" : action === "email" ? "اتبعت إيميل التأكيد للعميل" : ""
-    );
-    await load();
   }
 
   async function testNotify() {
-    const res = await fetch("/api/admin/test-telegram", { method: "POST" });
-    const json = await res.json();
-    setMessage(json.ok ? json.message || "تم إرسال تجربة الإشعار على الموبايل" : json.error || "فشل الإرسال");
+    if (busyKey) return;
+    setBusyKey("notify");
+    setMessage("");
+    try {
+      const res = await fetch("/api/admin/test-telegram", { method: "POST" });
+      const json = await res.json();
+      setMessage(json.ok ? json.message || "تم إرسال تجربة الإشعار على الموبايل" : json.error || "فشل الإرسال");
+    } finally {
+      setBusyKey("");
+    }
   }
 
   async function copyTopic() {
@@ -212,6 +237,7 @@ export default function AdminPage() {
 
   async function saveSettings(e: React.FormEvent) {
     e.preventDefault();
+    if (saving || busyKey) return;
     setSaving(true);
     setMessage("");
     const res = await fetch("/api/admin/settings", {
@@ -261,8 +287,8 @@ export default function AdminPage() {
             onChange={(e) => setPassword(e.target.value)}
             placeholder="كلمة المرور"
           />
-          <button className="buy-btn" style={{ marginTop: 14 }}>
-            دخول
+          <button className="buy-btn" style={{ marginTop: 14 }} disabled={busyKey === "login"}>
+            {busyKey === "login" ? "جاري الدخول..." : "دخول"}
           </button>
         </form>
       </div>
@@ -278,8 +304,8 @@ export default function AdminPage() {
             <p style={{ color: "#94A3B8" }}>كل الزيارات والطلبات وحالة الدفع في مكان واحد.</p>
           </div>
           <div style={{ display: "flex", gap: 8 }}>
-            <button className="ghost-btn" onClick={testNotify}>
-              تجربة إشعار الموبايل
+            <button className="ghost-btn" onClick={testNotify} disabled={Boolean(busyKey)}>
+              {busyKey === "notify" ? "جاري الإرسال..." : "تجربة إشعار الموبايل"}
             </button>
             <button
               className="ghost-btn"
@@ -345,8 +371,8 @@ export default function AdminPage() {
               >
                 تفعيل إشعارات الموبايل
               </a>
-              <button type="button" className="ghost-btn" onClick={testNotify}>
-                تجربة الإشعار
+              <button type="button" className="ghost-btn" onClick={testNotify} disabled={Boolean(busyKey)}>
+                {busyKey === "notify" ? "جاري الإرسال..." : "تجربة الإشعار"}
               </button>
               <a className="ghost-btn" href={notifications?.androidApp} target="_blank" rel="noreferrer">
                 تطبيق أندرويد
@@ -526,8 +552,20 @@ export default function AdminPage() {
                 <option value="failed">فشل</option>
                 <option value="rejected">مرفوض</option>
               </select>
-              <button className="ghost-btn" onClick={() => load(status, q)}>
-                تحديث
+              <button
+                className="ghost-btn"
+                disabled={busyKey === "refresh"}
+                onClick={async () => {
+                  if (busyKey) return;
+                  setBusyKey("refresh");
+                  try {
+                    await load(status, q);
+                  } finally {
+                    setBusyKey("");
+                  }
+                }}
+              >
+                {busyKey === "refresh" ? "جاري التحديث..." : "تحديث"}
               </button>
             </div>
 
@@ -539,6 +577,7 @@ export default function AdminPage() {
                   <th>الإعلان</th>
                   <th>الوسيلة</th>
                   <th>الحالة</th>
+                  <th>الإيميل</th>
                   <th>التاريخ</th>
                   <th>إجراء</th>
                 </tr>
@@ -570,6 +609,12 @@ export default function AdminPage() {
                     <td>
                       <span className={`badge ${order.status}`}>{STATUS_AR[order.status] || order.status}</span>
                     </td>
+                    <td>
+                      {(() => {
+                        const email = orderEmailStatus(order);
+                        return <span className={`badge email-${email.key}`}>{email.label}</span>;
+                      })()}
+                    </td>
                     <td>{new Date(order.created_at).toLocaleString("ar-EG")}</td>
                     <td>
                       {order.instapay_screenshot ? (
@@ -579,27 +624,52 @@ export default function AdminPage() {
                       ) : null}
                       {order.status === "pending_review" || order.status === "awaiting_payment" ? (
                         <div style={{ display: "flex", gap: 6, marginTop: 8, flexWrap: "wrap" }}>
-                          <button className="ok-btn" onClick={() => act(order.id, "confirm")}>
-                            تأكيد الدفع
+                          <button
+                            type="button"
+                            className="ok-btn"
+                            disabled={Boolean(busyKey)}
+                            onClick={() => act(order.id, "confirm")}
+                          >
+                            {busyKey === `${order.id}:confirm` ? "جاري التأكيد..." : "تأكيد الدفع"}
                           </button>
                           {order.status === "pending_review" ? (
-                            <button className="danger-btn" onClick={() => act(order.id, "reject")}>
-                              رفض
+                            <button
+                              type="button"
+                              className="danger-btn"
+                              disabled={Boolean(busyKey)}
+                              onClick={() => act(order.id, "reject")}
+                            >
+                              {busyKey === `${order.id}:reject` ? "جاري الرفض..." : "رفض"}
                             </button>
                           ) : null}
-                          <button className="danger-btn" onClick={() => act(order.id, "delete")}>
-                            مسح
+                          <button
+                            type="button"
+                            className="danger-btn"
+                            disabled={Boolean(busyKey)}
+                            onClick={() => act(order.id, "delete")}
+                          >
+                            {busyKey === `${order.id}:delete` ? "جاري المسح..." : "مسح"}
                           </button>
                         </div>
                       ) : (
                         <div style={{ display: "flex", gap: 6, marginTop: 8, flexWrap: "wrap" }}>
                           {order.status === "paid" ? (
-                            <button className="ok-btn" onClick={() => act(order.id, "email")}>
-                              إعادة إرسال الإيميل
+                            <button
+                              type="button"
+                              className="ok-btn"
+                              disabled={Boolean(busyKey)}
+                              onClick={() => act(order.id, "email")}
+                            >
+                              {busyKey === `${order.id}:email` ? "جاري الإرسال..." : "إعادة إرسال الإيميل"}
                             </button>
                           ) : null}
-                          <button className="danger-btn" onClick={() => act(order.id, "delete")}>
-                            مسح
+                          <button
+                            type="button"
+                            className="danger-btn"
+                            disabled={Boolean(busyKey)}
+                            onClick={() => act(order.id, "delete")}
+                          >
+                            {busyKey === `${order.id}:delete` ? "جاري المسح..." : "مسح"}
                           </button>
                         </div>
                       )}

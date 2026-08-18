@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { formatOrderMessage } from "../src/lib/telegram";
-import { canConfirmInstapay, canRejectInstapay } from "../src/lib/orders";
+import { canConfirmInstapay, canRejectInstapay, orderEmailStatus } from "../src/lib/orders";
 
 function order(patch: Record<string, unknown> = {}) {
   return {
@@ -54,5 +54,20 @@ describe("admin order actions and mobile alerts", () => {
     const lead = formatOrderMessage("lead", order({ status: "awaiting_payment", payment_method: "kashier" }));
     assert.match(lead, /ملأ بياناته/);
     assert.match(lead, /كاشير/);
+  });
+
+  it("shows whether the purchase email was sent", () => {
+    assert.deepEqual(orderEmailStatus(order({ status: "paid", email_sent_at: "2026-08-18T10:00:00.000Z" })), {
+      key: "sent",
+      label: "تم إرسال الإيميل",
+    });
+    assert.deepEqual(orderEmailStatus(order({ status: "paid", email_sent_at: null })), {
+      key: "pending",
+      label: "لسه متبعتش",
+    });
+    assert.deepEqual(orderEmailStatus(order({ status: "pending_review" })), {
+      key: "waiting",
+      label: "بعد الدفع",
+    });
   });
 });
