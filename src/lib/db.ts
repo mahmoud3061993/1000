@@ -28,6 +28,12 @@ export type Order = {
   purchase_event_id: string | null;
   fbp: string | null;
   fbc: string | null;
+  utm_source?: string | null;
+  utm_medium?: string | null;
+  utm_campaign?: string | null;
+  utm_content?: string | null;
+  utm_term?: string | null;
+  fbclid?: string | null;
   ip: string | null;
   user_agent: string | null;
   created_at: string;
@@ -67,6 +73,14 @@ function databaseUrl() {
   return resolveDatabaseUrl();
 }
 
+async function ensureColumn(database: Client, table: string, column: string, ddl: string) {
+  const info = await database.execute(`PRAGMA table_info(${table})`);
+  const exists = info.rows.some((row) => String(row.name) === column);
+  if (!exists) {
+    await database.execute(`ALTER TABLE ${table} ADD COLUMN ${column} ${ddl}`);
+  }
+}
+
 async function migrate(database: Client) {
   await database.executeMultiple(`
     CREATE TABLE IF NOT EXISTS visits (
@@ -79,6 +93,9 @@ async function migrate(database: Client) {
       utm_source TEXT,
       utm_medium TEXT,
       utm_campaign TEXT,
+      utm_content TEXT,
+      utm_term TEXT,
+      fbclid TEXT,
       referrer TEXT,
       created_at TEXT NOT NULL
     );
@@ -99,6 +116,12 @@ async function migrate(database: Client) {
       purchase_event_id TEXT,
       fbp TEXT,
       fbc TEXT,
+      utm_source TEXT,
+      utm_medium TEXT,
+      utm_campaign TEXT,
+      utm_content TEXT,
+      utm_term TEXT,
+      fbclid TEXT,
       ip TEXT,
       user_agent TEXT,
       created_at TEXT NOT NULL,
@@ -125,6 +148,15 @@ async function migrate(database: Client) {
     CREATE INDEX IF NOT EXISTS idx_orders_created ON orders(created_at);
     CREATE INDEX IF NOT EXISTS idx_events_name ON events(name);
   `);
+  await ensureColumn(database, "visits", "utm_content", "TEXT");
+  await ensureColumn(database, "visits", "utm_term", "TEXT");
+  await ensureColumn(database, "visits", "fbclid", "TEXT");
+  await ensureColumn(database, "orders", "utm_source", "TEXT");
+  await ensureColumn(database, "orders", "utm_medium", "TEXT");
+  await ensureColumn(database, "orders", "utm_campaign", "TEXT");
+  await ensureColumn(database, "orders", "utm_content", "TEXT");
+  await ensureColumn(database, "orders", "utm_term", "TEXT");
+  await ensureColumn(database, "orders", "fbclid", "TEXT");
 }
 
 export function usesRemoteDb() {
@@ -184,12 +216,15 @@ export async function insertVisit(visit: {
   utm_source?: string | null;
   utm_medium?: string | null;
   utm_campaign?: string | null;
+  utm_content?: string | null;
+  utm_term?: string | null;
+  fbclid?: string | null;
   referrer?: string | null;
 }) {
   const database = await getDb();
   await database.execute({
-    sql: `INSERT INTO visits (id, session_id, ip, user_agent, fbp, fbc, utm_source, utm_medium, utm_campaign, referrer, created_at)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    sql: `INSERT INTO visits (id, session_id, ip, user_agent, fbp, fbc, utm_source, utm_medium, utm_campaign, utm_content, utm_term, fbclid, referrer, created_at)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     args: [
       visit.id,
       visit.session_id,
@@ -200,6 +235,9 @@ export async function insertVisit(visit: {
       visit.utm_source || null,
       visit.utm_medium || null,
       visit.utm_campaign || null,
+      visit.utm_content || null,
+      visit.utm_term || null,
+      visit.fbclid || null,
       visit.referrer || null,
       nowIso(),
     ],
@@ -214,8 +252,9 @@ export async function createOrder(
     sql: `INSERT INTO orders (
         id, session_id, name, email, phone, amount, currency, payment_method, status,
         kashier_order_id, kashier_transaction_id, instapay_screenshot, purchase_event_id,
-        fbp, fbc, ip, user_agent, created_at, updated_at, paid_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        fbp, fbc, utm_source, utm_medium, utm_campaign, utm_content, utm_term, fbclid,
+        ip, user_agent, created_at, updated_at, paid_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     args: [
       order.id,
       order.session_id,
@@ -232,6 +271,12 @@ export async function createOrder(
       order.purchase_event_id,
       order.fbp,
       order.fbc,
+      order.utm_source ?? null,
+      order.utm_medium ?? null,
+      order.utm_campaign ?? null,
+      order.utm_content ?? null,
+      order.utm_term ?? null,
+      order.fbclid ?? null,
       order.ip,
       order.user_agent,
       order.created_at,
@@ -253,7 +298,8 @@ export async function updateOrder(id: string, patch: Partial<Order>) {
         currency=?, payment_method=?, status=?,
         kashier_order_id=?, kashier_transaction_id=?,
         instapay_screenshot=?, purchase_event_id=?,
-        fbp=?, fbc=?, ip=?, user_agent=?, created_at=?,
+        fbp=?, fbc=?, utm_source=?, utm_medium=?, utm_campaign=?, utm_content=?, utm_term=?, fbclid=?,
+        ip=?, user_agent=?, created_at=?,
         updated_at=?, paid_at=?
       WHERE id=?`,
     args: [
@@ -271,6 +317,12 @@ export async function updateOrder(id: string, patch: Partial<Order>) {
       next.purchase_event_id,
       next.fbp,
       next.fbc,
+      next.utm_source ?? null,
+      next.utm_medium ?? null,
+      next.utm_campaign ?? null,
+      next.utm_content ?? null,
+      next.utm_term ?? null,
+      next.fbclid ?? null,
       next.ip,
       next.user_agent,
       next.created_at,
@@ -280,6 +332,36 @@ export async function updateOrder(id: string, patch: Partial<Order>) {
     ],
   });
   return getOrder(id);
+}
+
+export async function getSessionAttribution(sessionId: string) {
+  if (!sessionId) return null;
+  const database = await getDb();
+  const result = await database.execute({
+    sql: `SELECT utm_source, utm_medium, utm_campaign, utm_content, utm_term, fbclid, fbp, fbc
+          FROM visits
+          WHERE session_id = ?
+          ORDER BY created_at ASC`,
+    args: [sessionId],
+  });
+  if (!result.rows.length) return null;
+  const merged = {
+    utm_source: "",
+    utm_medium: "",
+    utm_campaign: "",
+    utm_content: "",
+    utm_term: "",
+    fbclid: "",
+    fbp: "",
+    fbc: "",
+  };
+  for (const row of result.rows) {
+    const record = row as Record<string, unknown>;
+    (Object.keys(merged) as Array<keyof typeof merged>).forEach((key) => {
+      if (!merged[key] && record[key]) merged[key] = String(record[key]);
+    });
+  }
+  return merged;
 }
 
 export async function getOrder(id: string) {
@@ -299,9 +381,9 @@ export async function listOrders(filter?: { status?: string; q?: string }) {
     args.push(filter.status);
   }
   if (filter?.q) {
-    sql += ` AND (name LIKE ? OR email LIKE ? OR phone LIKE ? OR id LIKE ?)`;
+    sql += ` AND (name LIKE ? OR email LIKE ? OR phone LIKE ? OR id LIKE ? OR COALESCE(utm_campaign,'') LIKE ? OR COALESCE(utm_content,'') LIKE ?)`;
     const like = `%${filter.q}%`;
-    args.push(like, like, like, like);
+    args.push(like, like, like, like, like, like);
   }
   sql += ` ORDER BY created_at DESC LIMIT 500`;
   const database = await getDb();

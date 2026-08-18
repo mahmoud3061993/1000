@@ -1,4 +1,5 @@
 import { getDb } from "./db";
+import { formatAttribution } from "./attribution";
 
 export type AnalyticsPeriod = "day" | "week" | "month";
 
@@ -10,6 +11,11 @@ export type AnalyticsOrder = {
   amount: number;
   created_at: string;
   paid_at?: string | null;
+  utm_campaign?: string | null;
+  utm_content?: string | null;
+  utm_term?: string | null;
+  fbclid?: string | null;
+  fbc?: string | null;
 };
 
 export type AnalyticsVisit = {
@@ -45,6 +51,15 @@ export type AnalyticsPoint = {
   income: number;
 };
 
+export type AnalyticsSource = {
+  title: string;
+  detail: string;
+  leads: number;
+  closed: number;
+  waiting: number;
+  income: number;
+};
+
 export type AnalyticsRange = {
   period: AnalyticsPeriod;
   days: number;
@@ -74,6 +89,7 @@ export type AnalyticsReport = {
   openPipeline: number;
   insight: string;
   series: AnalyticsPoint[];
+  sources: AnalyticsSource[];
 };
 
 export const ANALYTICS_TIMEZONE = "Africa/Cairo";
@@ -261,6 +277,43 @@ export function summarizeWindow(
   };
 }
 
+export function summarizeSources(orders: AnalyticsOrder[], from: string, to: string): AnalyticsSource[] {
+  const buckets = new Map<string, AnalyticsSource>();
+  function bucketFor(order: AnalyticsOrder) {
+    const formatted = formatAttribution(order);
+    const key = `${formatted.title}|${formatted.detail}`;
+    const existing = buckets.get(key);
+    if (existing) return existing;
+    const created: AnalyticsSource = {
+      title: formatted.title,
+      detail: formatted.detail,
+      leads: 0,
+      closed: 0,
+      waiting: 0,
+      income: 0,
+    };
+    buckets.set(key, created);
+    return created;
+  }
+
+  for (const order of orders) {
+    if (inRange(order.created_at, from, to)) {
+      const row = bucketFor(order);
+      row.leads += 1;
+      if (order.status === "awaiting_payment" || order.status === "pending_review") {
+        row.waiting += 1;
+      }
+    }
+    if (order.status === "paid" && inRange(order.paid_at, from, to)) {
+      const row = bucketFor(order);
+      row.closed += 1;
+      row.income = roundMoney(row.income + Number(order.amount || 0));
+    }
+  }
+
+  return Array.from(buckets.values()).sort((a, b) => b.income - a.income || b.closed - a.closed || b.leads - a.leads);
+}
+
 export function insightText(totals: AnalyticsTotals, openPipeline: number) {
   const parts = [
     `اتقفل ${totals.closed} طلب`,
@@ -325,6 +378,7 @@ export function buildAnalyticsReport(input: {
     openPipeline,
     insight: insightText(current, openPipeline),
     series: buildSeries(input.orders, input.visits, range.fromYmd, range.toYmdExclusive),
+    sources: summarizeSources(input.orders, range.from, range.to),
   };
 }
 
@@ -337,6 +391,11 @@ function asOrder(row: Record<string, unknown>): AnalyticsOrder {
     amount: Number(row.amount || 0),
     created_at: String(row.created_at),
     paid_at: row.paid_at ? String(row.paid_at) : null,
+    utm_campaign: row.utm_campaign ? String(row.utm_campaign) : null,
+    utm_content: row.utm_content ? String(row.utm_content) : null,
+    utm_term: row.utm_term ? String(row.utm_term) : null,
+    fbclid: row.fbclid ? String(row.fbclid) : null,
+    fbc: row.fbc ? String(row.fbc) : null,
   };
 }
 
@@ -352,7 +411,8 @@ export async function getAnalyticsReport(period: AnalyticsPeriod, now = new Date
   const database = await getDb();
   const [ordersResult, visitsResult, pipelineResult] = await Promise.all([
     database.execute({
-      sql: `SELECT id, session_id, status, payment_method, amount, created_at, paid_at
+      sql: `SELECT id, session_id, status, payment_method, amount, created_at, paid_at,
+                   utm_campaign, utm_content, utm_term, fbclid, fbc
             FROM orders
             WHERE created_at >= ? OR COALESCE(paid_at, '') >= ?`,
       args: [range.previousFrom, range.previousFrom],

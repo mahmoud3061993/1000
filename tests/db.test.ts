@@ -85,6 +85,46 @@ describe("order funnel and payment states", async () => {
     assert.equal(stored.kashier_api_key, "k-secret");
   });
 
+  it("stores campaign and ad names on the order", async () => {
+    await db.insertVisit({
+      id: "v-ad",
+      session_id: "s-ad",
+      utm_campaign: "ramadan",
+      utm_content: "video-1",
+      fbclid: "click1",
+    });
+    const fromVisit = await db.getSessionAttribution("s-ad");
+    assert.equal(fromVisit?.utm_campaign, "ramadan");
+    assert.equal(fromVisit?.utm_content, "video-1");
+
+    await db.createOrder({
+      session_id: "s-ad",
+      id: "o-ad",
+      name: "عميل",
+      email: "ad@b.com",
+      phone: "01000000001",
+      amount: 235,
+      currency: "EGP",
+      payment_method: "instapay",
+      status: "pending_review",
+      kashier_order_id: null,
+      kashier_transaction_id: null,
+      instapay_screenshot: null,
+      purchase_event_id: null,
+      fbp: null,
+      fbc: null,
+      utm_campaign: "ramadan",
+      utm_content: "video-1",
+      fbclid: "click1",
+      ip: null,
+      user_agent: null,
+      created_at: new Date().toISOString(),
+    });
+    const listed = await db.listOrders({ q: "video-1" });
+    assert.equal(listed.some((order) => order.id === "o-ad"), true);
+    assert.equal(listed.find((order) => order.id === "o-ad")?.utm_content, "video-1");
+  });
+
   it("uses /tmp for SQLite on Vercel when Turso is not configured", () => {
     const url = db.resolveDatabaseUrl({ VERCEL: "1" });
     assert.equal(url.startsWith("file:/tmp/"), true);
