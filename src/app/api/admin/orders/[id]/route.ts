@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { isAdminRequest } from "@/lib/auth";
 import { getOrder, updateOrder, deleteOrder } from "@/lib/db";
+import { sendPurchaseEmail } from "@/lib/email";
 import { fulfillPaidOrder } from "@/lib/fulfillment";
 import { canConfirmInstapay, canRejectInstapay } from "@/lib/orders";
 import { notifyText } from "@/lib/notify";
@@ -24,6 +25,23 @@ export async function POST(
   if (action === "delete") {
     await deleteOrder(order.id);
     return NextResponse.json({ ok: true, deleted: order.id });
+  }
+
+  if (action === "email") {
+    if (order.status !== "paid") {
+      return NextResponse.json(
+        { ok: false, error: "الإيميل بيتبعت بعد تأكيد الدفع بس" },
+        { status: 400 }
+      );
+    }
+    const sent = await sendPurchaseEmail(order);
+    if (!sent.ok) {
+      return NextResponse.json(
+        { ok: false, error: sent.error || "فشل إرسال الإيميل" },
+        { status: 400 }
+      );
+    }
+    return NextResponse.json({ ok: true, emailed: true });
   }
 
   if (action === "confirm") {

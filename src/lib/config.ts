@@ -8,6 +8,9 @@ export const PRODUCT = {
   deliveryUrl: process.env.PRODUCT_DELIVERY_URL || "",
 };
 
+export const DEFAULT_DELIVERY_URL =
+  "https://drive.google.com/drive/u/0/folders/1YA69JKnLz1cCSa6913KvyuZdksZH-p6O";
+
 export type KashierCredentials = {
   mid: string;
   apiKey: string;
@@ -58,7 +61,11 @@ export function mergePaymentConfig(
       apiKey: kashierApiKey,
       mode: modeRaw === "test" ? "test" : "live",
     },
-    deliveryUrl: firstNonEmpty(env.PRODUCT_DELIVERY_URL, stored.product_delivery_url),
+    deliveryUrl: firstNonEmpty(
+      env.PRODUCT_DELIVERY_URL,
+      stored.product_delivery_url,
+      DEFAULT_DELIVERY_URL
+    ),
     whatsapp: firstNonEmpty(env.WHATSAPP_NUMBER, stored.whatsapp_number, "201017420379").replace(
       /\D/g,
       ""
@@ -132,4 +139,9 @@ export function metaConfigured() {
 
 export function telegramConfigured() {
   return Boolean(TELEGRAM.botToken && TELEGRAM.chatId);
+}
+
+export function emailConfigured(env: NodeJS.Dict<string> = process.env) {
+  if (env.RESEND_API_KEY) return true;
+  return Boolean(env.SMTP_USER && env.SMTP_PASS);
 }

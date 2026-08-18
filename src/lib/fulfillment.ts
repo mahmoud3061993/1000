@@ -1,6 +1,7 @@
 import { sendCapiEvent } from "./capi";
 import { SITE_URL } from "./config";
 import { Order, markOrderPaid } from "./db";
+import { sendPurchaseEmail } from "./email";
 import { notifyOrder } from "./notify";
 
 export async function fulfillPaidOrder(
@@ -39,6 +40,7 @@ export async function fulfillPaidOrder(
     },
   });
 
+  await sendPurchaseEmail(paid);
   await notifyOrder("paid", paid);
   return paid;
 }
