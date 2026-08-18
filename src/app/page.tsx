@@ -1,17 +1,22 @@
 import { CheckoutForm } from "@/components/CheckoutForm";
 import { LandingPage } from "@/components/LandingPage";
 import { TrackingBoot } from "@/components/TrackingBoot";
-import { INSTAPAY, WHATSAPP_NUMBER, kashierConfigured } from "@/lib/config";
+import { PRODUCT, getPaymentConfig, kashierConfigured } from "@/lib/config";
 
-export default function HomePage() {
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
+export default async function HomePage() {
+  const cfg = await getPaymentConfig();
   return (
     <>
       <TrackingBoot />
-      <LandingPage whatsapp={WHATSAPP_NUMBER} />
+      <LandingPage whatsapp={cfg.whatsapp} />
       <CheckoutForm
-        instapayNumber={INSTAPAY.number}
-        instapayName={INSTAPAY.name}
-        kashierReady={kashierConfigured()}
+        instapayNumber={cfg.instapay.number}
+        instapayName={cfg.instapay.name}
+        kashierReady={kashierConfigured(cfg.kashier)}
+        price={PRODUCT.price}
       />
     </>
   );

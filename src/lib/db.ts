@@ -107,11 +107,46 @@ async function migrate(database: Client) {
       created_at TEXT NOT NULL
     );
 
+    CREATE TABLE IF NOT EXISTS settings (
+      key TEXT PRIMARY KEY,
+      value TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    );
+
     CREATE INDEX IF NOT EXISTS idx_visits_session ON visits(session_id);
     CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status);
     CREATE INDEX IF NOT EXISTS idx_orders_created ON orders(created_at);
     CREATE INDEX IF NOT EXISTS idx_events_name ON events(name);
   `);
+}
+
+export function usesRemoteDb() {
+  return Boolean(process.env.TURSO_DATABASE_URL || process.env.LIBSQL_URL);
+}
+
+export async function getSettings() {
+  const database = await getDb();
+  const result = await database.execute(`SELECT key, value FROM settings`);
+  const stored: Record<string, string> = {};
+  for (const row of result.rows) {
+    stored[String(row.key)] = String(row.value ?? "");
+  }
+  return stored;
+}
+
+export async function setSettings(patch: Record<string, string>) {
+  const database = await getDb();
+  const ts = nowIso();
+  for (const [key, value] of Object.entries(patch)) {
+    await database.execute({
+      sql: `INSERT INTO settings (key, value, updated_at)
+            VALUES (?, ?, ?)
+            ON CONFLICT(key) DO UPDATE SET
+              value = excluded.value,
+              updated_at = excluded.updated_at`,
+      args: [key, value, ts],
+    });
+  }
 }
 
 export async function getDb() {

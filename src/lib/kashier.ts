@@ -1,5 +1,5 @@
 import crypto from "crypto";
-import { KASHIER, SITE_URL } from "./config";
+import { KASHIER, SITE_URL, type KashierCredentials } from "./config";
 
 export type KashierCallbackQuery = Record<string, string | string[] | undefined>;
 
@@ -36,24 +36,22 @@ export function buildKashierHppUrl(input: {
   customerEmail?: string;
   customerPhone?: string;
   allowedMethods?: string;
+  credentials?: KashierCredentials;
 }) {
+  const creds = input.credentials || KASHIER;
   const amount = formatKashierAmount(input.amount);
   const hash = generateKashierOrderHash({
-    mid: KASHIER.mid,
+    mid: creds.mid,
     orderId: input.orderId,
     amount,
     currency: input.currency,
-    secret: KASHIER.apiKey,
+    secret: creds.apiKey,
   });
-  const baseUrl =
-    KASHIER.mode === "live"
-      ? "https://checkout.kashier.io"
-      : "https://checkout.kashier.io";
   const callbackUrl = `${SITE_URL}/api/kashier/callback`;
   const params = new URLSearchParams({
-    merchantId: KASHIER.mid,
+    merchantId: creds.mid,
     orderId: input.orderId,
-    mode: KASHIER.mode,
+    mode: creds.mode,
     amount,
     currency: input.currency,
     hash,
@@ -66,7 +64,7 @@ export function buildKashierHppUrl(input: {
   if (input.customerName) params.set("customerName", input.customerName);
   if (input.customerEmail) params.set("customerEmail", input.customerEmail);
   if (input.customerPhone) params.set("customerMobile", input.customerPhone);
-  return `${baseUrl}?${params.toString()}`;
+  return `https://checkout.kashier.io?${params.toString()}`;
 }
 
 /**

@@ -1,3 +1,5 @@
+import { getSettings } from "./db";
+
 export const PRODUCT = {
   slug: "1000",
   name: "+1000 winning conversion ads canva editable templates",
@@ -5,6 +7,74 @@ export const PRODUCT = {
   currency: process.env.PRODUCT_CURRENCY || "EGP",
   deliveryUrl: process.env.PRODUCT_DELIVERY_URL || "",
 };
+
+export type KashierCredentials = {
+  mid: string;
+  apiKey: string;
+  mode: "live" | "test";
+};
+
+export type PaymentConfig = {
+  instapay: { number: string; name: string };
+  kashier: KashierCredentials;
+  deliveryUrl: string;
+  whatsapp: string;
+  usesRemoteDb: boolean;
+  envOverrides: {
+    instapay: boolean;
+    kashier: boolean;
+    deliveryUrl: boolean;
+  };
+};
+
+function firstNonEmpty(...values: Array<string | undefined>) {
+  for (const value of values) {
+    if (value && value.trim()) return value.trim();
+  }
+  return "";
+}
+
+export function mergePaymentConfig(
+  env: NodeJS.Dict<string>,
+  stored: Record<string, string> = {}
+): PaymentConfig {
+  const instapayNumber = firstNonEmpty(
+    env.INSTAPAY_NUMBER,
+    stored.instapay_number,
+    "01017420379"
+  );
+  const instapayName = firstNonEmpty(
+    env.INSTAPAY_NAME,
+    stored.instapay_name,
+    "mahmoud a i m"
+  );
+  const kashierMid = firstNonEmpty(env.KASHIER_MID, stored.kashier_mid, "MID-40746-226");
+  const kashierApiKey = firstNonEmpty(env.KASHIER_API_KEY, stored.kashier_api_key);
+  const modeRaw = firstNonEmpty(env.KASHIER_MODE, stored.kashier_mode, "live").toLowerCase();
+  return {
+    instapay: { number: instapayNumber, name: instapayName },
+    kashier: {
+      mid: kashierMid,
+      apiKey: kashierApiKey,
+      mode: modeRaw === "test" ? "test" : "live",
+    },
+    deliveryUrl: firstNonEmpty(env.PRODUCT_DELIVERY_URL, stored.product_delivery_url),
+    whatsapp: firstNonEmpty(env.WHATSAPP_NUMBER, stored.whatsapp_number, "201017420379").replace(
+      /\D/g,
+      ""
+    ),
+    usesRemoteDb: Boolean(env.TURSO_DATABASE_URL || env.LIBSQL_URL),
+    envOverrides: {
+      instapay: Boolean(env.INSTAPAY_NUMBER),
+      kashier: Boolean(env.KASHIER_MID && env.KASHIER_API_KEY),
+      deliveryUrl: Boolean(env.PRODUCT_DELIVERY_URL),
+    },
+  };
+}
+
+export async function getPaymentConfig(): Promise<PaymentConfig> {
+  return mergePaymentConfig(process.env, await getSettings());
+}
 
 export const SITE_URL = (
   process.env.SITE_URL ||
@@ -21,12 +91,12 @@ export const WHATSAPP_NUMBER = (process.env.WHATSAPP_NUMBER || "201017420379").r
 );
 
 export const INSTAPAY = {
-  number: process.env.INSTAPAY_NUMBER || "",
-  name: process.env.INSTAPAY_NAME || "",
+  number: process.env.INSTAPAY_NUMBER || "01017420379",
+  name: process.env.INSTAPAY_NAME || "mahmoud a i m",
 };
 
 export const KASHIER = {
-  mid: process.env.KASHIER_MID || "",
+  mid: process.env.KASHIER_MID || "MID-40746-226",
   apiKey: process.env.KASHIER_API_KEY || "",
   mode: (process.env.KASHIER_MODE || "live") as "live" | "test",
 };
@@ -47,8 +117,8 @@ export const TELEGRAM = {
   chatId: process.env.TELEGRAM_CHAT_ID || "",
 };
 
-export function kashierConfigured() {
-  return Boolean(KASHIER.mid && KASHIER.apiKey);
+export function kashierConfigured(creds: KashierCredentials = KASHIER) {
+  return Boolean(creds.mid && creds.apiKey);
 }
 
 export function metaConfigured() {
