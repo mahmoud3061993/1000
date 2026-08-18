@@ -311,9 +311,33 @@ a { color: inherit; }
 
 .stats {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   gap: 12px;
   margin-bottom: 22px;
+}
+
+.admin-integrations {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.admin-integrations span {
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-weight: 800;
+  font-size: 13px;
+}
+
+.admin-integrations .on {
+  background: #14532d;
+  color: #bbf7d0;
+}
+
+.admin-integrations .off {
+  background: #3f1d1d;
+  color: #fecaca;
 }
 
 .stat {
