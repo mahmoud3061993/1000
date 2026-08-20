@@ -493,7 +493,7 @@ export function summarizeSources(
     eventsBySession.set(event.session_id, set);
   }
 
-  for (const sessionId of sessionIds) {
+  for (const sessionId of Array.from(sessionIds)) {
     const formatted = attributionForSession(sessionId, visitsIn.length ? visitsIn : visits, orders);
     const row = bucketFor(formatted.title, formatted.detail);
     const names = eventsBySession.get(sessionId) || new Set<string>();
@@ -526,7 +526,7 @@ export function summarizeSources(
     }
   }
 
-  for (const row of buckets.values()) {
+  for (const row of Array.from(buckets.values())) {
     row.sections = row.sections.map((section) => ({
       ...section,
       pct: row.opens ? round1((section.count / row.opens) * 100) : 0,
