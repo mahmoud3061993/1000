@@ -135,7 +135,7 @@ describe("admin analytics periods", () => {
           id: "p1",
           status: "paid",
           payment_method: "kashier",
-          amount: 449,
+          amount: 350,
           created_at: inCurrent,
           paid_at: inCurrent,
           product_slug: "plant",
@@ -148,7 +148,75 @@ describe("admin analytics periods", () => {
     assert.equal(report.funnel.leads, 1);
     assert.equal(report.funnel.purchased, 1);
     assert.equal(report.current.closed, 1);
-    assert.equal(report.current.income, 449);
+    assert.equal(report.current.income, 350);
+  });
+
+  it("breaks the plant funnel down by ad and landing section", () => {
+    const range = periodRange("week", now);
+    const inCurrent = new Date(Date.parse(range.from) + 2 * 60 * 60 * 1000).toISOString();
+    const report = buildAnalyticsReport({
+      period: "week",
+      now,
+      product: "plant",
+      visits: [
+        {
+          session_id: "ad1",
+          created_at: inCurrent,
+          product_slug: "plant",
+          utm_campaign: "plant-sales",
+          utm_content: "video-a",
+        },
+        {
+          session_id: "ad2",
+          created_at: inCurrent,
+          product_slug: "plant",
+          utm_campaign: "plant-sales",
+          utm_content: "video-b",
+        },
+      ],
+      events: [
+        { session_id: "ad1", name: "Scroll50", created_at: inCurrent, product_slug: "plant" },
+        { session_id: "ad1", name: "SectionTools", created_at: inCurrent, product_slug: "plant" },
+        { session_id: "ad1", name: "CheckoutView", created_at: inCurrent, product_slug: "plant" },
+        { session_id: "ad2", name: "Scroll25", created_at: inCurrent, product_slug: "plant" },
+      ],
+      orders: [
+        {
+          id: "paid-ad",
+          session_id: "ad1",
+          status: "paid",
+          payment_method: "kashier",
+          amount: 350,
+          created_at: inCurrent,
+          paid_at: inCurrent,
+          product_slug: "plant",
+          utm_campaign: "plant-sales",
+          utm_content: "video-a",
+        },
+        {
+          id: "wait-ad",
+          session_id: "ad2",
+          status: "awaiting_payment",
+          payment_method: "kashier",
+          amount: 350,
+          created_at: inCurrent,
+          paid_at: null,
+          product_slug: "plant",
+          utm_campaign: "plant-sales",
+          utm_content: "video-b",
+        },
+      ],
+    });
+    assert.equal(report.funnel.waiting, 1);
+    assert.equal(report.funnel.sections.find((section) => section.event === "SectionTools")?.count, 1);
+    const videoA = report.sources.find((source) => source.title === "video-a");
+    const videoB = report.sources.find((source) => source.title === "video-b");
+    assert.equal(videoA?.opens, 1);
+    assert.equal(videoA?.reachedPay, 1);
+    assert.equal(videoA?.closed, 1);
+    assert.equal(videoB?.opens, 1);
+    assert.equal(videoB?.waiting, 1);
+    assert.equal(videoB?.closed, 0);
   });
 
   it("treats a jump from zero as 100 percent", () => {

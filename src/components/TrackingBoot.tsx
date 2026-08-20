@@ -171,24 +171,33 @@ export function TrackingBoot({
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
 
-    const pay = document.getElementById("order-form");
-    let observer: IntersectionObserver | null = null;
-    if (pay && "IntersectionObserver" in window) {
-      observer = new IntersectionObserver(
-        (entries) => {
-          if (entries.some((entry) => entry.isIntersecting && entry.intersectionRatio >= 0.25)) {
-            sendNamed("CheckoutView");
-            observer?.disconnect();
-          }
-        },
-        { threshold: [0.25, 0.5] }
-      );
-      observer.observe(pay);
+    const observers: IntersectionObserver[] = [];
+    if ("IntersectionObserver" in window) {
+      const watch = (el: Element | null, eventName: string, ratio = 0.25) => {
+        if (!el) return;
+        const observer = new IntersectionObserver(
+          (entries) => {
+            if (entries.some((entry) => entry.isIntersecting && entry.intersectionRatio >= ratio)) {
+              sendNamed(eventName);
+              observer.disconnect();
+            }
+          },
+          { threshold: [0.2, 0.35, 0.5] }
+        );
+        observer.observe(el);
+        observers.push(observer);
+      };
+
+      watch(document.getElementById("order-form"), "CheckoutView");
+      document.querySelectorAll<HTMLElement>("[data-track-section]").forEach((el) => {
+        const eventName = el.dataset.trackSection;
+        if (eventName) watch(el, eventName, 0.2);
+      });
     }
 
     return () => {
       window.removeEventListener("scroll", onScroll);
-      observer?.disconnect();
+      observers.forEach((observer) => observer.disconnect());
     };
   }, [productSlug, price, contentName, trackFunnel]);
 

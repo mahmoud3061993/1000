@@ -1,5 +1,6 @@
 import { getDb } from "./db";
 import { formatAttribution } from "./attribution";
+import { LANDING_SECTIONS } from "./funnel";
 
 export type AnalyticsPeriod = "day" | "week" | "month";
 
@@ -23,6 +24,12 @@ export type AnalyticsVisit = {
   session_id: string;
   created_at: string;
   product_slug?: string | null;
+  utm_source?: string | null;
+  utm_campaign?: string | null;
+  utm_content?: string | null;
+  utm_term?: string | null;
+  fbclid?: string | null;
+  fbc?: string | null;
 };
 
 export type AnalyticsEvent = {
@@ -34,6 +41,13 @@ export type AnalyticsEvent = {
 
 export type AnalyticsProductFilter = "all" | "1000" | "plant";
 
+export type AnalyticsSectionStat = {
+  event: string;
+  label: string;
+  count: number;
+  pct: number;
+};
+
 export type AnalyticsFunnel = {
   opens: number;
   uniqueVisitors: number;
@@ -41,12 +55,15 @@ export type AnalyticsFunnel = {
   scroll50: number;
   scroll75: number;
   scroll100: number;
+  sections: AnalyticsSectionStat[];
   reachedPay: number;
   leads: number;
+  waiting: number;
   purchased: number;
   openToScroll: number;
   scrollToPay: number;
   payToLead: number;
+  leadToWaiting: number;
   leadToPurchase: number;
   openToPurchase: number;
 };
@@ -82,9 +99,16 @@ export type AnalyticsPoint = {
 export type AnalyticsSource = {
   title: string;
   detail: string;
+  opens: number;
+  scroll25: number;
+  scroll50: number;
+  scroll75: number;
+  scroll100: number;
+  sections: AnalyticsSectionStat[];
+  reachedPay: number;
   leads: number;
-  closed: number;
   waiting: number;
+  closed: number;
   income: number;
 };
 
@@ -209,8 +233,8 @@ export function parseAnalyticsPeriod(value: string | null | undefined): Analytic
 }
 
 export function parseProductFilter(value: string | null | undefined): AnalyticsProductFilter {
-  if (value === "plant" || value === "1000") return value;
-  return "all";
+  if (value === "all" || value === "1000") return value;
+  return "plant";
 }
 
 function matchesProduct<T extends { product_slug?: string | null }>(
@@ -221,6 +245,15 @@ function matchesProduct<T extends { product_slug?: string | null }>(
   return (row.product_slug || "1000") === product;
 }
 
+export function emptySections(): AnalyticsSectionStat[] {
+  return LANDING_SECTIONS.map((section) => ({
+    event: section.event,
+    label: section.label,
+    count: 0,
+    pct: 0,
+  }));
+}
+
 export function emptyFunnel(): AnalyticsFunnel {
   return {
     opens: 0,
@@ -229,12 +262,15 @@ export function emptyFunnel(): AnalyticsFunnel {
     scroll50: 0,
     scroll75: 0,
     scroll100: 0,
+    sections: emptySections(),
     reachedPay: 0,
     leads: 0,
+    waiting: 0,
     purchased: 0,
     openToScroll: 0,
     scrollToPay: 0,
     payToLead: 0,
+    leadToWaiting: 0,
     leadToPurchase: 0,
     openToPurchase: 0,
   };
@@ -263,9 +299,17 @@ export function buildFunnel(input: {
   const scroll75 = uniqueSessions(input.events, "Scroll75", from, to);
   const scroll100 = uniqueSessions(input.events, "Scroll100", from, to);
   const reachedPay = uniqueSessions(input.events, "CheckoutView", from, to);
-  const leads = input.orders.filter((order) => inRange(order.created_at, from, to)).length;
+  const created = input.orders.filter((order) => inRange(order.created_at, from, to));
+  const leads = created.length;
+  const waiting = created.filter(
+    (order) => order.status === "awaiting_payment" || order.status === "pending_review"
+  ).length;
   const purchased = input.orders.filter((order) => order.status === "paid" && inRange(order.paid_at, from, to)).length;
   const pct = (num: number, den: number) => (den ? round1((num / den) * 100) : 0);
+  const sections = LANDING_SECTIONS.map((section) => {
+    const count = uniqueSessions(input.events, section.event, from, to);
+    return { event: section.event, label: section.label, count, pct: pct(count, opens) };
+  });
   return {
     opens,
     uniqueVisitors,
@@ -273,12 +317,15 @@ export function buildFunnel(input: {
     scroll50,
     scroll75,
     scroll100,
+    sections,
     reachedPay,
     leads,
+    waiting,
     purchased,
     openToScroll: pct(scroll50, opens),
     scrollToPay: pct(reachedPay, scroll50 || opens),
     payToLead: pct(leads, reachedPay || opens),
+    leadToWaiting: pct(waiting, leads),
     leadToPurchase: pct(purchased, leads),
     openToPurchase: pct(purchased, opens),
   };
@@ -382,41 +429,113 @@ export function summarizeWindow(
   };
 }
 
-export function summarizeSources(orders: AnalyticsOrder[], from: string, to: string): AnalyticsSource[] {
+function attributionForSession(
+  sessionId: string,
+  visits: AnalyticsVisit[],
+  orders: AnalyticsOrder[]
+) {
+  const visit = visits.find((row) => row.session_id === sessionId && (row.utm_campaign || row.utm_content || row.fbclid));
+  const anyVisit = visits.find((row) => row.session_id === sessionId);
+  const order = orders.find((row) => row.session_id === sessionId);
+  return formatAttribution(visit || order || anyVisit || {});
+}
+
+function emptySource(title: string, detail: string): AnalyticsSource {
+  return {
+    title,
+    detail,
+    opens: 0,
+    scroll25: 0,
+    scroll50: 0,
+    scroll75: 0,
+    scroll100: 0,
+    sections: emptySections(),
+    reachedPay: 0,
+    leads: 0,
+    waiting: 0,
+    closed: 0,
+    income: 0,
+  };
+}
+
+export function summarizeSources(
+  orders: AnalyticsOrder[],
+  from: string,
+  to: string,
+  visits: AnalyticsVisit[] = [],
+  events: AnalyticsEvent[] = []
+): AnalyticsSource[] {
   const buckets = new Map<string, AnalyticsSource>();
-  function bucketFor(order: AnalyticsOrder) {
-    const formatted = formatAttribution(order);
-    const key = `${formatted.title}|${formatted.detail}`;
+  function bucketFor(title: string, detail: string) {
+    const key = `${title}|${detail}`;
     const existing = buckets.get(key);
     if (existing) return existing;
-    const created: AnalyticsSource = {
-      title: formatted.title,
-      detail: formatted.detail,
-      leads: 0,
-      closed: 0,
-      waiting: 0,
-      income: 0,
-    };
+    const created = emptySource(title, detail);
     buckets.set(key, created);
     return created;
   }
 
+  const visitsIn = visits.filter((visit) => inRange(visit.created_at, from, to));
+  const eventsIn = events.filter((event) => inRange(event.created_at, from, to));
+  const sessionIds = new Set<string>();
+  visitsIn.forEach((visit) => sessionIds.add(visit.session_id));
+  eventsIn.forEach((event) => sessionIds.add(event.session_id));
+  orders.forEach((order) => {
+    if (order.session_id && (inRange(order.created_at, from, to) || (order.status === "paid" && inRange(order.paid_at, from, to)))) {
+      sessionIds.add(order.session_id);
+    }
+  });
+
+  const eventsBySession = new Map<string, Set<string>>();
+  for (const event of eventsIn) {
+    const set = eventsBySession.get(event.session_id) || new Set<string>();
+    set.add(event.name);
+    eventsBySession.set(event.session_id, set);
+  }
+
+  for (const sessionId of sessionIds) {
+    const formatted = attributionForSession(sessionId, visitsIn.length ? visitsIn : visits, orders);
+    const row = bucketFor(formatted.title, formatted.detail);
+    const names = eventsBySession.get(sessionId) || new Set<string>();
+    row.opens += 1;
+    if (names.has("Scroll25")) row.scroll25 += 1;
+    if (names.has("Scroll50")) row.scroll50 += 1;
+    if (names.has("Scroll75")) row.scroll75 += 1;
+    if (names.has("Scroll100")) row.scroll100 += 1;
+    if (names.has("CheckoutView")) row.reachedPay += 1;
+    row.sections = row.sections.map((section) =>
+      names.has(section.event) ? { ...section, count: section.count + 1 } : section
+    );
+  }
+
   for (const order of orders) {
+    if (!inRange(order.created_at, from, to) && !(order.status === "paid" && inRange(order.paid_at, from, to))) {
+      continue;
+    }
+    const formatted = formatAttribution(order);
+    const row = bucketFor(formatted.title, formatted.detail);
     if (inRange(order.created_at, from, to)) {
-      const row = bucketFor(order);
       row.leads += 1;
       if (order.status === "awaiting_payment" || order.status === "pending_review") {
         row.waiting += 1;
       }
     }
     if (order.status === "paid" && inRange(order.paid_at, from, to)) {
-      const row = bucketFor(order);
       row.closed += 1;
       row.income = roundMoney(row.income + Number(order.amount || 0));
     }
   }
 
-  return Array.from(buckets.values()).sort((a, b) => b.income - a.income || b.closed - a.closed || b.leads - a.leads);
+  for (const row of buckets.values()) {
+    row.sections = row.sections.map((section) => ({
+      ...section,
+      pct: row.opens ? round1((section.count / row.opens) * 100) : 0,
+    }));
+  }
+
+  return Array.from(buckets.values()).sort(
+    (a, b) => b.income - a.income || b.closed - a.closed || b.opens - a.opens || b.leads - a.leads
+  );
 }
 
 export function insightText(totals: AnalyticsTotals, openPipeline: number) {
@@ -490,7 +609,7 @@ export function buildAnalyticsReport(input: {
     openPipeline,
     insight: insightText(current, openPipeline),
     series: buildSeries(orders, visits, range.fromYmd, range.toYmdExclusive),
-    sources: summarizeSources(orders, range.from, range.to),
+    sources: summarizeSources(orders, range.from, range.to, visits, events),
     funnel,
   };
 }
@@ -518,6 +637,12 @@ function asVisit(row: Record<string, unknown>): AnalyticsVisit {
     session_id: String(row.session_id || ""),
     created_at: String(row.created_at),
     product_slug: row.product_slug ? String(row.product_slug) : "1000",
+    utm_source: row.utm_source ? String(row.utm_source) : null,
+    utm_campaign: row.utm_campaign ? String(row.utm_campaign) : null,
+    utm_content: row.utm_content ? String(row.utm_content) : null,
+    utm_term: row.utm_term ? String(row.utm_term) : null,
+    fbclid: row.fbclid ? String(row.fbclid) : null,
+    fbc: row.fbc ? String(row.fbc) : null,
   };
 }
 
@@ -533,29 +658,32 @@ function asEvent(row: Record<string, unknown>): AnalyticsEvent {
 export async function getAnalyticsReport(
   period: AnalyticsPeriod,
   now = new Date(),
-  product: AnalyticsProductFilter = "all"
+  product: AnalyticsProductFilter = "plant"
 ) {
   const range = periodRange(period, now);
+  const productSql = product === "all" ? "" : ` AND COALESCE(product_slug, '1000') = ?`;
+  const productArgs = product === "all" ? [] : [product];
   const database = await getDb();
   const [ordersResult, visitsResult, eventsResult, pipelineResult] = await Promise.all([
     database.execute({
       sql: `SELECT id, session_id, status, payment_method, amount, created_at, paid_at, product_slug,
                    utm_campaign, utm_content, utm_term, fbclid, fbc
             FROM orders
-            WHERE created_at >= ? OR COALESCE(paid_at, '') >= ?`,
-      args: [range.previousFrom, range.previousFrom],
+            WHERE (created_at >= ? OR COALESCE(paid_at, '') >= ?)${productSql}`,
+      args: [range.previousFrom, range.previousFrom, ...productArgs],
     }),
     database.execute({
-      sql: `SELECT session_id, created_at, product_slug FROM visits WHERE created_at >= ?`,
-      args: [range.previousFrom],
+      sql: `SELECT session_id, created_at, product_slug, utm_source, utm_campaign, utm_content, utm_term, fbclid, fbc
+            FROM visits WHERE created_at >= ?${productSql}`,
+      args: [range.previousFrom, ...productArgs],
     }),
     database.execute({
-      sql: `SELECT session_id, name, created_at, product_slug FROM events WHERE created_at >= ?`,
-      args: [range.previousFrom],
+      sql: `SELECT session_id, name, created_at, product_slug FROM events WHERE created_at >= ?${productSql}`,
+      args: [range.previousFrom, ...productArgs],
     }),
     database.execute({
-      sql: `SELECT COUNT(*) as c FROM orders WHERE status IN ('awaiting_payment', 'pending_review')`,
-      args: [],
+      sql: `SELECT COUNT(*) as c FROM orders WHERE status IN ('awaiting_payment', 'pending_review')${productSql}`,
+      args: productArgs,
     }),
   ]);
 

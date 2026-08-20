@@ -558,9 +558,13 @@ a { color: inherit; }
 
 .funnel-grid {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 10px;
   margin-top: 16px;
+}
+
+.funnel-deep {
+  grid-template-columns: repeat(3, 1fr);
 }
 
 .funnel-step {

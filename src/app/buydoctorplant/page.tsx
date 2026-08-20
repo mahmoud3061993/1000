@@ -12,7 +12,7 @@ const product = getCatalogProduct("plant");
 export const metadata: Metadata = {
   title: product.arabicName,
   description:
-    "دليل تفاعلي لرعاية وإنقاذ النباتات المنزلية المتوفرة في مصر — 77 نوع بصور حقيقية، وأدوات تشخيص وري وتربة، بـ 449 جنيه.",
+    "دليل تفاعلي لرعاية وإنقاذ النباتات المنزلية المتوفرة في مصر — 77 نوع بصور حقيقية، وأدوات تشخيص وري وتربة، بـ 350 جنيه.",
   openGraph: {
     title: product.arabicName,
     description: "77 نبات من المشاتل المصرية، وأدوات عناية تفاعلية. شراء لمرة واحدة.",

@@ -1,12 +1,82 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 function scrollToOrder() {
   const el = document.getElementById("order-form");
   if (!el) return;
   const top = el.getBoundingClientRect().top + window.scrollY - 12;
   window.scrollTo({ top, behavior: "smooth" });
+}
+
+const SLIDES = [
+  {
+    src: "/images/plant/slides/home.png",
+    title: "الصفحة الرئيسية",
+    caption: "تبدأ من هنا: تفتح دليل النباتات أو تختار أداة العناية اللي محتاجها.",
+  },
+  {
+    src: "/images/plant/slides/library.png",
+    title: "دليل 77 نبات",
+    caption: "بتدور بالعربي أو الإنجليزي، وتفلتر حسب الضوء والري والحيوانات.",
+  },
+  {
+    src: "/images/plant/slides/doctor.png",
+    title: "دكتور النباتات",
+    caption: "بتختار النبات، وبعدين الأداة بتسألك سؤال سؤال لحد ما توصل للسبب.",
+  },
+  {
+    src: "/images/plant/slides/watering.png",
+    title: "أسقي دلوقتي؟",
+    caption: "القرار من حالة التربة والنبات، مش من عدد الأيام لوحده.",
+  },
+  {
+    src: "/images/plant/slides/soil.png",
+    title: "خلطة التربة",
+    caption: "نِسَب جاهزة بمواد المشاتل المصرية: بيتموس، بيرلايت، رمل، وكمبوست.",
+  },
+];
+
+function PlantSlider() {
+  const [index, setIndex] = useState(0);
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setIndex((current) => (current + 1) % SLIDES.length);
+    }, 4500);
+    return () => window.clearInterval(timer);
+  }, []);
+
+  const slide = SLIDES[index];
+  return (
+    <div className="plant-slider">
+      <div className="plant-slider-frame">
+        <img src={slide.src} alt={slide.title} />
+      </div>
+      <div className="plant-slider-caption">
+        <b>{slide.title}</b>
+        <p>{slide.caption}</p>
+      </div>
+      <div className="plant-slider-nav">
+        <button type="button" onClick={() => setIndex((index - 1 + SLIDES.length) % SLIDES.length)} aria-label="السابق">
+          →
+        </button>
+        <div className="plant-slider-dots">
+          {SLIDES.map((item, i) => (
+            <button
+              key={item.src}
+              type="button"
+              className={i === index ? "active" : ""}
+              onClick={() => setIndex(i)}
+              aria-label={item.title}
+            />
+          ))}
+        </div>
+        <button type="button" onClick={() => setIndex((index + 1) % SLIDES.length)} aria-label="التالي">
+          ←
+        </button>
+      </div>
+    </div>
+  );
 }
 
 export function PlantLandingPage({ whatsapp, price }: { whatsapp: string; price: number }) {
@@ -17,24 +87,24 @@ export function PlantLandingPage({ whatsapp, price }: { whatsapp: string; price:
 
   const faqs = [
     {
-      q: "الدليل ده تطبيق ولا موقع؟",
-      a: "موقع تفاعلي بتدخل عليه من اللينك بعد الدفع. مفيش تحميل تطبيق ومفيش اشتراك شهري. تدفع مرة واحدة وتستخدم الأدوات.",
+      q: "هستلم المنتج إزاي؟",
+      a: "بعد الدفع هيوصلك إيميل فيه لينك فولدر Google Drive. جوه الفولدر 3 حاجات: الموقع الأونلاين، ونسخة HTML تشتغل من غير نت، وتطبيق موبايل تحمّله من الدرايف وتفتحه أوفلاين.",
+    },
+    {
+      q: "الموقع الأونلاين مختلف عن ملف الـ HTML؟",
+      a: "لأ، نفس السيستم. الأونلاين تفتحه من اللينك على أي جهاز. ملف الـ HTML نفس الأدوات والدليل، بس بتشتغله من جهازك لو النت فصل.",
+    },
+    {
+      q: "تطبيق الموبايل ده من المتجر؟",
+      a: "لأ. مش من App Store ولا Google Play. بتنزّله من فولدر الدرايف وتثبّته على موبايلك عشان تفتح الدليل من غير إنترنت.",
     },
     {
       q: "النباتات دي موجودة في مصر فعلًا؟",
       a: "أيوه. الكتالوج 77 نوع من اللي بيتباع في المشاتل والورود والبلكونات المصرية، بأسماء الناس بتستخدمها، وصورة حقيقية على كل كارت.",
     },
     {
-      q: "هستلم المنتج إزاي؟",
-      a: "بعد إتمام الطلب هيوصلك إيميل فيه لينك الدخول على الدليل، وكل تفاصيل الاستخدام. نفس خطوات باقة الـ 1000 تصميم.",
-    },
-    {
-      q: "ينفع على الموبايل؟",
-      a: "أيوه. الأدوات متعملة للموبايل: اختيار كبير، سؤال واحد في كل خطوة، وزرار رجوع.",
-    },
-    {
-      q: "في حساب أو تسجيل دخول؟",
-      a: "لأ. مفيش تسجيل ومفيش متابعة سحابية. القيمة في الدليل والأدوات والطباعة.",
+      q: "في حساب أو اشتراك شهري؟",
+      a: "لأ. تدفع مرة واحدة، وتستخدم النسخ التلاتة قد ما تحتاج. مفيش تسجيل دخول.",
     },
     {
       q: "خلطة التربة هتطلب مواد مش موجودة؟",
@@ -48,15 +118,14 @@ export function PlantLandingPage({ whatsapp, price }: { whatsapp: string; price:
         🌿 سعر خاص — الدليل الكامل بـ <strong>{price} جنيه فقط</strong>
       </div>
 
-      <section className="lp-hero">
+      <section className="lp-hero" data-track-section="SectionHero">
         <div className="lp-container lp-hero-grid">
           <div className="lp-hero-copy">
             <div className="lp-eyebrow">دليل تفاعلي للنباتات المنزلية في مصر</div>
-            <h1>
-              اعرف نباتك، اسقيه صح، وأنقذه قبل ما يموت — من غير تخمين
-            </h1>
+            <h1>اعرف نباتك، اسقيه صح، وأنقذه قبل ما يموت — من غير تخمين</h1>
             <p className="lp-hero-desc">
-              موقع تفاعلي فيه <strong>77 نبات من المشاتل المصرية</strong> بصور حقيقية، وأدوات تشخيص وري وتربة ومكان النبات. تدفع مرة واحدة وتستخدمه على طول.
+              سيستم كامل فيه <strong>77 نبات من المشاتل المصرية</strong> بصور حقيقية، وأدوات تشخيص وري وتربة ومكان النبات.
+              بتستلمه فولدر درايف فيه الموقع + نسخة أوفلاين + تطبيق موبايل. تدفع مرة واحدة.
             </p>
             <div className="lp-hero-points">
               <div className="lp-hero-point">
@@ -69,7 +138,7 @@ export function PlantLandingPage({ whatsapp, price }: { whatsapp: string; price:
               </div>
               <div className="lp-hero-point">
                 <div className="lp-check">✓</div>
-                <div>الري حسب التربة والنبات… مش «كل 3 أيام» وخلاص.</div>
+                <div>الموقع الأونلاين، ونفس الموقع ملف HTML أوفلاين، وتطبيق موبايل من الدرايف.</div>
               </div>
               <div className="lp-hero-point">
                 <div className="lp-check">✓</div>
@@ -84,7 +153,7 @@ export function PlantLandingPage({ whatsapp, price }: { whatsapp: string; price:
             <button className="lp-btn" onClick={scrollToOrder}>
               اطلب الدليل دلوقتي <span>←</span>
             </button>
-            <div className="lp-small-note">📩 لينك الدخول وكل التفاصيل هتوصلك على الإيميل بعد الدفع</div>
+            <div className="lp-small-note">📩 لينك فولدر الدرايف بالتلات نسخ هيوصلك على الإيميل بعد الدفع</div>
           </div>
           <div className="lp-hero-media">
             <div className="lp-main-image">
@@ -101,13 +170,24 @@ export function PlantLandingPage({ whatsapp, price }: { whatsapp: string; price:
       <div className="lp-trust">
         <div className="lp-container lp-trust-grid">
           <div className="lp-trust-item">✓ نباتات مصر فقط</div>
-          <div className="lp-trust-item">✓ صورة حقيقية لكل نوع</div>
-          <div className="lp-trust-item">✓ استلام على الإيميل</div>
+          <div className="lp-trust-item">✓ 3 نسخ: أونلاين + HTML + موبايل</div>
+          <div className="lp-trust-item">✓ استلام على درايف</div>
           <div className="lp-trust-item">✓ من غير اشتراك شهري</div>
         </div>
       </div>
 
-      <section className="lp-section lp-problem">
+      <section className="lp-section lp-preview" data-track-section="SectionPreview">
+        <div className="lp-container">
+          <div className="lp-center">
+            <div className="lp-tag">سكرينات من جوه السيستم</div>
+            <h2 className="lp-title">ده شكل الدليل من جوه… مش صور ديكور</h2>
+            <p className="lp-subtitle">اسحب السلايدر وشوف الصفحة الرئيسية، دليل النباتات، دكتور النباتات، الري، وخلطة التربة.</p>
+          </div>
+          <PlantSlider />
+        </div>
+      </section>
+
+      <section className="lp-section lp-problem" data-track-section="SectionProblem">
         <div className="lp-container">
           <div className="lp-center">
             <div className="lp-tag">المشكلة</div>
@@ -137,76 +217,93 @@ export function PlantLandingPage({ whatsapp, price }: { whatsapp: string; price:
               <p>خلطات بتطلب لحاء وبيوميس مش بيتباعوا عندك، فتخلط غلط.</p>
             </div>
           </div>
-          <div className="lp-solution-wrap">
-            <p>
-              عشان كده الدليل ده معمول للبيت المصري: تعرف النبات من صورته، تسأله إيه مشكلته، وتسقيه وتعملله تربة من المواد اللي في المشاتل.
-            </p>
+        </div>
+      </section>
+
+      <section className="lp-section" data-track-section="SectionReceive">
+        <div className="lp-container">
+          <div className="lp-center">
+            <div className="lp-tag">الاستلام</div>
+            <h2 className="lp-title">هتستلمه فولدر درايف فيه 3 حاجات</h2>
+            <p className="lp-subtitle">نفس السيستم، بثلاث طرق فتح. تدفع مرة، وتستخدم اللي يناسبك.</p>
+          </div>
+          <div className="lp-deliver-grid">
+            <div className="lp-deliver-card">
+              <div className="lp-deliver-no">1</div>
+              <h3>موقع أونلاين</h3>
+              <p>
+                لينك تدخل منه على الدليل من الموبايل أو الكمبيوتر. كل الأدوات شغالة: دليل النباتات، التشخيص، الري، التربة،
+                المكان، والآفات.
+              </p>
+            </div>
+            <div className="lp-deliver-card">
+              <div className="lp-deliver-no">2</div>
+              <h3>نفس الموقع ملف HTML</h3>
+              <p>
+                نسخة كاملة تقدر تفتحها من جهازك من غير إنترنت. لو النت فصل أو عايز تحفظه عندك، السيستم معاك أوفلاين.
+              </p>
+            </div>
+            <div className="lp-deliver-card">
+              <div className="lp-deliver-no">3</div>
+              <h3>تطبيق موبايل من الدرايف</h3>
+              <p>
+                بتنزّل ملف التطبيق من نفس الفولدر وتثبّته على موبايلك. ينفع تفتح الدليل من غير نت وأنت واقف في المشتل أو البلكونة.
+              </p>
+            </div>
           </div>
         </div>
       </section>
 
-      <section className="lp-section lp-preview">
+      <section className="lp-section" data-track-section="SectionTools">
         <div className="lp-container">
           <div className="lp-center">
-            <h2 className="lp-title">صور حقيقية… عشان تتعرف على النبات وأنت بتشتري</h2>
-            <p className="lp-subtitle">كل كارت عليه صورة النبات نفسه، مش رسمة ولا إيموجي.</p>
+            <div className="lp-tag">جوه السيستم</div>
+            <h2 className="lp-title">إيه اللي هتستخدمه حتة حتة؟</h2>
+            <p className="lp-subtitle">كل الأدوات بتقرأ من نفس دليل الـ 77 نبات. مفيش إجابات متناقضة.</p>
           </div>
-          <div className="lp-preview-grid">
-            <div className="lp-preview-card">
-              <img src="/images/plant/preview-1.jpg" alt="البوتس" />
-            </div>
-            <div className="lp-preview-card">
-              <img src="/images/plant/preview-2.jpg" alt="جلد النمر" />
-            </div>
-            <div className="lp-preview-card">
-              <img src="/images/plant/preview-3.jpg" alt="زنبق السلام" />
-            </div>
+          <div className="lp-get-list">
+            {[
+              {
+                t: "دليل النباتات",
+                d: "77 نوع من المشاتل المصرية بصورة حقيقية، اسم عربي زي ما بيتقال في السوق، ضوء، ري، تربة، وتحذيرات الحيوانات والأطفال.",
+              },
+              {
+                t: "دكتور النباتات",
+                d: "بتختار النبات والأعراض: اصفرار، تساقط، عفن، حروق شمس، حشرة. الأداة تمشي معاك سؤال سؤال وتديك السبب والتصرف.",
+              },
+              {
+                t: "النبات المناسب",
+                d: "قبل الشراء: ضوء البيت، البلكونة، الأطفال، والحيوانات. تعرف إيه النوع اللي يعيش عندك.",
+              },
+              {
+                t: "أسقي دلوقتي؟",
+                d: "حسب التربة والنبات والجو، مش روزنامة كل 3 أيام. عشان حر مصر بيغيّر الري كل أسبوع.",
+              },
+              {
+                t: "خلطة التربة",
+                d: "نِسَب جاهزة ببيتموس وبيرلايت ورمل وتربة زراعية وكمبوست وبيت جوز هند وفحم نباتي — اللي في المشاتل هنا.",
+              },
+              {
+                t: "أحط النبات فين؟ + الآفات + الإنقاذ",
+                d: "مكان الأصيص، تعريف الحشرة، وخطوات سريعة لو النبات ذبل بعد التشتيل أو الغرق أو النقل.",
+              },
+              {
+                t: "بطاقات عناية + مخطط أسبوعي",
+                d: "تطبع بطاقة لكل نبات ومخطط فحص وري وتعلّقهم جنب الأصيص. من غير تطبيق سحابي.",
+              },
+            ].map((item) => (
+              <div className="lp-get-row" key={item.t}>
+                <div className="tick">✓</div>
+                <div>
+                  <strong>{item.t}</strong>
+                  <div>{item.d}</div>
+                </div>
+              </div>
+            ))}
           </div>
-        </div>
-      </section>
-
-      <section className="lp-section">
-        <div className="lp-container">
-          <div className="lp-center">
-            <div className="lp-tag">الأدوات</div>
-            <h2 className="lp-title">كل اللي محتاجه لنباتك في مكان واحد</h2>
-            <p className="lp-subtitle">كل الأدوات بتقرأ من نفس دليل النباتات. مفيش إجابات متناقضة.</p>
-          </div>
-          <div className="lp-categories">
-            <div className="lp-category">
-              <div className="emoji">🩺</div>
-              <h3>دكتور النباتات</h3>
-              <p>تشخيص بالأسئلة: اصفرار، تساقط، عفن، حروق شمس، والآفة.</p>
-            </div>
-            <div className="lp-category">
-              <div className="emoji">🏡</div>
-              <h3>النبات المناسب</h3>
-              <p>قبل الشراء: ضوء البيت، البلكونة، الأطفال والحيوانات.</p>
-            </div>
-            <div className="lp-category">
-              <div className="emoji">💧</div>
-              <h3>أسقي دلوقتي؟</h3>
-              <p>حسب التربة والنبات والجو، مش حسب روزنامة.</p>
-            </div>
-            <div className="lp-category">
-              <div className="emoji">🪣</div>
-              <h3>خلطة التربة</h3>
-              <p>بيتموس وبيرلايت ورمل وتربة زراعية وكمبوست من السوق المصري.</p>
-            </div>
-            <div className="lp-category">
-              <div className="emoji">📍</div>
-              <h3>أحط النبات فين؟</h3>
-              <p>الصالة، البلكونة، جنب التكييف، والشمس المباشرة.</p>
-            </div>
-            <div className="lp-category">
-              <div className="emoji">🚑</div>
-              <h3>إنقاذ سريع</h3>
-              <p>خطوات لو النبات بيذبل بعد التشتيل أو النقل أو الغرق.</p>
-            </div>
-          </div>
-          <div className="lp-center" style={{ marginTop: 35 }}>
+          <div className="lp-center" style={{ marginTop: 28 }}>
             <button className="lp-btn" onClick={scrollToOrder}>
-              عايز الدليل كامل <span>←</span>
+              عايز السيستم كامل <span>←</span>
             </button>
           </div>
         </div>
@@ -244,36 +341,12 @@ export function PlantLandingPage({ whatsapp, price }: { whatsapp: string; price:
         </div>
       </section>
 
-      <section className="lp-section">
-        <div className="lp-container">
-          <div className="lp-center">
-            <div className="lp-tag">هتاخد إيه؟</div>
-            <h2 className="lp-title">إيه اللي هيوصلك بالظبط؟</h2>
-          </div>
-          <div className="lp-get-list">
-            {[
-              "دخول على الدليل التفاعلي من اللينك بعد الدفع.",
-              "77 نبات من السوق المصري بصورة حقيقية على كل كارت.",
-              "دكتور نباتات + اختيار النبات + الري + التربة + المكان + الآفات + الإنقاذ.",
-              "بطاقات عناية تقدر تطبعها وتعلّقها جنب الأصيص.",
-              "مخطط أسبوعي للطباعة، مش تطبيق بيتابعك أونلاين.",
-              "خلطات تربة بمواد موجودة في المشاتل المصرية.",
-            ].map((item) => (
-              <div className="lp-get-row" key={item}>
-                <div className="tick">✓</div>
-                {item}
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       <section className="lp-section lp-bonus">
         <div className="lp-container">
           <div className="lp-center">
             <div className="lp-tag">مش الدليل بس</div>
             <h2 className="lp-title">
-              جوه نفس السعر <span className="lp-highlight">أدوات للطباعة والإنقاذ</span>
+              جوه نفس السعر <span className="lp-highlight">النسخ التلاتة وأدوات الطباعة</span>
             </h2>
           </div>
           <div className="lp-bonus-grid">
@@ -282,46 +355,22 @@ export function PlantLandingPage({ whatsapp, price }: { whatsapp: string; price:
               <div className="lp-bonus-number">1</div>
               <h3>بطاقات العناية</h3>
               <p>بطاقة لكل نبات: الضوء، الري، التحذير، والأخطاء الشائعة. تنفع تتطبع وتتحط جنب الأصيص.</p>
-              <div className="lp-bonus-value">
-                جزء من الدليل — مش إضافة منفصلة
-              </div>
             </div>
             <div className="lp-bonus-card">
               <div className="lp-bonus-badge">مضمّن</div>
               <div className="lp-bonus-number">2</div>
               <h3>مخطط أسبوعي للطباعة</h3>
-              <p>ورقة تتابع عليها الفحص والري من غير تطبيق وبدون تسجيل دخول.</p>
-              <div className="lp-bonus-value">
-                جزء من الدليل — مش إضافة منفصلة
-              </div>
+              <p>ورقة تتابع عليها الفحص والري من غير تسجيل دخول ومتابعة سحابية.</p>
             </div>
           </div>
         </div>
       </section>
 
-      <section className="lp-section lp-audience">
-        <div className="lp-container">
-          <div className="lp-center">
-            <div className="lp-tag">المنتج ده معمول ليك لو...</div>
-            <h2 className="lp-title">عندك أصص في البيت ومش عايز تخسرها</h2>
-          </div>
-          <div className="lp-audience-tags">
-            {["مبتدئين", "بلكونة مصرية", "أصحاب قطط", "بعد شراء من مشتل", "نبات هدايا", "ناس زهقت من النصايح العامة"].map(
-              (tag) => (
-                <div className="lp-audience-tag" key={tag}>
-                  {tag}
-                </div>
-              )
-            )}
-          </div>
-        </div>
-      </section>
-
-      <section className="lp-section">
+      <section className="lp-section" data-track-section="SectionOffer">
         <div className="lp-container">
           <div className="lp-center">
             <div className="lp-tag">طريقة الاستلام</div>
-            <h2 className="lp-title">3 خطوات والدليل يبقى عندك</h2>
+            <h2 className="lp-title">3 خطوات والسيستم يبقى عندك</h2>
           </div>
           <div className="lp-steps">
             <div className="lp-step">
@@ -331,13 +380,13 @@ export function PlantLandingPage({ whatsapp, price }: { whatsapp: string; price:
             </div>
             <div className="lp-step">
               <div className="lp-step-no">2</div>
-              <h3>استلم الإيميل</h3>
-              <p>هيجيلك Email فيه لينك الدخول وكل تفاصيل الدليل.</p>
+              <h3>استلم فولدر الدرايف</h3>
+              <p>الإيميل فيه لينك فيه الموقع الأونلاين، ملف HTML، وتطبيق الموبايل.</p>
             </div>
             <div className="lp-step">
               <div className="lp-step-no">3</div>
-              <h3>افتح الدليل</h3>
-              <p>استخدم الأدوات على الموبايل أو الكمبيوتر من غير تسجيل.</p>
+              <h3>افتح اللي يناسبك</h3>
+              <p>أونلاين من اللينك، أوفلاين من HTML، أو من التطبيق وأنت في المشتل.</p>
             </div>
           </div>
         </div>
@@ -350,11 +399,11 @@ export function PlantLandingPage({ whatsapp, price }: { whatsapp: string; price:
             <h2 className="lp-offer-title">كل اللي هتاخده النهاردة</h2>
             <div className="lp-stack">
               <div className="lp-stack-row">
-                <div className="lp-stack-name">دليل 77 نبات بصور حقيقية</div>
+                <div className="lp-stack-name">دليل 77 نبات + كل الأدوات</div>
                 <div className="lp-stack-value">790 جنيه</div>
               </div>
               <div className="lp-stack-row">
-                <div className="lp-stack-name">أدوات التشخيص والري والتربة والمكان</div>
+                <div className="lp-stack-name">موقع أونلاين + HTML أوفلاين + تطبيق موبايل</div>
                 <div className="lp-stack-value">400 جنيه</div>
               </div>
               <div className="lp-stack-row">
@@ -405,7 +454,7 @@ export function PlantLandingPage({ whatsapp, price }: { whatsapp: string; price:
       <section className="lp-bottom">
         <div className="lp-container">
           <h2>جاهز تبطل تخمّن على نباتاتك؟</h2>
-          <p>دليل 77 نبات من مصر، وأدوات تشخيص وري وتربة، بـ {price} جنيه لمرة واحدة.</p>
+          <p>سيستم 77 نبات من مصر، وأدوات تشخيص وري وتربة، بـ {price} جنيه لمرة واحدة.</p>
           <button className="lp-btn" onClick={scrollToOrder}>
             اطلب الدليل بـ {price} جنيه <span>←</span>
           </button>

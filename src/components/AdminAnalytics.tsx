@@ -4,9 +4,9 @@ import { useEffect, useState } from "react";
 import type { AnalyticsPeriod, AnalyticsProductFilter, AnalyticsReport } from "@/lib/analytics";
 
 const PRODUCTS: Array<{ id: AnalyticsProductFilter; label: string }> = [
-  { id: "all", label: "كل المنتجات" },
   { id: "plant", label: "دليل النباتات" },
   { id: "1000", label: "مكتبة +1000" },
+  { id: "all", label: "كل المنتجات" },
 ];
 
 const PERIODS: Array<{ id: AnalyticsPeriod; label: string }> = [
@@ -33,7 +33,7 @@ function changeClass(value: number) {
 
 export default function AdminAnalytics() {
   const [period, setPeriod] = useState<AnalyticsPeriod>("week");
-  const [product, setProduct] = useState<AnalyticsProductFilter>("all");
+  const [product, setProduct] = useState<AnalyticsProductFilter>("plant");
   const [report, setReport] = useState<AnalyticsReport | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -65,7 +65,7 @@ export default function AdminAnalytics() {
       <div className="settings-card">
         <h2>تحليل المبيعات</h2>
         <p>
-          شوف مين فتح الصفحة، مين عمل سكرول، مين وصل للدفع، مين اشترى، والدخل. الأرقام بتتوقيت مصر، ومقارنة بالفترة اللي قبلها.
+          تحليل دليل النباتات: فتح الصفحة من كل إعلان، السكرول، السكشن اللي وصلوله، الفورم، ومين دفع. الأرقام بتوقيت مصر.
         </p>
         <div className="analytics-periods">
           {PRODUCTS.map((item) => (
@@ -110,15 +110,16 @@ export default function AdminAnalytics() {
 
       {report?.funnel ? (
         <div className="settings-card">
-          <h2>فنل الصفحة</h2>
-          <p>كام واحد فتح، عمل سكرول، نزل لمكان الدفع، ملأ البيانات، واشترى.</p>
-          <div className="funnel-grid">
+          <h2>فنل الصفحة — مجمع</h2>
+          <p>الكام واحد فتح، عمل سكرول، وصل لسكشن، نزل للفورم، ملأ البيانات، وقف على الدفع، ودفع.</p>
+          <div className="funnel-grid funnel-deep">
             {[
               { label: "فتح الصفحة", value: report.funnel.opens, hint: `${report.funnel.uniqueVisitors} زائر مختلف` },
               { label: "سكرول 50%", value: report.funnel.scroll50, hint: `${report.funnel.openToScroll}% من الفتح` },
-              { label: "وصل للدفع", value: report.funnel.reachedPay, hint: `${report.funnel.scrollToPay}% بعد السكرول` },
-              { label: "ملأ البيانات", value: report.funnel.leads, hint: `${report.funnel.payToLead}% من اللي وصلوا للدفع` },
-              { label: "اشترى", value: report.funnel.purchased, hint: `${report.funnel.openToPurchase}% من الفتح` },
+              { label: "وصل للفورم", value: report.funnel.reachedPay, hint: `${report.funnel.scrollToPay}% بعد السكرول` },
+              { label: "ملأ البيانات", value: report.funnel.leads, hint: `${report.funnel.payToLead}% من اللي وصلوا للفورم` },
+              { label: "واقف على الدفع", value: report.funnel.waiting, hint: `${report.funnel.leadToWaiting}% من اللي ملوا الفورم` },
+              { label: "دفع", value: report.funnel.purchased, hint: `${report.funnel.openToPurchase}% من الفتح` },
             ].map((step, index, list) => (
               <div className="funnel-step" key={step.label}>
                 <b>{step.value}</b>
@@ -145,6 +146,16 @@ export default function AdminAnalytics() {
               تحويل الشراء من الطلب
               <b>{report.funnel.leadToPurchase}%</b>
             </div>
+          </div>
+          <h3 style={{ marginTop: 22, fontSize: 16 }}>وصلوا لانهي سكشن في الصفحة</h3>
+          <div className="stats" style={{ marginTop: 12 }}>
+            {report.funnel.sections.map((section) => (
+              <div className="stat" key={section.event}>
+                {section.label}
+                <b>{section.count}</b>
+                <small>{section.pct}% من الفتح</small>
+              </div>
+            ))}
           </div>
         </div>
       ) : null}
@@ -242,14 +253,17 @@ export default function AdminAnalytics() {
 
       <div className="settings-card">
         <h2>حسب الإعلان</h2>
-        <p>كل إعلان أو حملة جاب كام طلب ودخل كام في الفترة دي.</p>
+        <p>كل إعلان: كام واحد فتح، عمل سكرول، وصل للفورم، ملأ البيانات، وقف على الدفع، ودفع.</p>
         <table className="admin-table">
           <thead>
             <tr>
               <th>الإعلان</th>
-              <th>طلبات</th>
-              <th>اتقفلت</th>
-              <th>واقفة</th>
+              <th>فتح</th>
+              <th>سكرول 50%</th>
+              <th>وصل للفورم</th>
+              <th>ملأ البيانات</th>
+              <th>واقف</th>
+              <th>دفع</th>
               <th>الدخل</th>
             </tr>
           </thead>
@@ -259,10 +273,19 @@ export default function AdminAnalytics() {
                 <td>
                   <div>{source.title}</div>
                   <div style={{ color: "#94A3B8" }}>{source.detail}</div>
+                  <div style={{ color: "#64748B", fontSize: 12, marginTop: 6 }}>
+                    {source.sections
+                      .filter((section) => section.count > 0)
+                      .map((section) => `${section.label} ${section.count}`)
+                      .join(" · ") || "لسه مفيش سكشنز متسجلة"}
+                  </div>
                 </td>
+                <td>{source.opens}</td>
+                <td>{source.scroll50}</td>
+                <td>{source.reachedPay}</td>
                 <td>{source.leads}</td>
-                <td>{source.closed}</td>
                 <td>{source.waiting}</td>
+                <td>{source.closed}</td>
                 <td>{money(source.income)}</td>
               </tr>
             ))}
