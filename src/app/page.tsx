@@ -10,7 +10,12 @@ export default async function HomePage() {
   const cfg = await getPaymentConfig();
   return (
     <>
-      <TrackingBoot />
+      <TrackingBoot
+        productSlug={PRODUCT.slug}
+        price={PRODUCT.price}
+        contentName={PRODUCT.pixelName}
+        trackFunnel
+      />
       <LandingPage whatsapp={cfg.whatsapp} />
       <CheckoutForm
         instapayNumber={cfg.instapay.number}

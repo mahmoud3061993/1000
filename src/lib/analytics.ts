@@ -11,6 +11,7 @@ export type AnalyticsOrder = {
   amount: number;
   created_at: string;
   paid_at?: string | null;
+  product_slug?: string | null;
   utm_campaign?: string | null;
   utm_content?: string | null;
   utm_term?: string | null;
@@ -21,6 +22,33 @@ export type AnalyticsOrder = {
 export type AnalyticsVisit = {
   session_id: string;
   created_at: string;
+  product_slug?: string | null;
+};
+
+export type AnalyticsEvent = {
+  session_id: string;
+  name: string;
+  created_at: string;
+  product_slug?: string | null;
+};
+
+export type AnalyticsProductFilter = "all" | "1000" | "plant";
+
+export type AnalyticsFunnel = {
+  opens: number;
+  uniqueVisitors: number;
+  scroll25: number;
+  scroll50: number;
+  scroll75: number;
+  scroll100: number;
+  reachedPay: number;
+  leads: number;
+  purchased: number;
+  openToScroll: number;
+  scrollToPay: number;
+  payToLead: number;
+  leadToPurchase: number;
+  openToPurchase: number;
 };
 
 export type AnalyticsTotals = {
@@ -90,6 +118,7 @@ export type AnalyticsReport = {
   insight: string;
   series: AnalyticsPoint[];
   sources: AnalyticsSource[];
+  funnel: AnalyticsFunnel;
 };
 
 export const ANALYTICS_TIMEZONE = "Africa/Cairo";
@@ -177,6 +206,82 @@ function arabicDateLabel(ymd: string) {
 export function parseAnalyticsPeriod(value: string | null | undefined): AnalyticsPeriod {
   if (value === "week" || value === "month" || value === "day") return value;
   return "week";
+}
+
+export function parseProductFilter(value: string | null | undefined): AnalyticsProductFilter {
+  if (value === "plant" || value === "1000") return value;
+  return "all";
+}
+
+function matchesProduct<T extends { product_slug?: string | null }>(
+  row: T,
+  product: AnalyticsProductFilter
+) {
+  if (product === "all") return true;
+  return (row.product_slug || "1000") === product;
+}
+
+export function emptyFunnel(): AnalyticsFunnel {
+  return {
+    opens: 0,
+    uniqueVisitors: 0,
+    scroll25: 0,
+    scroll50: 0,
+    scroll75: 0,
+    scroll100: 0,
+    reachedPay: 0,
+    leads: 0,
+    purchased: 0,
+    openToScroll: 0,
+    scrollToPay: 0,
+    payToLead: 0,
+    leadToPurchase: 0,
+    openToPurchase: 0,
+  };
+}
+
+function uniqueSessions(events: AnalyticsEvent[], name: string, from: string, to: string) {
+  return new Set(
+    events.filter((event) => event.name === name && inRange(event.created_at, from, to)).map((event) => event.session_id)
+  ).size;
+}
+
+export function buildFunnel(input: {
+  visits: AnalyticsVisit[];
+  events: AnalyticsEvent[];
+  orders: AnalyticsOrder[];
+  from: string;
+  to: string;
+}): AnalyticsFunnel {
+  const from = input.from;
+  const to = input.to;
+  const visitsIn = input.visits.filter((visit) => inRange(visit.created_at, from, to));
+  const uniqueVisitors = new Set(visitsIn.map((visit) => visit.session_id)).size;
+  const opens = uniqueVisitors || uniqueSessions(input.events, "PageView", from, to);
+  const scroll25 = uniqueSessions(input.events, "Scroll25", from, to);
+  const scroll50 = uniqueSessions(input.events, "Scroll50", from, to);
+  const scroll75 = uniqueSessions(input.events, "Scroll75", from, to);
+  const scroll100 = uniqueSessions(input.events, "Scroll100", from, to);
+  const reachedPay = uniqueSessions(input.events, "CheckoutView", from, to);
+  const leads = input.orders.filter((order) => inRange(order.created_at, from, to)).length;
+  const purchased = input.orders.filter((order) => order.status === "paid" && inRange(order.paid_at, from, to)).length;
+  const pct = (num: number, den: number) => (den ? round1((num / den) * 100) : 0);
+  return {
+    opens,
+    uniqueVisitors,
+    scroll25,
+    scroll50,
+    scroll75,
+    scroll100,
+    reachedPay,
+    leads,
+    purchased,
+    openToScroll: pct(scroll50, opens),
+    scrollToPay: pct(reachedPay, scroll50 || opens),
+    payToLead: pct(leads, reachedPay || opens),
+    leadToPurchase: pct(purchased, leads),
+    openToPurchase: pct(purchased, opens),
+  };
 }
 
 export function periodRange(period: AnalyticsPeriod, now = new Date()): AnalyticsRange {
@@ -356,12 +461,19 @@ export function buildAnalyticsReport(input: {
   now?: Date;
   orders: AnalyticsOrder[];
   visits: AnalyticsVisit[];
+  events?: AnalyticsEvent[];
+  product?: AnalyticsProductFilter;
   openPipeline?: number;
 }): AnalyticsReport {
+  const product = input.product || "all";
+  const orders = input.orders.filter((row) => matchesProduct(row, product));
+  const visits = input.visits.filter((row) => matchesProduct(row, product));
+  const events = (input.events || []).filter((row) => matchesProduct(row, product));
   const range = periodRange(input.period, input.now);
-  const current = summarizeWindow(input.orders, input.visits, range.from, range.to);
-  const previous = summarizeWindow(input.orders, input.visits, range.previousFrom, range.previousTo);
+  const current = summarizeWindow(orders, visits, range.from, range.to);
+  const previous = summarizeWindow(orders, visits, range.previousFrom, range.previousTo);
   const openPipeline = input.openPipeline ?? 0;
+  const funnel = buildFunnel({ visits, events, orders, from: range.from, to: range.to });
   return {
     period: input.period,
     timezone: ANALYTICS_TIMEZONE,
@@ -377,8 +489,9 @@ export function buildAnalyticsReport(input: {
     },
     openPipeline,
     insight: insightText(current, openPipeline),
-    series: buildSeries(input.orders, input.visits, range.fromYmd, range.toYmdExclusive),
-    sources: summarizeSources(input.orders, range.from, range.to),
+    series: buildSeries(orders, visits, range.fromYmd, range.toYmdExclusive),
+    sources: summarizeSources(orders, range.from, range.to),
+    funnel,
   };
 }
 
@@ -391,6 +504,7 @@ function asOrder(row: Record<string, unknown>): AnalyticsOrder {
     amount: Number(row.amount || 0),
     created_at: String(row.created_at),
     paid_at: row.paid_at ? String(row.paid_at) : null,
+    product_slug: row.product_slug ? String(row.product_slug) : "1000",
     utm_campaign: row.utm_campaign ? String(row.utm_campaign) : null,
     utm_content: row.utm_content ? String(row.utm_content) : null,
     utm_term: row.utm_term ? String(row.utm_term) : null,
@@ -403,22 +517,40 @@ function asVisit(row: Record<string, unknown>): AnalyticsVisit {
   return {
     session_id: String(row.session_id || ""),
     created_at: String(row.created_at),
+    product_slug: row.product_slug ? String(row.product_slug) : "1000",
   };
 }
 
-export async function getAnalyticsReport(period: AnalyticsPeriod, now = new Date()) {
+function asEvent(row: Record<string, unknown>): AnalyticsEvent {
+  return {
+    session_id: String(row.session_id || ""),
+    name: String(row.name || ""),
+    created_at: String(row.created_at),
+    product_slug: row.product_slug ? String(row.product_slug) : "1000",
+  };
+}
+
+export async function getAnalyticsReport(
+  period: AnalyticsPeriod,
+  now = new Date(),
+  product: AnalyticsProductFilter = "all"
+) {
   const range = periodRange(period, now);
   const database = await getDb();
-  const [ordersResult, visitsResult, pipelineResult] = await Promise.all([
+  const [ordersResult, visitsResult, eventsResult, pipelineResult] = await Promise.all([
     database.execute({
-      sql: `SELECT id, session_id, status, payment_method, amount, created_at, paid_at,
+      sql: `SELECT id, session_id, status, payment_method, amount, created_at, paid_at, product_slug,
                    utm_campaign, utm_content, utm_term, fbclid, fbc
             FROM orders
             WHERE created_at >= ? OR COALESCE(paid_at, '') >= ?`,
       args: [range.previousFrom, range.previousFrom],
     }),
     database.execute({
-      sql: `SELECT session_id, created_at FROM visits WHERE created_at >= ?`,
+      sql: `SELECT session_id, created_at, product_slug FROM visits WHERE created_at >= ?`,
+      args: [range.previousFrom],
+    }),
+    database.execute({
+      sql: `SELECT session_id, name, created_at, product_slug FROM events WHERE created_at >= ?`,
       args: [range.previousFrom],
     }),
     database.execute({
@@ -430,8 +562,10 @@ export async function getAnalyticsReport(period: AnalyticsPeriod, now = new Date
   return buildAnalyticsReport({
     period,
     now,
+    product,
     orders: ordersResult.rows.map((row) => asOrder(row as Record<string, unknown>)),
     visits: visitsResult.rows.map((row) => asVisit(row as Record<string, unknown>)),
+    events: eventsResult.rows.map((row) => asEvent(row as Record<string, unknown>)),
     openPipeline: Number(pipelineResult.rows[0]?.c || 0),
   });
 }

@@ -407,7 +407,7 @@ export default function AdminPage() {
               </code>
               ودليل النباتات:
               <code className="settings-code" dir="ltr">
-                {"https://www.mahmoudelkousy.online/products/plant?utm_source=facebook&utm_medium=paid&utm_campaign={{campaign.name}}&utm_content={{ad.name}}&utm_term={{adset.name}}"}
+                {"https://www.mahmoudelkousy.online/buydoctorplant?utm_source=facebook&utm_medium=paid&utm_campaign={{campaign.name}}&utm_content={{ad.name}}&utm_term={{adset.name}}"}
               </code>
             </p>
             {!usesRemoteDb ? (

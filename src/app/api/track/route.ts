@@ -11,8 +11,10 @@ export async function POST(req: NextRequest) {
   const sessionId = body.sessionId || getOrCreateSessionId();
   const eventName = body.eventName || "PageView";
   const eventId = body.eventId || crypto.randomUUID();
+  const productSlug = body.productSlug === "plant" ? "plant" : "1000";
   const ip = clientIp(req);
   const ua = userAgent(req);
+  const funnelOnly = eventName.startsWith("Scroll") || eventName === "CheckoutView";
 
   if (eventName === "PageView") {
     await insertVisit({
@@ -29,6 +31,7 @@ export async function POST(req: NextRequest) {
       utm_term: body.utm_term,
       fbclid: body.fbclid,
       referrer: body.referrer,
+      product_slug: productSlug,
     });
   }
 
@@ -37,6 +40,7 @@ export async function POST(req: NextRequest) {
     session_id: sessionId,
     order_id: body.orderId || null,
     name: eventName,
+    product_slug: productSlug,
   });
 
   if (eventName === "Purchase") {
@@ -53,6 +57,17 @@ export async function POST(req: NextRequest) {
       maxAge: 60 * 60 * 24 * 90,
     });
     return skipped;
+  }
+
+  if (funnelOnly) {
+    const res = NextResponse.json({ ok: true, eventId, sessionId });
+    res.cookies.set("sid", sessionId, {
+      httpOnly: true,
+      sameSite: "lax",
+      path: "/",
+      maxAge: 60 * 60 * 24 * 90,
+    });
+    return res;
   }
 
   await sendCapiEvent({
@@ -76,6 +91,8 @@ export async function POST(req: NextRequest) {
             value: body.value,
             currency: body.currency,
             orderId: body.orderId,
+            contentName: body.productSlug === "plant" ? "Plant Care Guide" : undefined,
+            contentIds: [productSlug],
           },
   });
 

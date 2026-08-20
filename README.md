@@ -3,7 +3,7 @@
 متجر رقمي لصفحات الهبوط:
 
 - مكتبة +1000 Canva Ads: `/` و `/products/1000`
-- دليل رعاية النباتات المنزلية: `/products/plant` بسعر **449 جنيه**
+- دليل رعاية النباتات: الشراء `/buydoctorplant` — الدليل `/products/plant`
 
 الدفع في الاتنين واحد:
 
@@ -35,6 +35,7 @@ npm run dev
 | `PRODUCT_DELIVERY_URL` | لينك Google Drive لمكتبة الـ 1000 بعد الدفع |
 | `PLANT_PRODUCT_PRICE` | سعر دليل النباتات (الافتراضي 449) |
 | `PLANT_DELIVERY_URL` | لينك دخول دليل النباتات بعد الدفع |
+| `PLANT_APP_ORIGIN` | أصل نشر الدليل عشان `/products/plant` تتوجه له |
 | `ADMIN_PASSWORD` | دخول لوحة الأدمن |
 | `SESSION_SECRET` | مفتاح توقيع جلسة الأدمن |
 | `KASHIER_MID` / `KASHIER_API_KEY` / `KASHIER_MODE` | ربط كاشير (`live` أو `test`) |

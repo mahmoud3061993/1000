@@ -25,7 +25,12 @@ export default async function PlantProductPage() {
   const plant = getCatalogProduct("plant");
   return (
     <>
-      <TrackingBoot />
+      <TrackingBoot
+        productSlug={plant.slug}
+        price={plant.price}
+        contentName={plant.pixelName}
+        trackFunnel
+      />
       <PlantLandingPage whatsapp={cfg.whatsapp} price={plant.price} />
       <CheckoutForm
         instapayNumber={cfg.instapay.number}

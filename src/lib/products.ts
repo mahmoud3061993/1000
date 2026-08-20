@@ -39,7 +39,7 @@ export function getCatalogProduct(
       kashierDescription: "دليل إنقاذ ورعاية النباتات المنزلية",
       checkoutTitle: "دليل إنقاذ ورعاية النباتات المنزلية",
       whatsappMessage: "أهلاً، حابب أعرف تفاصيل أكتر عن دليل رعاية النباتات المنزلية",
-      path: "/products/plant",
+      path: "/buydoctorplant",
       thankYouCta: "افتح الدليل دلوقتي",
       thankYouBody: "شكراً {name}. الدليل وهيوصلك على الإيميل، وتقدر تفتحه من الرابط تحت.",
       pendingBody: "استلمنا سكرين شوت إنستاباي. أول ما نتأكد من التحويل هنبعتلك لينك الدليل على الإيميل.",

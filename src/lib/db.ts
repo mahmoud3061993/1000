@@ -162,6 +162,10 @@ async function migrate(database: Client) {
   await ensureColumn(database, "orders", "fbclid", "TEXT");
   await ensureColumn(database, "orders", "email_sent_at", "TEXT");
   await ensureColumn(database, "orders", "product_slug", "TEXT");
+  await ensureColumn(database, "visits", "product_slug", "TEXT");
+  await ensureColumn(database, "events", "product_slug", "TEXT");
+  await database.execute(`CREATE INDEX IF NOT EXISTS idx_events_session ON events(session_id)`);
+  await database.execute(`CREATE INDEX IF NOT EXISTS idx_events_created ON events(created_at)`);
 }
 
 export function usesRemoteDb() {
@@ -225,11 +229,12 @@ export async function insertVisit(visit: {
   utm_term?: string | null;
   fbclid?: string | null;
   referrer?: string | null;
+  product_slug?: string | null;
 }) {
   const database = await getDb();
   await database.execute({
-    sql: `INSERT INTO visits (id, session_id, ip, user_agent, fbp, fbc, utm_source, utm_medium, utm_campaign, utm_content, utm_term, fbclid, referrer, created_at)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    sql: `INSERT INTO visits (id, session_id, ip, user_agent, fbp, fbc, utm_source, utm_medium, utm_campaign, utm_content, utm_term, fbclid, referrer, created_at, product_slug)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     args: [
       visit.id,
       visit.session_id,
@@ -245,6 +250,7 @@ export async function insertVisit(visit: {
       visit.fbclid || null,
       visit.referrer || null,
       nowIso(),
+      visit.product_slug || "1000",
     ],
   });
 }
@@ -422,12 +428,13 @@ export async function insertEvent(event: {
   session_id?: string | null;
   order_id?: string | null;
   name: string;
+  product_slug?: string | null;
 }) {
   const database = await getDb();
   await database.execute({
-    sql: `INSERT INTO events (id, session_id, order_id, name, created_at)
-          VALUES (?, ?, ?, ?, ?)`,
-    args: [event.id, event.session_id || null, event.order_id || null, event.name, nowIso()],
+    sql: `INSERT INTO events (id, session_id, order_id, name, created_at, product_slug)
+          VALUES (?, ?, ?, ?, ?, ?)`,
+    args: [event.id, event.session_id || null, event.order_id || null, event.name, nowIso(), event.product_slug || null],
   });
 }
 

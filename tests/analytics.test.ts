@@ -109,6 +109,46 @@ describe("admin analytics periods", () => {
     assert.match(report.insight, /اتقفل 2 طلب/);
     assert.match(report.insight, /470/);
     assert.equal(report.sources.length >= 1, true);
+    assert.equal(report.funnel.opens, 2);
+    assert.equal(report.funnel.purchased, 2);
+  });
+
+  it("counts landing funnel unique sessions for scroll and checkout", () => {
+    const range = periodRange("week", now);
+    const inCurrent = new Date(Date.parse(range.from) + 2 * 60 * 60 * 1000).toISOString();
+    const report = buildAnalyticsReport({
+      period: "week",
+      now,
+      product: "plant",
+      visits: [
+        { session_id: "a", created_at: inCurrent, product_slug: "plant" },
+        { session_id: "b", created_at: inCurrent, product_slug: "plant" },
+        { session_id: "c", created_at: inCurrent, product_slug: "1000" },
+      ],
+      events: [
+        { session_id: "a", name: "Scroll50", created_at: inCurrent, product_slug: "plant" },
+        { session_id: "a", name: "CheckoutView", created_at: inCurrent, product_slug: "plant" },
+        { session_id: "b", name: "Scroll50", created_at: inCurrent, product_slug: "plant" },
+      ],
+      orders: [
+        {
+          id: "p1",
+          status: "paid",
+          payment_method: "kashier",
+          amount: 449,
+          created_at: inCurrent,
+          paid_at: inCurrent,
+          product_slug: "plant",
+        },
+      ],
+    });
+    assert.equal(report.funnel.opens, 2);
+    assert.equal(report.funnel.scroll50, 2);
+    assert.equal(report.funnel.reachedPay, 1);
+    assert.equal(report.funnel.leads, 1);
+    assert.equal(report.funnel.purchased, 1);
+    assert.equal(report.current.closed, 1);
+    assert.equal(report.current.income, 449);
   });
 
   it("treats a jump from zero as 100 percent", () => {

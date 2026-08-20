@@ -169,12 +169,13 @@ export async function POST(req: NextRequest) {
 
   await notifyOrder("lead", order);
 
-  await insertEvent({ id: leadEventId, session_id: sessionId, order_id: orderId, name: "Lead" });
+  await insertEvent({ id: leadEventId, session_id: sessionId, order_id: orderId, name: "Lead", product_slug: product.slug });
   await insertEvent({
     id: checkoutEventId,
     session_id: sessionId,
     order_id: orderId,
     name: "InitiateCheckout",
+    product_slug: product.slug,
   });
 
   const user = {
@@ -209,6 +210,7 @@ export async function POST(req: NextRequest) {
     session_id: sessionId,
     order_id: orderId,
     name: "AddPaymentInfo",
+    product_slug: product.slug,
   });
   await sendCapiEvent({
     eventName: "AddPaymentInfo",

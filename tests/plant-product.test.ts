@@ -9,7 +9,7 @@ describe("plant catalog product", () => {
     assert.equal(plant.slug, "plant");
     assert.equal(plant.price, 449);
     assert.equal(plant.currency, "EGP");
-    assert.equal(plant.path, "/products/plant");
+    assert.equal(plant.path, "/buydoctorplant");
     assert.match(plant.arabicName, /النباتات/);
   });
 
