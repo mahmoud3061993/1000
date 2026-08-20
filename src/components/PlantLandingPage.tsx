@@ -88,15 +88,15 @@ export function PlantLandingPage({ whatsapp, price }: { whatsapp: string; price:
   const faqs = [
     {
       q: "هستلم المنتج إزاي؟",
-      a: "بعد الدفع هيوصلك إيميل فيه لينك فولدر Google Drive. جوه الفولدر 3 حاجات: الموقع الأونلاين، ونسخة HTML تشتغل من غير نت، وتطبيق موبايل تحمّله من الدرايف وتفتحه أوفلاين.",
+      a: "بعد الدفع هيوصلك إيميل فيه لينك السيستم تفتحه وتستخدمه مباشرة، وكمان ملف تنزّله على موبايلك وتثبّته وتشتغل عليه. كل الخطوات مشروحة بالتفصيل في نفس الإيميل.",
     },
     {
-      q: "الموقع الأونلاين مختلف عن ملف الـ HTML؟",
-      a: "لأ، نفس السيستم. الأونلاين تفتحه من اللينك على أي جهاز. ملف الـ HTML نفس الأدوات والدليل، بس بتشتغله من جهازك لو النت فصل.",
+      q: "ملف الموبايل من Google Play؟",
+      a: "لأ. مش من المتجر. بتنزّل الملف من الإيميل وتثبّته على الموبايل مباشرة، وبعدين تفتح أيقونة دليل النباتات.",
     },
     {
-      q: "تطبيق الموبايل ده من المتجر؟",
-      a: "لأ. مش من App Store ولا Google Play. بتنزّله من فولدر الدرايف وتثبّته على موبايلك عشان تفتح الدليل من غير إنترنت.",
+      q: "ينفع على آيفون؟",
+      a: "لينك السيستم يفتح على آيفون وعلى أي جهاز. ملف التثبيت ده لأندرويد.",
     },
     {
       q: "النباتات دي موجودة في مصر فعلًا؟",
@@ -104,7 +104,7 @@ export function PlantLandingPage({ whatsapp, price }: { whatsapp: string; price:
     },
     {
       q: "في حساب أو اشتراك شهري؟",
-      a: "لأ. تدفع مرة واحدة، وتستخدم النسخ التلاتة قد ما تحتاج. مفيش تسجيل دخول.",
+      a: "لأ. تدفع مرة واحدة، وتستخدم اللينك أو الملف على الموبايل قد ما تحتاج. مفيش تسجيل دخول.",
     },
     {
       q: "خلطة التربة هتطلب مواد مش موجودة؟",
@@ -125,7 +125,7 @@ export function PlantLandingPage({ whatsapp, price }: { whatsapp: string; price:
             <h1>اعرف نباتك، اسقيه صح، وأنقذه قبل ما يموت — من غير تخمين</h1>
             <p className="lp-hero-desc">
               سيستم كامل فيه <strong>77 نبات من المشاتل المصرية</strong> بصور حقيقية، وأدوات تشخيص وري وتربة ومكان النبات.
-              بتستلمه فولدر درايف فيه الموقع + نسخة أوفلاين + تطبيق موبايل. تدفع مرة واحدة.
+              هتستلم لينك السيستم تستخدمه مباشرة، وملف تنزّله على موبايلك وتثبّته وتشتغل عليه. تدفع مرة واحدة.
             </p>
             <div className="lp-hero-points">
               <div className="lp-hero-point">
@@ -138,7 +138,7 @@ export function PlantLandingPage({ whatsapp, price }: { whatsapp: string; price:
               </div>
               <div className="lp-hero-point">
                 <div className="lp-check">✓</div>
-                <div>الموقع الأونلاين، ونفس الموقع ملف HTML أوفلاين، وتطبيق موبايل من الدرايف.</div>
+                <div>لينك السيستم للاستخدام المباشر، وملف تثبّته على موبايلك وتشتغل عليه.</div>
               </div>
               <div className="lp-hero-point">
                 <div className="lp-check">✓</div>
@@ -153,7 +153,7 @@ export function PlantLandingPage({ whatsapp, price }: { whatsapp: string; price:
             <button className="lp-btn" onClick={scrollToOrder}>
               اطلب الدليل دلوقتي <span>←</span>
             </button>
-            <div className="lp-small-note">📩 لينك فولدر الدرايف بالتلات نسخ هيوصلك على الإيميل بعد الدفع</div>
+            <div className="lp-small-note">📩 الإيميل بعد الشراء فيه اللينك وملف الموبايل، وكل الخطوات مشروحة بالتفصيل</div>
           </div>
           <div className="lp-hero-media">
             <div className="lp-main-image">
@@ -170,8 +170,8 @@ export function PlantLandingPage({ whatsapp, price }: { whatsapp: string; price:
       <div className="lp-trust">
         <div className="lp-container lp-trust-grid">
           <div className="lp-trust-item">✓ نباتات مصر فقط</div>
-          <div className="lp-trust-item">✓ 3 نسخ: أونلاين + HTML + موبايل</div>
-          <div className="lp-trust-item">✓ استلام على درايف</div>
+          <div className="lp-trust-item">✓ لينك السيستم مباشر</div>
+          <div className="lp-trust-item">✓ ملف تثبّته على الموبايل</div>
           <div className="lp-trust-item">✓ من غير اشتراك شهري</div>
         </div>
       </div>
@@ -224,33 +224,30 @@ export function PlantLandingPage({ whatsapp, price }: { whatsapp: string; price:
         <div className="lp-container">
           <div className="lp-center">
             <div className="lp-tag">الاستلام</div>
-            <h2 className="lp-title">هتستلمه فولدر درايف فيه 3 حاجات</h2>
-            <p className="lp-subtitle">نفس السيستم، بثلاث طرق فتح. تدفع مرة، وتستخدم اللي يناسبك.</p>
+            <h2 className="lp-title">هتستلم الملفات عبارة عن إيه؟</h2>
+            <p className="lp-subtitle">
+              لينك السيستم تستخدمه مباشرة، وملف تنزّله على موبايلك وتثبّته وتشتغل عليه. كل ده مشروح بالتفصيل في الإيميل بعد
+              الشراء.
+            </p>
           </div>
-          <div className="lp-deliver-grid">
+          <div className="lp-deliver-grid lp-deliver-grid-two">
             <div className="lp-deliver-card">
               <div className="lp-deliver-no">1</div>
-              <h3>موقع أونلاين</h3>
+              <h3>لينك السيستم</h3>
               <p>
-                لينك تدخل منه على الدليل من الموبايل أو الكمبيوتر. كل الأدوات شغالة: دليل النباتات، التشخيص، الري، التربة،
-                المكان، والآفات.
+                تفتح الدليل من اللينك على الموبايل أو الكمبيوتر وتستخدمه على طول. كل الأدوات شغالة: دليل النباتات، التشخيص،
+                الري، التربة، المكان، والآفات.
               </p>
             </div>
             <div className="lp-deliver-card">
               <div className="lp-deliver-no">2</div>
-              <h3>نفس الموقع ملف HTML</h3>
+              <h3>ملف تثبّته على الموبايل</h3>
               <p>
-                نسخة كاملة تقدر تفتحها من جهازك من غير إنترنت. لو النت فصل أو عايز تحفظه عندك، السيستم معاك أوفلاين.
-              </p>
-            </div>
-            <div className="lp-deliver-card">
-              <div className="lp-deliver-no">3</div>
-              <h3>تطبيق موبايل من الدرايف</h3>
-              <p>
-                بتنزّل ملف التطبيق من نفس الفولدر وتثبّته على موبايلك. ينفع تفتح الدليل من غير نت وأنت واقف في المشتل أو البلكونة.
+                تنزّل الملف على موبايلك، تثبّته، وتفتح السيستم من أيقونة على الشاشة. مش من Play Store — تثبيت مباشر من الملف.
               </p>
             </div>
           </div>
+          <p className="lp-deliver-note">كل الخطوات هتكون مشروحة بالتفصيل في الإيميل اللي هيوصلك بعد الشراء.</p>
         </div>
       </section>
 
@@ -346,7 +343,7 @@ export function PlantLandingPage({ whatsapp, price }: { whatsapp: string; price:
           <div className="lp-center">
             <div className="lp-tag">مش الدليل بس</div>
             <h2 className="lp-title">
-              جوه نفس السعر <span className="lp-highlight">النسخ التلاتة وأدوات الطباعة</span>
+              جوه نفس السعر <span className="lp-highlight">اللينك وملف الموبايل وأدوات الطباعة</span>
             </h2>
           </div>
           <div className="lp-bonus-grid">
@@ -380,13 +377,13 @@ export function PlantLandingPage({ whatsapp, price }: { whatsapp: string; price:
             </div>
             <div className="lp-step">
               <div className="lp-step-no">2</div>
-              <h3>استلم فولدر الدرايف</h3>
-              <p>الإيميل فيه لينك فيه الموقع الأونلاين، ملف HTML، وتطبيق الموبايل.</p>
+              <h3>استلم الإيميل</h3>
+              <p>هيوصلك لينك السيستم وملف الموبايل، وشرح خطوة بخطوة إزاي تستخدمهم.</p>
             </div>
             <div className="lp-step">
               <div className="lp-step-no">3</div>
               <h3>افتح اللي يناسبك</h3>
-              <p>أونلاين من اللينك، أوفلاين من HTML، أو من التطبيق وأنت في المشتل.</p>
+              <p>استخدم اللينك مباشرة، أو نزّل الملف وثبّته على الموبايل واشتغل من الأيقونة.</p>
             </div>
           </div>
         </div>
@@ -403,7 +400,7 @@ export function PlantLandingPage({ whatsapp, price }: { whatsapp: string; price:
                 <div className="lp-stack-value">790 جنيه</div>
               </div>
               <div className="lp-stack-row">
-                <div className="lp-stack-name">موقع أونلاين + HTML أوفلاين + تطبيق موبايل</div>
+                <div className="lp-stack-name">لينك السيستم + ملف تثبّته على الموبايل</div>
                 <div className="lp-stack-value">400 جنيه</div>
               </div>
               <div className="lp-stack-row">

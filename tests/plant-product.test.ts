@@ -38,8 +38,9 @@ describe("plant purchase email", () => {
     assert.equal(email.text.includes(link), true);
     assert.equal(email.html.includes(link), true);
     assert.match(email.html, /dir="rtl"/);
-    assert.match(email.text, /Google Drive/);
-    assert.match(email.text, /HTML/);
-    assert.match(email.text, /تطبيق موبايل/);
+    assert.match(email.text, /لينك السيستم/);
+    assert.match(email.text, /ملف تثبّته على الموبايل/);
+    assert.match(email.text, /Google Play/);
+    assert.match(email.text, /أندرويد/);
   });
 });

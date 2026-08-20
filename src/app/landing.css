@@ -1163,6 +1163,22 @@ MOBILE
     margin-top: 36px;
 }
 
+.lp-deliver-grid-two {
+    grid-template-columns: repeat(2, 1fr);
+    max-width: 860px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.lp-deliver-note {
+    margin: 22px auto 0;
+    max-width: 720px;
+    text-align: center;
+    color: #4d5f52;
+    line-height: 1.8;
+    font-weight: 700;
+}
+
 .lp-deliver-card {
     background: #fffdf8;
     border: 1px solid #e6dccb;
