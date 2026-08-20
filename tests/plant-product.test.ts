@@ -1,7 +1,12 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { getCatalogProduct } from "../src/lib/products";
-import { buildPlantPurchaseEmail, PLANT_PURCHASE_EMAIL_SUBJECT } from "../src/lib/plant-email";
+import {
+  buildPlantPurchaseEmail,
+  PLANT_DRIVE_URL,
+  PLANT_PURCHASE_EMAIL_SUBJECT,
+  PLANT_SYSTEM_URL,
+} from "../src/lib/plant-email";
 
 describe("plant catalog product", () => {
   it("sells the Egyptian plant guide for 350 EGP", () => {
@@ -21,26 +26,27 @@ describe("plant catalog product", () => {
 });
 
 describe("plant purchase email", () => {
-  it("sends the new product details and access link", () => {
-    const link = "https://www.mahmoudelkousy.online/guide";
+  it("sends the system link, Drive folder, and how to start", () => {
     const email = buildPlantPurchaseEmail({
       name: "سارة",
-      deliveryUrl: link,
+      deliveryUrl: PLANT_SYSTEM_URL,
       whatsappDisplay: "01017420379",
     });
     assert.equal(email.subject, PLANT_PURCHASE_EMAIL_SUBJECT);
+    assert.match(email.subject, /دليل إنقاذ ورعاية النباتات المنزلية/);
     assert.match(email.text, /دليل إنقاذ ورعاية النباتات المنزلية/);
+    assert.equal(email.text.includes(PLANT_SYSTEM_URL), true);
+    assert.equal(email.text.includes(PLANT_DRIVE_URL), true);
+    assert.equal(email.html.includes(PLANT_SYSTEM_URL), true);
+    assert.equal(email.html.includes(PLANT_DRIVE_URL), true);
+    assert.match(email.html, /dir="rtl"/);
+    assert.match(email.text, /نفس السيستم نسخة الموبايل/);
+    assert.match(email.text, /ملف طريقة التثبيت على الموبايل/);
+    assert.match(email.text, /ملف شرح استخدام السيستم كله/);
     assert.match(email.text, /77 نبات/);
     assert.match(email.text, /دكتور النباتات/);
     assert.match(email.text, /بيتموس/);
     assert.match(email.text, /01017420379/);
     assert.match(email.text, /محمود القوصي/);
-    assert.equal(email.text.includes(link), true);
-    assert.equal(email.html.includes(link), true);
-    assert.match(email.html, /dir="rtl"/);
-    assert.match(email.text, /لينك السيستم/);
-    assert.match(email.text, /ملف تثبّته على الموبايل/);
-    assert.match(email.text, /Google Play/);
-    assert.match(email.text, /أندرويد/);
   });
 });
