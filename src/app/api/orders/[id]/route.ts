@@ -21,5 +21,6 @@ export async function GET(
     currency: order.currency,
     payment_method: order.payment_method,
     purchase_event_id: order.purchase_event_id,
+    product_slug: order.product_slug || "1000",
   });
 }

@@ -91,36 +91,106 @@ export function firePixel(event: string, extra: Record<string, unknown> = {}, ev
   }
 }
 
-export function TrackingBoot() {
+function postEvent(body: Record<string, unknown>) {
+  fetch("/api/track", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    keepalive: true,
+    body: JSON.stringify(body),
+  }).catch(() => {});
+}
+
+function onceKey(productSlug: string, name: string) {
+  return `elkousy-funnel:${productSlug}:${name}`;
+}
+
+function markOnce(productSlug: string, name: string) {
+  try {
+    const key = onceKey(productSlug, name);
+    if (sessionStorage.getItem(key)) return false;
+    sessionStorage.setItem(key, "1");
+    return true;
+  } catch {
+    return true;
+  }
+}
+
+export function TrackingBoot({
+  productSlug = "1000",
+  price = 235,
+  contentName,
+  trackFunnel = false,
+}: {
+  productSlug?: string;
+  price?: number;
+  contentName?: string;
+  trackFunnel?: boolean;
+}) {
   useEffect(() => {
     const attr = captureAttribution();
-    const eventId = crypto.randomUUID();
     const cookies = getMetaCookies();
-    firePixel("PageView", {}, eventId);
-    const viewId = crypto.randomUUID();
-    firePixel("ViewContent", { content_name: document.title, content_ids: ["1000"], value: 235, currency: "EGP" }, viewId);
     const payload = {
       ...cookies,
       ...attr,
       referrer: document.referrer,
       eventSourceUrl: window.location.href,
+      productSlug,
+      value: price,
+      currency: "EGP",
     };
-    fetch("/api/track", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ eventName: "PageView", eventId, ...payload }),
-    }).catch(() => {});
-    fetch("/api/track", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        eventName: "ViewContent",
-        eventId: viewId,
-        value: 235,
-        currency: "EGP",
-        ...payload,
-      }),
-    }).catch(() => {});
-  }, []);
+
+    const pageEventId = crypto.randomUUID();
+    firePixel("PageView", {}, pageEventId);
+    postEvent({ eventName: "PageView", eventId: pageEventId, ...payload });
+
+    const viewId = crypto.randomUUID();
+    firePixel(
+      "ViewContent",
+      { content_name: contentName || document.title, content_ids: [productSlug], value: price, currency: "EGP" },
+      viewId
+    );
+    postEvent({ eventName: "ViewContent", eventId: viewId, ...payload });
+
+    if (!trackFunnel) return;
+
+    const sendNamed = (eventName: string) => {
+      if (!markOnce(productSlug, eventName)) return;
+      postEvent({ eventName, eventId: crypto.randomUUID(), ...payload });
+    };
+
+    const onScroll = () => {
+      const doc = document.documentElement;
+      const max = doc.scrollHeight - doc.clientHeight;
+      const pct = max <= 0 ? 100 : Math.round((window.scrollY / max) * 100);
+      if (pct >= 25) sendNamed("Scroll25");
+      if (pct >= 50) sendNamed("Scroll50");
+      if (pct >= 75) sendNamed("Scroll75");
+      if (pct >= 90) sendNamed("Scroll100");
+    };
+
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+
+    const pay = document.getElementById("order-form");
+    let observer: IntersectionObserver | null = null;
+    if (pay && "IntersectionObserver" in window) {
+      observer = new IntersectionObserver(
+        (entries) => {
+          if (entries.some((entry) => entry.isIntersecting && entry.intersectionRatio >= 0.25)) {
+            sendNamed("CheckoutView");
+            observer?.disconnect();
+          }
+        },
+        { threshold: [0.25, 0.5] }
+      );
+      observer.observe(pay);
+    }
+
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      observer?.disconnect();
+    };
+  }, [productSlug, price, contentName, trackFunnel]);
+
   return null;
 }

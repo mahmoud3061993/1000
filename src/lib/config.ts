@@ -1,12 +1,8 @@
 import { getSettings } from "./db";
+import { getCatalogProduct } from "./products";
 
-export const PRODUCT = {
-  slug: "1000",
-  name: "+1000 winning conversion ads canva editable templates",
-  price: Number(process.env.PRODUCT_PRICE || 235),
-  currency: process.env.PRODUCT_CURRENCY || "EGP",
-  deliveryUrl: process.env.PRODUCT_DELIVERY_URL || "",
-};
+export { PRODUCT, getCatalogProduct } from "./products";
+export type { CatalogProduct, ProductSlug } from "./products";
 
 export const DEFAULT_DELIVERY_URL =
   "https://drive.google.com/drive/u/0/folders/1YA69JKnLz1cCSa6913KvyuZdksZH-p6O";
@@ -21,12 +17,14 @@ export type PaymentConfig = {
   instapay: { number: string; name: string };
   kashier: KashierCredentials;
   deliveryUrl: string;
+  plantDeliveryUrl: string;
   whatsapp: string;
   usesRemoteDb: boolean;
   envOverrides: {
     instapay: boolean;
     kashier: boolean;
     deliveryUrl: boolean;
+    plantDeliveryUrl: boolean;
   };
 };
 
@@ -66,6 +64,11 @@ export function mergePaymentConfig(
       stored.product_delivery_url,
       DEFAULT_DELIVERY_URL
     ),
+    plantDeliveryUrl: firstNonEmpty(
+      env.PLANT_DELIVERY_URL,
+      stored.plant_delivery_url,
+      "https://www.mahmoudelkousy.online/products/plant"
+    ),
     whatsapp: firstNonEmpty(env.WHATSAPP_NUMBER, stored.whatsapp_number, "201017420379").replace(
       /\D/g,
       ""
@@ -75,8 +78,15 @@ export function mergePaymentConfig(
       instapay: Boolean(env.INSTAPAY_NUMBER),
       kashier: Boolean(env.KASHIER_MID && env.KASHIER_API_KEY),
       deliveryUrl: Boolean(env.PRODUCT_DELIVERY_URL),
+      plantDeliveryUrl: Boolean(env.PLANT_DELIVERY_URL),
     },
   };
+}
+
+export function deliveryUrlForProduct(slug: string | null | undefined, cfg: PaymentConfig) {
+  const product = getCatalogProduct(slug);
+  if (product.slug === "plant") return cfg.plantDeliveryUrl;
+  return cfg.deliveryUrl || DEFAULT_DELIVERY_URL;
 }
 
 export async function getPaymentConfig(): Promise<PaymentConfig> {

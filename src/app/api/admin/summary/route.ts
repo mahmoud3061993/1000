@@ -12,12 +12,13 @@ export async function GET(req: NextRequest) {
   }
   const status = req.nextUrl.searchParams.get("status") || "all";
   const q = req.nextUrl.searchParams.get("q") || "";
+  const product = req.nextUrl.searchParams.get("product") || "all";
   const cfg = await getPaymentConfig();
   const notifications = await getNotificationInfo();
   return NextResponse.json({
     ok: true,
-    stats: await getFunnelStats(),
-    orders: await listOrders({ status, q }),
+    stats: await getFunnelStats(product),
+    orders: await listOrders({ status, q, product }),
     notifications,
     integrations: {
       kashier: kashierConfigured(cfg.kashier),

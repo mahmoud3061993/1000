@@ -37,6 +37,8 @@ export async function fulfillPaidOrder(
       value: paid.amount,
       currency: paid.currency,
       orderId: paid.id,
+      contentName: paid.product_slug === "plant" ? "Plant Care Guide" : undefined,
+      contentIds: [paid.product_slug || "1000"],
     },
   });
 

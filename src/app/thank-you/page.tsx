@@ -12,6 +12,7 @@ type OrderInfo = {
   currency: string;
   payment_method: string;
   purchase_event_id: string | null;
+  product_slug?: string | null;
 };
 
 export default function ThankYouPage({
@@ -33,6 +34,11 @@ function ThankYouClient({
 }) {
   const [order, setOrder] = useState<OrderInfo | null>(null);
   const [deliveryUrl, setDeliveryUrl] = useState("");
+  const [cta, setCta] = useState("افتح المكتبة دلوقتي");
+  const [paidBody, setPaidBody] = useState("المكتبة هتوصلك على الإيميل، وتقدر تفتحها من الرابط تحت.");
+  const [pendingBody, setPendingBody] = useState(
+    "استلمنا سكرين شوت إنستاباي. أول ما نتأكد من التحويل هنبعتلك المكتبة على الإيميل."
+  );
 
   useEffect(() => {
     if (!orderId) return;
@@ -40,11 +46,17 @@ function ThankYouClient({
       .then((r) => r.json())
       .then((json) => {
         if (json.ok) setOrder(json);
+        const slug = json.product_slug || "1000";
+        return fetch(`/api/public-config?product=${encodeURIComponent(slug)}`);
       })
-      .catch(() => {});
-    fetch("/api/public-config")
-      .then((r) => r.json())
-      .then((json) => setDeliveryUrl(json.deliveryUrl || ""))
+      .then((r) => r?.json())
+      .then((json) => {
+        if (!json) return;
+        setDeliveryUrl(json.deliveryUrl || "");
+        if (json.thankYouCta) setCta(json.thankYouCta);
+        if (json.thankYouBody) setPaidBody(json.thankYouBody);
+        if (json.pendingBody) setPendingBody(json.pendingBody);
+      })
       .catch(() => {});
   }, [orderId]);
 
@@ -53,7 +65,7 @@ function ThankYouClient({
     const eventId = order.purchase_event_id || order.id;
     firePixel(
       "Purchase",
-      { value: order.amount, currency: order.currency, content_ids: ["1000"] },
+      { value: order.amount, currency: order.currency, content_ids: [order.product_slug || "1000"] },
       eventId
     );
   }, [order]);
@@ -73,19 +85,22 @@ function ThankYouClient({
         ) : paid ? (
           <>
             <h1>تم الدفع بنجاح</h1>
-            <p>شكراً {order?.name}. المكتبة هتوصلك على الإيميل، وتقدر تفتحها من الرابط تحت.</p>
+            <p>
+              شكراً {order?.name}.{" "}
+              {paidBody.replace("{name}. ", "").replace("{name}", order?.name || "")}
+            </p>
             {deliveryUrl ? (
               <a className="drive-link" href={deliveryUrl} target="_blank" rel="noreferrer">
-                افتح المكتبة دلوقتي
+                {cta}
               </a>
             ) : (
-              <p>هنبعتلك لينك Google Drive على الإيميل خلال دقايق.</p>
+              <p>التفاصيل ولينك الدخول هتوصلك على الإيميل خلال دقايق.</p>
             )}
           </>
         ) : waiting ? (
           <>
             <h1>طلبك قيد المراجعة</h1>
-            <p>استلمنا سكرين شوت إنستاباي. أول ما نتأكد من التحويل هنبعتلك المكتبة على الإيميل.</p>
+            <p>{pendingBody}</p>
           </>
         ) : (
           <>

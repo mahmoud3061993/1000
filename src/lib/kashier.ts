@@ -37,6 +37,7 @@ export function buildKashierHppUrl(input: {
   customerPhone?: string;
   allowedMethods?: string;
   credentials?: KashierCredentials;
+  description?: string;
 }) {
   const creds = input.credentials || KASHIER;
   const amount = formatKashierAmount(input.amount);
@@ -59,7 +60,7 @@ export function buildKashierHppUrl(input: {
     allowedMethods: input.allowedMethods || "card,wallet",
     display: "ar",
     type: "external",
-    description: "+1000 Canva Ads Templates",
+    description: input.description || "+1000 Canva Ads Templates",
   });
   if (input.customerName) params.set("customerName", input.customerName);
   if (input.customerEmail) params.set("customerEmail", input.customerEmail);

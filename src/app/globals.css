@@ -556,10 +556,52 @@ a { color: inherit; }
   font-size: 11px;
 }
 
+.funnel-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.funnel-step {
+  position: relative;
+  background: #0F172A;
+  color: #fff;
+  border-radius: 16px;
+  padding: 16px 14px 14px;
+}
+
+.funnel-step b {
+  display: block;
+  font-size: 28px;
+  line-height: 1.1;
+}
+
+.funnel-step span {
+  display: block;
+  margin-top: 8px;
+  font-weight: 800;
+}
+
+.funnel-step small {
+  display: block;
+  margin-top: 4px;
+  color: #94A3B8;
+}
+
+.funnel-step em {
+  position: absolute;
+  left: -8px;
+  top: 22px;
+  font-style: normal;
+  color: #54C7FF;
+}
+
 @media (max-width: 900px) {
   .stats { grid-template-columns: 1fr 1fr; }
   .pay-grid { grid-template-columns: 1fr; }
   .admin-table { display: block; overflow-x: auto; }
   .settings-grid { grid-template-columns: 1fr; }
   .analytics-hero { grid-template-columns: 1fr 1fr; }
+  .funnel-grid { grid-template-columns: 1fr 1fr; }
 }

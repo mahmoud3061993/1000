@@ -185,4 +185,40 @@ describe("order funnel and payment states", async () => {
     const listed = await db.listOrders({ status: "paid" });
     assert.equal(listed.find((order) => order.id === "o-mail")?.email_sent_at, "2026-08-18T10:00:00.000Z");
   });
+
+  it("filters orders and funnel stats by product", async () => {
+    await db.createOrder({
+      id: "o-plant",
+      session_id: "s-plant",
+      name: "نبات",
+      email: "plant@b.com",
+      phone: "01000000003",
+      amount: 449,
+      currency: "EGP",
+      product_slug: "plant",
+      payment_method: "kashier",
+      status: "paid",
+      kashier_order_id: null,
+      kashier_transaction_id: null,
+      instapay_screenshot: null,
+      purchase_event_id: null,
+      fbp: null,
+      fbc: null,
+      ip: null,
+      user_agent: null,
+      created_at: new Date().toISOString(),
+      paid_at: new Date().toISOString(),
+    });
+
+    const plantOrders = await db.listOrders({ product: "plant" });
+    assert.equal(plantOrders.some((order) => order.id === "o-plant"), true);
+    assert.equal(plantOrders.every((order) => (order.product_slug || "1000") === "plant"), true);
+
+    const adsOrders = await db.listOrders({ product: "1000" });
+    assert.equal(adsOrders.some((order) => order.id === "o-plant"), false);
+
+    const plantStats = await db.getFunnelStats("plant");
+    assert.equal(plantStats.paid >= 1, true);
+    assert.equal(plantStats.revenue >= 449, true);
+  });
 });

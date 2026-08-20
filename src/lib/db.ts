@@ -20,6 +20,7 @@ export type Order = {
   phone: string;
   amount: number;
   currency: string;
+  product_slug?: string | null;
   payment_method: PaymentMethod | null;
   status: OrderStatus;
   kashier_order_id: string | null;
@@ -160,6 +161,11 @@ async function migrate(database: Client) {
   await ensureColumn(database, "orders", "utm_term", "TEXT");
   await ensureColumn(database, "orders", "fbclid", "TEXT");
   await ensureColumn(database, "orders", "email_sent_at", "TEXT");
+  await ensureColumn(database, "orders", "product_slug", "TEXT");
+  await ensureColumn(database, "visits", "product_slug", "TEXT");
+  await ensureColumn(database, "events", "product_slug", "TEXT");
+  await database.execute(`CREATE INDEX IF NOT EXISTS idx_events_session ON events(session_id)`);
+  await database.execute(`CREATE INDEX IF NOT EXISTS idx_events_created ON events(created_at)`);
 }
 
 export function usesRemoteDb() {
@@ -223,11 +229,12 @@ export async function insertVisit(visit: {
   utm_term?: string | null;
   fbclid?: string | null;
   referrer?: string | null;
+  product_slug?: string | null;
 }) {
   const database = await getDb();
   await database.execute({
-    sql: `INSERT INTO visits (id, session_id, ip, user_agent, fbp, fbc, utm_source, utm_medium, utm_campaign, utm_content, utm_term, fbclid, referrer, created_at)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    sql: `INSERT INTO visits (id, session_id, ip, user_agent, fbp, fbc, utm_source, utm_medium, utm_campaign, utm_content, utm_term, fbclid, referrer, created_at, product_slug)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     args: [
       visit.id,
       visit.session_id,
@@ -243,6 +250,7 @@ export async function insertVisit(visit: {
       visit.fbclid || null,
       visit.referrer || null,
       nowIso(),
+      visit.product_slug || "1000",
     ],
   });
 }
@@ -253,11 +261,11 @@ export async function createOrder(
   const database = await getDb();
   await database.execute({
     sql: `INSERT INTO orders (
-        id, session_id, name, email, phone, amount, currency, payment_method, status,
+        id, session_id, name, email, phone, amount, currency, product_slug, payment_method, status,
         kashier_order_id, kashier_transaction_id, instapay_screenshot, purchase_event_id,
         fbp, fbc, utm_source, utm_medium, utm_campaign, utm_content, utm_term, fbclid,
         ip, user_agent, created_at, updated_at, paid_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     args: [
       order.id,
       order.session_id,
@@ -266,6 +274,7 @@ export async function createOrder(
       order.phone,
       order.amount,
       order.currency,
+      order.product_slug || "1000",
       order.payment_method,
       order.status,
       order.kashier_order_id,
@@ -298,7 +307,7 @@ export async function updateOrder(id: string, patch: Partial<Order>) {
   await database.execute({
     sql: `UPDATE orders SET
         session_id=?, name=?, email=?, phone=?, amount=?,
-        currency=?, payment_method=?, status=?,
+        currency=?, product_slug=?, payment_method=?, status=?,
         kashier_order_id=?, kashier_transaction_id=?,
         instapay_screenshot=?, purchase_event_id=?,
         fbp=?, fbc=?, utm_source=?, utm_medium=?, utm_campaign=?, utm_content=?, utm_term=?, fbclid=?,
@@ -312,6 +321,7 @@ export async function updateOrder(id: string, patch: Partial<Order>) {
       next.phone,
       next.amount,
       next.currency,
+      next.product_slug || "1000",
       next.payment_method,
       next.status,
       next.kashier_order_id,
@@ -392,12 +402,16 @@ export async function getOrder(id: string) {
   return (result.rows[0] as unknown as Order | undefined) || undefined;
 }
 
-export async function listOrders(filter?: { status?: string; q?: string }) {
+export async function listOrders(filter?: { status?: string; q?: string; product?: string }) {
   const args: Array<string> = [];
   let sql = `SELECT * FROM orders WHERE 1=1`;
   if (filter?.status && filter.status !== "all") {
     sql += ` AND status = ?`;
     args.push(filter.status);
+  }
+  if (filter?.product && filter.product !== "all") {
+    sql += ` AND COALESCE(product_slug, '1000') = ?`;
+    args.push(filter.product);
   }
   if (filter?.q) {
     sql += ` AND (name LIKE ? OR email LIKE ? OR phone LIKE ? OR id LIKE ? OR COALESCE(utm_campaign,'') LIKE ? OR COALESCE(utm_content,'') LIKE ?)`;
@@ -418,12 +432,13 @@ export async function insertEvent(event: {
   session_id?: string | null;
   order_id?: string | null;
   name: string;
+  product_slug?: string | null;
 }) {
   const database = await getDb();
   await database.execute({
-    sql: `INSERT INTO events (id, session_id, order_id, name, created_at)
-          VALUES (?, ?, ?, ?, ?)`,
-    args: [event.id, event.session_id || null, event.order_id || null, event.name, nowIso()],
+    sql: `INSERT INTO events (id, session_id, order_id, name, created_at, product_slug)
+          VALUES (?, ?, ?, ?, ?, ?)`,
+    args: [event.id, event.session_id || null, event.order_id || null, event.name, nowIso(), event.product_slug || null],
   });
 }
 
@@ -433,22 +448,35 @@ async function count(sql: string, args: Array<string> = []) {
   return Number(result.rows[0]?.c || 0);
 }
 
-export async function getFunnelStats(): Promise<FunnelStats> {
-  const visits = await count(`SELECT COUNT(*) as c FROM visits`);
-  const uniqueVisitors = await count(`SELECT COUNT(DISTINCT session_id) as c FROM visits`);
-  const formFilled = await count(`SELECT COUNT(*) as c FROM orders`);
-  const tryingToPay = await count(
-    `SELECT COUNT(*) as c FROM orders WHERE status IN ('awaiting_payment', 'pending_review')`
+export async function getFunnelStats(product?: string): Promise<FunnelStats> {
+  const productFilter = product && product !== "all";
+  const productSql = productFilter ? ` AND COALESCE(product_slug, '1000') = ?` : "";
+  const args = productFilter ? [product] : [];
+  const visits = await count(`SELECT COUNT(*) as c FROM visits WHERE 1=1${productSql}`, args);
+  const uniqueVisitors = await count(
+    `SELECT COUNT(DISTINCT session_id) as c FROM visits WHERE 1=1${productSql}`,
+    args
   );
-  const paid = await count(`SELECT COUNT(*) as c FROM orders WHERE status = 'paid'`);
+  const formFilled = await count(`SELECT COUNT(*) as c FROM orders WHERE 1=1${productSql}`, args);
+  const tryingToPay = await count(
+    `SELECT COUNT(*) as c FROM orders WHERE status IN ('awaiting_payment', 'pending_review')${productSql}`,
+    args
+  );
+  const paid = await count(
+    `SELECT COUNT(*) as c FROM orders WHERE status = 'paid'${productSql}`,
+    args
+  );
   const pendingReview = await count(
-    `SELECT COUNT(*) as c FROM orders WHERE status = 'pending_review'`
+    `SELECT COUNT(*) as c FROM orders WHERE status = 'pending_review'${productSql}`,
+    args
   );
   const failed = await count(
-    `SELECT COUNT(*) as c FROM orders WHERE status IN ('failed', 'rejected')`
+    `SELECT COUNT(*) as c FROM orders WHERE status IN ('failed', 'rejected')${productSql}`,
+    args
   );
   const revenue = await count(
-    `SELECT COALESCE(SUM(amount), 0) as c FROM orders WHERE status = 'paid'`
+    `SELECT COALESCE(SUM(amount), 0) as c FROM orders WHERE status = 'paid'${productSql}`,
+    args
   );
 
   return {

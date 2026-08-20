@@ -1046,3 +1046,26 @@ MOBILE
     }
 }
 
+/* Plant care landing — same layout, Egyptian leaf palette */
+.plant-lp {
+    --blue:#3d6b4c;
+    --blue-dark:#2f5340;
+    --blue-light:#e4efe4;
+    --cyan:#c4a574;
+    background:#f6f1e8;
+}
+
+.plant-lp .lp-tag {
+    background:#e4efe4;
+    color:#2f5340;
+}
+
+.plant-lp .lp-topbar {
+    background:#2f5340;
+}
+
+.plant-lp .lp-sticky-price strong {
+    color:#c4e0c8;
+}
+
+

@@ -13,6 +13,7 @@ type NotifyOrder = {
   phone: string;
   amount: number;
   currency: string;
+  product_slug?: string | null;
   payment_method: string | null;
   status: string;
   instapay_screenshot?: string | null;
