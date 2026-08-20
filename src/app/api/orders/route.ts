@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sendCapiEvent } from "@/lib/capi";
-import { PRODUCT, SITE_URL, getPaymentConfig, kashierConfigured } from "@/lib/config";
+import { SITE_URL, getCatalogProduct, getPaymentConfig, kashierConfigured } from "@/lib/config";
 import { createOrder, getSessionAttribution, insertEvent, type PaymentMethod } from "@/lib/db";
 import { mergeAttribution, parseAttribution } from "@/lib/attribution";
 import { buildKashierHppUrl } from "@/lib/kashier";
@@ -24,6 +24,7 @@ type OrderPayload = {
   email: string;
   phone: string;
   method: PaymentMethod;
+  productSlug: string;
   sessionId: string;
   leadEventId: string;
   checkoutEventId: string;
@@ -48,6 +49,7 @@ async function readPayload(req: NextRequest): Promise<OrderPayload> {
       email: String(form.get("email") || "").trim(),
       phone: String(form.get("phone") || "").trim(),
       method: (String(form.get("method") || "") === "instapay" ? "instapay" : "kashier") as PaymentMethod,
+      productSlug: String(form.get("productSlug") || "1000"),
       sessionId: String(form.get("sessionId") || ""),
       leadEventId: String(form.get("leadEventId") || ""),
       checkoutEventId: String(form.get("checkoutEventId") || ""),
@@ -70,6 +72,7 @@ async function readPayload(req: NextRequest): Promise<OrderPayload> {
     email: String(body.email || "").trim(),
     phone: String(body.phone || "").trim(),
     method: (body.method === "instapay" ? "instapay" : "kashier") as PaymentMethod,
+    productSlug: String(body.productSlug || "1000"),
     sessionId: String(body.sessionId || ""),
     leadEventId: String(body.leadEventId || ""),
     checkoutEventId: String(body.checkoutEventId || ""),
@@ -96,6 +99,8 @@ export async function POST(req: NextRequest) {
   const ip = clientIp(req);
   const ua = userAgent(req);
   const cfg = await getPaymentConfig();
+  const product = getCatalogProduct(payload.productSlug);
+  const eventSourceUrl = `${SITE_URL}${product.path}`;
 
   if (!name || !validEmail(email) || !validPhone(phone)) {
     return NextResponse.json(
@@ -140,8 +145,9 @@ export async function POST(req: NextRequest) {
     name,
     email,
     phone,
-    amount: PRODUCT.price,
-    currency: PRODUCT.currency,
+    amount: product.price,
+    currency: product.currency,
+    product_slug: product.slug,
     payment_method: method,
     status: method === "kashier" ? "awaiting_payment" : "pending_review",
     kashier_order_id: method === "kashier" ? orderId : null,
@@ -185,16 +191,16 @@ export async function POST(req: NextRequest) {
   await sendCapiEvent({
     eventName: "Lead",
     eventId: leadEventId,
-    eventSourceUrl: `${SITE_URL}/#order-form`,
+    eventSourceUrl,
     user,
-    customData: { orderId },
+    customData: { orderId, contentName: product.pixelName, contentIds: [product.slug], value: product.price, currency: product.currency },
   });
   await sendCapiEvent({
     eventName: "InitiateCheckout",
     eventId: checkoutEventId,
-    eventSourceUrl: `${SITE_URL}/#order-form`,
+    eventSourceUrl,
     user,
-    customData: { orderId },
+    customData: { orderId, contentName: product.pixelName, contentIds: [product.slug], value: product.price, currency: product.currency },
   });
 
   const payEventId = payload.payEventId || crypto.randomUUID();
@@ -207,21 +213,22 @@ export async function POST(req: NextRequest) {
   await sendCapiEvent({
     eventName: "AddPaymentInfo",
     eventId: payEventId,
-    eventSourceUrl: `${SITE_URL}/#order-form`,
+    eventSourceUrl,
     user,
-    customData: { orderId },
+    customData: { orderId, contentName: product.pixelName, contentIds: [product.slug], value: product.price, currency: product.currency },
   });
 
   if (method === "kashier") {
     const checkoutUrl = buildKashierHppUrl({
       orderId,
-      amount: PRODUCT.price,
-      currency: PRODUCT.currency,
+      amount: product.price,
+      currency: product.currency,
       customerName: name,
       customerEmail: email,
       customerPhone: phone,
       allowedMethods: "card,wallet",
       credentials: cfg.kashier,
+      description: product.kashierDescription,
     });
     return NextResponse.json({
       ok: true,
@@ -238,7 +245,7 @@ export async function POST(req: NextRequest) {
     orderId,
     method,
     redirect: `/thank-you?order=${orderId}&pending=1`,
-    amount: PRODUCT.price,
+    amount: product.price,
     purchaseEventId,
   });
 }

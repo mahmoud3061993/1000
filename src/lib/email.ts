@@ -1,6 +1,13 @@
 import nodemailer from "nodemailer";
 import type { Order } from "./db";
-import { DEFAULT_DELIVERY_URL, emailConfigured, getPaymentConfig } from "./config";
+import {
+  DEFAULT_DELIVERY_URL,
+  deliveryUrlForProduct,
+  emailConfigured,
+  getPaymentConfig,
+} from "./config";
+import { buildPlantPurchaseEmail } from "./plant-email";
+import { getCatalogProduct } from "./products";
 
 export { DEFAULT_DELIVERY_URL, emailConfigured };
 
@@ -174,7 +181,7 @@ async function sendWithSmtp(to: string, subject: string, text: string, html: str
   return { ok: true as const, provider: "smtp" as const };
 }
 
-export async function sendPurchaseEmail(order: Pick<Order, "name" | "email">) {
+export async function sendPurchaseEmail(order: Pick<Order, "name" | "email" | "product_slug">) {
   if (!order.email) {
     return { ok: false as const, skipped: true as const, error: "مفيش إيميل على الطلب" };
   }
@@ -188,11 +195,20 @@ export async function sendPurchaseEmail(order: Pick<Order, "name" | "email">) {
   }
 
   const cfg = await getPaymentConfig();
-  const message = buildPurchaseEmail({
-    name: order.name,
-    deliveryUrl: cfg.deliveryUrl || DEFAULT_DELIVERY_URL,
-    whatsappDisplay: displayWhatsapp(cfg.whatsapp),
-  });
+  const product = getCatalogProduct(order.product_slug);
+  const deliveryUrl = deliveryUrlForProduct(product.slug, cfg);
+  const message =
+    product.slug === "plant"
+      ? buildPlantPurchaseEmail({
+          name: order.name,
+          deliveryUrl,
+          whatsappDisplay: displayWhatsapp(cfg.whatsapp),
+        })
+      : buildPurchaseEmail({
+          name: order.name,
+          deliveryUrl: deliveryUrl || DEFAULT_DELIVERY_URL,
+          whatsappDisplay: displayWhatsapp(cfg.whatsapp),
+        });
 
   try {
     if (process.env.RESEND_API_KEY) {

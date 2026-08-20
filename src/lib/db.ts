@@ -20,6 +20,7 @@ export type Order = {
   phone: string;
   amount: number;
   currency: string;
+  product_slug?: string | null;
   payment_method: PaymentMethod | null;
   status: OrderStatus;
   kashier_order_id: string | null;
@@ -160,6 +161,7 @@ async function migrate(database: Client) {
   await ensureColumn(database, "orders", "utm_term", "TEXT");
   await ensureColumn(database, "orders", "fbclid", "TEXT");
   await ensureColumn(database, "orders", "email_sent_at", "TEXT");
+  await ensureColumn(database, "orders", "product_slug", "TEXT");
 }
 
 export function usesRemoteDb() {
@@ -253,11 +255,11 @@ export async function createOrder(
   const database = await getDb();
   await database.execute({
     sql: `INSERT INTO orders (
-        id, session_id, name, email, phone, amount, currency, payment_method, status,
+        id, session_id, name, email, phone, amount, currency, product_slug, payment_method, status,
         kashier_order_id, kashier_transaction_id, instapay_screenshot, purchase_event_id,
         fbp, fbc, utm_source, utm_medium, utm_campaign, utm_content, utm_term, fbclid,
         ip, user_agent, created_at, updated_at, paid_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     args: [
       order.id,
       order.session_id,
@@ -266,6 +268,7 @@ export async function createOrder(
       order.phone,
       order.amount,
       order.currency,
+      order.product_slug || "1000",
       order.payment_method,
       order.status,
       order.kashier_order_id,
@@ -298,7 +301,7 @@ export async function updateOrder(id: string, patch: Partial<Order>) {
   await database.execute({
     sql: `UPDATE orders SET
         session_id=?, name=?, email=?, phone=?, amount=?,
-        currency=?, payment_method=?, status=?,
+        currency=?, product_slug=?, payment_method=?, status=?,
         kashier_order_id=?, kashier_transaction_id=?,
         instapay_screenshot=?, purchase_event_id=?,
         fbp=?, fbc=?, utm_source=?, utm_medium=?, utm_campaign=?, utm_content=?, utm_term=?, fbclid=?,
@@ -312,6 +315,7 @@ export async function updateOrder(id: string, patch: Partial<Order>) {
       next.phone,
       next.amount,
       next.currency,
+      next.product_slug || "1000",
       next.payment_method,
       next.status,
       next.kashier_order_id,

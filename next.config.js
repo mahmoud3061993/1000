@@ -1,8 +1,4 @@
 /** @type {import('next').NextConfig} */
-const nextConfig = {
-  async rewrites() {
-    return [{ source: "/products/:id", destination: "/" }];
-  },
-};
+const nextConfig = {};
 
 module.exports = nextConfig;

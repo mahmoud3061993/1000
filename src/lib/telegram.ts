@@ -8,6 +8,7 @@ type NotifyOrder = {
   phone: string;
   amount: number;
   currency: string;
+  product_slug?: string | null;
   payment_method: string | null;
   status: string;
   instapay_screenshot?: string | null;
@@ -37,6 +38,7 @@ export function formatOrderMessage(kind: "lead" | "trying" | "pending" | "paid" 
     `الاسم: ${order.name}`,
     `الموبايل: ${order.phone}`,
     `الإيميل: ${order.email}`,
+    `المنتج: ${order.product_slug === "plant" ? "دليل النباتات" : "مكتبة +1000 Canva"}`,
     `المبلغ: ${order.amount} ${order.currency}`,
     `الوسيلة: ${method}`,
     `الحالة: ${STATUS_AR[order.status] || order.status}`,

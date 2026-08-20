@@ -17,6 +17,10 @@ export default async function HomePage() {
         instapayName={cfg.instapay.name}
         kashierReady={kashierConfigured(cfg.kashier)}
         price={PRODUCT.price}
+        compareAtPrice={PRODUCT.compareAtPrice}
+        productSlug={PRODUCT.slug}
+        productTitle={PRODUCT.checkoutTitle}
+        pixelName={PRODUCT.pixelName}
       />
     </>
   );

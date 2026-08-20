@@ -10,11 +10,19 @@ export function CheckoutForm({
   instapayName,
   kashierReady,
   price = 235,
+  compareAtPrice = 2870,
+  productSlug = "1000",
+  productTitle = "+1000 winning conversion ads canva editable templates",
+  pixelName = "+1000 Canva Ads",
 }: {
   instapayNumber: string;
   instapayName: string;
   kashierReady: boolean;
   price?: number;
+  compareAtPrice?: number;
+  productSlug?: string;
+  productTitle?: string;
+  pixelName?: string;
 }) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -55,15 +63,16 @@ export function CheckoutForm({
       const leadEventId = crypto.randomUUID();
       const checkoutEventId = crypto.randomUUID();
       const payEventId = crypto.randomUUID();
-      firePixel("Lead", { content_name: "+1000 Canva Ads" }, leadEventId);
-      firePixel("InitiateCheckout", { value: price, currency: "EGP" }, checkoutEventId);
-      firePixel("AddPaymentInfo", { value: price, currency: "EGP" }, payEventId);
+      firePixel("Lead", { content_name: pixelName }, leadEventId);
+      firePixel("InitiateCheckout", { value: price, currency: "EGP", content_name: pixelName }, checkoutEventId);
+      firePixel("AddPaymentInfo", { value: price, currency: "EGP", content_name: pixelName }, payEventId);
 
       const common = {
         name,
         email,
         phone,
         method,
+        productSlug,
         leadEventId,
         checkoutEventId,
         payEventId,
@@ -107,10 +116,10 @@ export function CheckoutForm({
 
   return (
     <section id="order-form" className="checkout-wrap">
-      <h2 className="checkout-title">+1000 winning conversion ads canva editable templates</h2>
+      <h2 className="checkout-title">{productTitle}</h2>
       <div className="checkout-price">
         <strong>{price} ج.م</strong>
-        <s>2870 ج.م</s>
+        <s>{compareAtPrice} ج.م</s>
       </div>
       <div className="checkout-box">
         <h3>يرجى ادخال معلوماتك لإكمال الطلب</h3>

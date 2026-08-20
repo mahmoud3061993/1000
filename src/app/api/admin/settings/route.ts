@@ -25,6 +25,7 @@ export async function GET() {
       kashier_api_key_set: Boolean(cfg.kashier.apiKey),
       kashier_mode: cfg.kashier.mode,
       product_delivery_url: cfg.deliveryUrl,
+      plant_delivery_url: cfg.plantDeliveryUrl,
       whatsapp_number: cfg.whatsapp,
       ntfy_topic: notifications.topic,
     },
@@ -57,6 +58,9 @@ export async function POST(req: NextRequest) {
   }
   if ("product_delivery_url" in body) {
     patch.product_delivery_url = asString(body.product_delivery_url);
+  }
+  if ("plant_delivery_url" in body) {
+    patch.plant_delivery_url = asString(body.plant_delivery_url);
   }
   if ("whatsapp_number" in body) {
     patch.whatsapp_number = asString(body.whatsapp_number).replace(/\D/g, "");
