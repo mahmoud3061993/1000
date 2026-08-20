@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { sendCapiEvent } from "@/lib/capi";
 import { SITE_URL } from "@/lib/config";
 import { insertEvent, insertVisit } from "@/lib/db";
+import { isFunnelOnlyEvent } from "@/lib/funnel";
 import { clientIp, getOrCreateSessionId, userAgent } from "@/lib/request";
 
 export const runtime = "nodejs";
@@ -14,7 +15,7 @@ export async function POST(req: NextRequest) {
   const productSlug = body.productSlug === "plant" ? "plant" : "1000";
   const ip = clientIp(req);
   const ua = userAgent(req);
-  const funnelOnly = eventName.startsWith("Scroll") || eventName === "CheckoutView";
+  const funnelOnly = isFunnelOnlyEvent(eventName);
 
   if (eventName === "PageView") {
     await insertVisit({

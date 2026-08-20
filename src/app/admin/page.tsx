@@ -91,7 +91,7 @@ export default function AdminPage() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);
   const [status, setStatus] = useState("all");
-  const [product, setProduct] = useState("all");
+  const [product, setProduct] = useState("plant");
   const [q, setQ] = useState("");
   const [integrations, setIntegrations] = useState({
     kashier: false,

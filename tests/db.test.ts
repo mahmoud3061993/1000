@@ -193,7 +193,7 @@ describe("order funnel and payment states", async () => {
       name: "نبات",
       email: "plant@b.com",
       phone: "01000000003",
-      amount: 449,
+      amount: 350,
       currency: "EGP",
       product_slug: "plant",
       payment_method: "kashier",
@@ -219,6 +219,6 @@ describe("order funnel and payment states", async () => {
 
     const plantStats = await db.getFunnelStats("plant");
     assert.equal(plantStats.paid >= 1, true);
-    assert.equal(plantStats.revenue >= 449, true);
+    assert.equal(plantStats.revenue >= 350, true);
   });
 });

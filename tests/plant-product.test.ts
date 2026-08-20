@@ -4,10 +4,10 @@ import { getCatalogProduct } from "../src/lib/products";
 import { buildPlantPurchaseEmail, PLANT_PURCHASE_EMAIL_SUBJECT } from "../src/lib/plant-email";
 
 describe("plant catalog product", () => {
-  it("sells the Egyptian plant guide for 449 EGP", () => {
+  it("sells the Egyptian plant guide for 350 EGP", () => {
     const plant = getCatalogProduct("plant", {});
     assert.equal(plant.slug, "plant");
-    assert.equal(plant.price, 449);
+    assert.equal(plant.price, 350);
     assert.equal(plant.currency, "EGP");
     assert.equal(plant.path, "/buydoctorplant");
     assert.match(plant.arabicName, /النباتات/);
@@ -38,5 +38,8 @@ describe("plant purchase email", () => {
     assert.equal(email.text.includes(link), true);
     assert.equal(email.html.includes(link), true);
     assert.match(email.html, /dir="rtl"/);
+    assert.match(email.text, /Google Drive/);
+    assert.match(email.text, /HTML/);
+    assert.match(email.text, /تطبيق موبايل/);
   });
 });

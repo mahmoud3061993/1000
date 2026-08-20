@@ -32,7 +32,7 @@ export function getCatalogProduct(
       name: "دليل إنقاذ ورعاية النباتات المنزلية",
       arabicName: "دليل إنقاذ ورعاية النباتات المنزلية",
       shortName: "دليل النباتات",
-      price: Number(env.PLANT_PRODUCT_PRICE || 449),
+      price: Number(env.PLANT_PRODUCT_PRICE || 350),
       compareAtPrice: Number(env.PLANT_COMPARE_AT_PRICE || 1490),
       currency: "EGP",
       pixelName: "Plant Care Guide",

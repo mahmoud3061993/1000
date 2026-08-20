@@ -33,7 +33,7 @@ npm run dev
 | --- | --- |
 | `SITE_URL` | رابط الموقع النهائي (مهم لكاشير وCAPI) |
 | `PRODUCT_DELIVERY_URL` | لينك Google Drive لمكتبة الـ 1000 بعد الدفع |
-| `PLANT_PRODUCT_PRICE` | سعر دليل النباتات (الافتراضي 449) |
+| `PLANT_PRODUCT_PRICE` | سعر دليل النباتات (الافتراضي 350) |
 | `PLANT_DELIVERY_URL` | لينك دخول دليل النباتات بعد الدفع |
 | `PLANT_APP_ORIGIN` | أصل نشر الدليل عشان `/products/plant` تتوجه له |
 | `ADMIN_PASSWORD` | دخول لوحة الأدمن |

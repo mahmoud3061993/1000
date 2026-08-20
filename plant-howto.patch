@@ -1,0 +1,91 @@
+From 5f038de53b6a7884283706e6ce9290ae9350bd55 Mon Sep 17 00:00:00 2001
+From: Cursor Agent <cursoragent@cursor.com>
+Date: Thu, 20 Aug 2026 20:40:06 +0000
+Subject: [PATCH] Add a how-to-use section on the plant guide home
+
+Explain the three delivery copies and the first tool to open for care, diagnosis, watering, soil, or buying.
+---
+ app/page.tsx              |  3 +++
+ components/how-to-use.tsx | 51 +++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 54 insertions(+)
+ create mode 100644 components/how-to-use.tsx
+
+diff --git a/app/page.tsx b/app/page.tsx
+index 01afeda..bff0d35 100644
+--- a/app/page.tsx
++++ b/app/page.tsx
+@@ -1,4 +1,5 @@
+ import Link from "next/link";
++import { HowToUse } from "@/components/how-to-use";
+ import { PlantCard } from "@/components/plant-card";
+ import { ToolCard } from "@/components/tool-card";
+ import { ToolIcon } from "@/components/tool-icon";
+@@ -47,6 +48,8 @@ export default function HomePage() {
+         </div>
+       </section>
+ 
++      <HowToUse />
++
+       <section className="mt-14" aria-labelledby="tools-heading">
+         <h2 id="tools-heading" className="text-2xl font-bold text-leaf-dark">
+           اختار اللي محتاجه دلوقتي
+diff --git a/components/how-to-use.tsx b/components/how-to-use.tsx
+new file mode 100644
+index 0000000..1a53448
+--- /dev/null
++++ b/components/how-to-use.tsx
+@@ -0,0 +1,51 @@
++const STEPS = [
++  {
++    title: "افتح الدليل من الدرايف",
++    body: "بعد الشراء عندك 3 طرق: الموقع الأونلاين من اللينك، أو ملف HTML على جهازك من غير نت، أو تطبيق الموبايل اللي بتنزّله من نفس الفولدر.",
++  },
++  {
++    title: "لو عندك نبات: ابدأ من دليل النباتات",
++    body: "دور باسمه بالعربي أو الإنجليزي، أو اختار من الصور. هتعرف الضوء والري والتربة والتحذيرات الخاصة بالنوع ده.",
++  },
++  {
++    title: "لو النبات تعبان: افتح دكتور النباتات",
++    body: "اختار النبات، وبعدين الأداة بتسألك عن الأعراض سؤال سؤال لحد ما توصّلك للسبب والتصرف المناسب.",
++  },
++  {
++    title: "لو مش عارف تسقي أو تخلط تربة",
++    body: "أداة الري بتقرر حسب التربة والنبات مش حسب عدد الأيام. خلطة التربة بتديك نسب بمواد المشاتل المصرية.",
++  },
++  {
++    title: "لو لسه هتشتري",
++    body: "استخدم أداة النبات المناسب حسب ضوء البيت والبلكونة والأطفال والحيوانات، وبعدين ارجع لدليل النباتات قبل ما تشتري من المشتل.",
++  },
++];
++
++export function HowToUse() {
++  return (
++    <section className="mt-16" aria-labelledby="howto-heading">
++      <h2 id="howto-heading" className="text-2xl font-bold text-leaf-dark">
++        طريقة استخدام السيستم
++      </h2>
++      <p className="mt-2 max-w-2xl text-sm leading-7 text-muted">
++        مش محتاج تسجّل. اختار الطريق اللي يناسبك وابدأ بأداة واحدة.
++      </p>
++      <ol className="mt-6 grid gap-4">
++        {STEPS.map((step, index) => (
++          <li
++            key={step.title}
++            className="flex gap-4 rounded-[1.75rem] border border-line bg-card p-5 shadow-[var(--shadow-card)]"
++          >
++            <span className="grid size-10 shrink-0 place-items-center rounded-full bg-leaf text-sm font-bold text-white">
++              {index + 1}
++            </span>
++            <div>
++              <h3 className="text-lg font-bold text-leaf-dark">{step.title}</h3>
++              <p className="mt-1 text-sm leading-7 text-muted">{step.body}</p>
++            </div>
++          </li>
++        ))}
++      </ol>
++    </section>
++  );
++}
+-- 
+2.43.0
+
