@@ -402,12 +402,16 @@ export async function getOrder(id: string) {
   return (result.rows[0] as unknown as Order | undefined) || undefined;
 }
 
-export async function listOrders(filter?: { status?: string; q?: string }) {
+export async function listOrders(filter?: { status?: string; q?: string; product?: string }) {
   const args: Array<string> = [];
   let sql = `SELECT * FROM orders WHERE 1=1`;
   if (filter?.status && filter.status !== "all") {
     sql += ` AND status = ?`;
     args.push(filter.status);
+  }
+  if (filter?.product && filter.product !== "all") {
+    sql += ` AND COALESCE(product_slug, '1000') = ?`;
+    args.push(filter.product);
   }
   if (filter?.q) {
     sql += ` AND (name LIKE ? OR email LIKE ? OR phone LIKE ? OR id LIKE ? OR COALESCE(utm_campaign,'') LIKE ? OR COALESCE(utm_content,'') LIKE ?)`;
@@ -444,22 +448,35 @@ async function count(sql: string, args: Array<string> = []) {
   return Number(result.rows[0]?.c || 0);
 }
 
-export async function getFunnelStats(): Promise<FunnelStats> {
-  const visits = await count(`SELECT COUNT(*) as c FROM visits`);
-  const uniqueVisitors = await count(`SELECT COUNT(DISTINCT session_id) as c FROM visits`);
-  const formFilled = await count(`SELECT COUNT(*) as c FROM orders`);
-  const tryingToPay = await count(
-    `SELECT COUNT(*) as c FROM orders WHERE status IN ('awaiting_payment', 'pending_review')`
+export async function getFunnelStats(product?: string): Promise<FunnelStats> {
+  const productFilter = product && product !== "all";
+  const productSql = productFilter ? ` AND COALESCE(product_slug, '1000') = ?` : "";
+  const args = productFilter ? [product] : [];
+  const visits = await count(`SELECT COUNT(*) as c FROM visits WHERE 1=1${productSql}`, args);
+  const uniqueVisitors = await count(
+    `SELECT COUNT(DISTINCT session_id) as c FROM visits WHERE 1=1${productSql}`,
+    args
   );
-  const paid = await count(`SELECT COUNT(*) as c FROM orders WHERE status = 'paid'`);
+  const formFilled = await count(`SELECT COUNT(*) as c FROM orders WHERE 1=1${productSql}`, args);
+  const tryingToPay = await count(
+    `SELECT COUNT(*) as c FROM orders WHERE status IN ('awaiting_payment', 'pending_review')${productSql}`,
+    args
+  );
+  const paid = await count(
+    `SELECT COUNT(*) as c FROM orders WHERE status = 'paid'${productSql}`,
+    args
+  );
   const pendingReview = await count(
-    `SELECT COUNT(*) as c FROM orders WHERE status = 'pending_review'`
+    `SELECT COUNT(*) as c FROM orders WHERE status = 'pending_review'${productSql}`,
+    args
   );
   const failed = await count(
-    `SELECT COUNT(*) as c FROM orders WHERE status IN ('failed', 'rejected')`
+    `SELECT COUNT(*) as c FROM orders WHERE status IN ('failed', 'rejected')${productSql}`,
+    args
   );
   const revenue = await count(
-    `SELECT COALESCE(SUM(amount), 0) as c FROM orders WHERE status = 'paid'`
+    `SELECT COALESCE(SUM(amount), 0) as c FROM orders WHERE status = 'paid'${productSql}`,
+    args
   );
 
   return {

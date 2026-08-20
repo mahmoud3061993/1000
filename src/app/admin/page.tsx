@@ -91,6 +91,7 @@ export default function AdminPage() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);
   const [status, setStatus] = useState("all");
+  const [product, setProduct] = useState("all");
   const [q, setQ] = useState("");
   const [integrations, setIntegrations] = useState({
     kashier: false,
@@ -112,8 +113,10 @@ export default function AdminPage() {
   const [busyKey, setBusyKey] = useState("");
   const [message, setMessage] = useState("");
 
-  async function load(nextStatus = status, nextQ = q) {
-    const res = await fetch(`/api/admin/summary?status=${encodeURIComponent(nextStatus)}&q=${encodeURIComponent(nextQ)}`);
+  async function load(nextStatus = status, nextQ = q, nextProduct = product) {
+    const res = await fetch(
+      `/api/admin/summary?status=${encodeURIComponent(nextStatus)}&q=${encodeURIComponent(nextQ)}&product=${encodeURIComponent(nextProduct)}`
+    );
     if (res.status === 401) {
       setAuthed(false);
       setChecking(false);
@@ -551,15 +554,27 @@ export default function AdminPage() {
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
                 onKeyDown={(e) => {
-                  if (e.key === "Enter") load(status, q);
+                  if (e.key === "Enter") load(status, q, product);
                 }}
               />
+              <select
+                className="admin-filter"
+                value={product}
+                onChange={(e) => {
+                  setProduct(e.target.value);
+                  load(status, q, e.target.value);
+                }}
+              >
+                <option value="all">كل المنتجات</option>
+                <option value="plant">دليل النباتات</option>
+                <option value="1000">مكتبة +1000</option>
+              </select>
               <select
                 className="admin-filter"
                 value={status}
                 onChange={(e) => {
                   setStatus(e.target.value);
-                  load(e.target.value, q);
+                  load(e.target.value, q, product);
                 }}
               >
                 <option value="all">كل الحالات</option>
@@ -577,7 +592,7 @@ export default function AdminPage() {
                   if (busyKey) return;
                   setBusyKey("refresh");
                   try {
-                    await load(status, q);
+                    await load(status, q, product);
                   } finally {
                     setBusyKey("");
                   }
