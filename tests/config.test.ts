@@ -1,6 +1,10 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { kashierConfigured, mergePaymentConfig } from "../src/lib/config";
+import {
+  kashierConfigured,
+  mergePaymentConfig,
+  rewriteRetiredSiteUrl,
+} from "../src/lib/config";
 
 describe("payment config merge", () => {
   it("uses admin-stored Instapay and Kashier when env is empty", () => {
@@ -44,6 +48,22 @@ describe("payment config merge", () => {
   it("treats Kashier as not ready until both MID and API key exist", () => {
     const cfg = mergePaymentConfig({}, { kashier_mid: "MID-1-1" });
     assert.equal(kashierConfigured(cfg.kashier), false);
+  });
+
+  it("rewrites leftover mahmoudelkousy.online URLs onto the live domain", () => {
+    assert.equal(
+      rewriteRetiredSiteUrl("https://www.mahmoudelkousy.online"),
+      "https://www.producthelpyou.online"
+    );
+    const cfg = mergePaymentConfig(
+      {},
+      {
+        plant_delivery_url: "https://www.mahmoudelkousy.online/products/plant",
+        product_delivery_url: "https://mahmoudelkousy.online/products/1000",
+      }
+    );
+    assert.equal(cfg.plantDeliveryUrl, "https://www.producthelpyou.online/products/plant");
+    assert.equal(cfg.deliveryUrl, "https://www.producthelpyou.online/products/1000");
   });
 
   it("falls back to the store Instapay number when nothing is configured", () => {
