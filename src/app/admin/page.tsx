@@ -406,11 +406,11 @@ export default function AdminPage() {
             <p>
               عشان الأدمن يعرف كل طلب جاي من أنهي إعلان، في Ads Manager حط لينك صفحة المنتج زي ما هو بالظبط (سيب الأقواس زي ما هي):
               <code className="settings-code" dir="ltr">
-                {"https://www.mahmoudelkousy.online/products/1000?utm_source=facebook&utm_medium=paid&utm_campaign={{campaign.name}}&utm_content={{ad.name}}&utm_term={{adset.name}}"}
+                {"https://www.producthelpyou.online/products/1000?utm_source=facebook&utm_medium=paid&utm_campaign={{campaign.name}}&utm_content={{ad.name}}&utm_term={{adset.name}}"}
               </code>
               ودليل النباتات:
               <code className="settings-code" dir="ltr">
-                {"https://www.mahmoudelkousy.online/buydoctorplant?utm_source=facebook&utm_medium=paid&utm_campaign={{campaign.name}}&utm_content={{ad.name}}&utm_term={{adset.name}}"}
+                {"https://www.producthelpyou.online/buydoctorplant?utm_source=facebook&utm_medium=paid&utm_campaign={{campaign.name}}&utm_content={{ad.name}}&utm_term={{adset.name}}"}
               </code>
             </p>
             {!usesRemoteDb ? (
