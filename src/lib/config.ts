@@ -7,6 +7,16 @@ export type { CatalogProduct, ProductSlug } from "./products";
 export const DEFAULT_DELIVERY_URL =
   "https://drive.google.com/drive/u/0/folders/1YA69JKnLz1cCSa6913KvyuZdksZH-p6O";
 
+export const CANONICAL_SITE_URL = "https://www.producthelpyou.online";
+
+/** Old registrar domain is dead; rewrite leftover env/admin URLs onto the live site. */
+export function rewriteRetiredSiteUrl(value: string) {
+  return value.replace(
+    /https?:\/\/(?:www\.)?mahmoudelkousy\.online/gi,
+    CANONICAL_SITE_URL
+  );
+}
+
 export type KashierCredentials = {
   mid: string;
   apiKey: string;
@@ -59,15 +69,19 @@ export function mergePaymentConfig(
       apiKey: kashierApiKey,
       mode: modeRaw === "test" ? "test" : "live",
     },
-    deliveryUrl: firstNonEmpty(
-      env.PRODUCT_DELIVERY_URL,
-      stored.product_delivery_url,
-      DEFAULT_DELIVERY_URL
+    deliveryUrl: rewriteRetiredSiteUrl(
+      firstNonEmpty(
+        env.PRODUCT_DELIVERY_URL,
+        stored.product_delivery_url,
+        DEFAULT_DELIVERY_URL
+      )
     ),
-    plantDeliveryUrl: firstNonEmpty(
-      env.PLANT_DELIVERY_URL,
-      stored.plant_delivery_url,
-      "https://www.producthelpyou.online/products/plant"
+    plantDeliveryUrl: rewriteRetiredSiteUrl(
+      firstNonEmpty(
+        env.PLANT_DELIVERY_URL,
+        stored.plant_delivery_url,
+        `${CANONICAL_SITE_URL}/products/plant`
+      )
     ),
     whatsapp: firstNonEmpty(env.WHATSAPP_NUMBER, stored.whatsapp_number, "201017420379").replace(
       /\D/g,
@@ -98,14 +112,16 @@ export async function getPaymentConfig(): Promise<PaymentConfig> {
   }
 }
 
-export const SITE_URL = (
-  process.env.SITE_URL ||
-  (process.env.VERCEL_PROJECT_PRODUCTION_URL
-    ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
-    : process.env.VERCEL_URL
-      ? `https://${process.env.VERCEL_URL}`
-      : "http://localhost:3000")
-).replace(/\/$/, "");
+export const SITE_URL = rewriteRetiredSiteUrl(
+  (
+    process.env.SITE_URL ||
+    (process.env.VERCEL_PROJECT_PRODUCTION_URL
+      ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+      : process.env.VERCEL_URL
+        ? `https://${process.env.VERCEL_URL}`
+        : "http://localhost:3000")
+  ).replace(/\/$/, "")
+);
 
 export const WHATSAPP_NUMBER = (process.env.WHATSAPP_NUMBER || "201017420379").replace(
   /\D/g,
