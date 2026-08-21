@@ -106,11 +106,11 @@ npm run dev
 
 Webhook كاشير:
 
-`https://www.mahmoudelkousy.online/api/kashier/webhook`
+`https://www.producthelpyou.online/api/kashier/webhook`
 
 لو حطيت نفس القيم في Vercel Environment Variables هتغلب اللي في الأدمن.
 
-## الرفع على Vercel وربط mahmoudelkousy.online
+## الرفع على Vercel وربط producthelpyou.online
 
 Vercel مناسب للمشروع بعد ما قاعدة البيانات بقت Turso/libSQL (مش ملف محلي). رابط الإعلانات القديم `/products/1000` شغال كمان.
 
@@ -129,7 +129,7 @@ Vercel مناسب للمشروع بعد ما قاعدة البيانات بقت 
 حط Environment Variables:
 
 ```
-SITE_URL=https://www.mahmoudelkousy.online
+SITE_URL=https://www.producthelpyou.online
 TURSO_DATABASE_URL=libsql://...
 TURSO_AUTH_TOKEN=...
 ADMIN_PASSWORD=...
@@ -151,8 +151,8 @@ WHATSAPP_NUMBER=201017420379
 
 في Vercel → Project → Settings → Domains ضيف:
 
-- `mahmoudelkousy.online`
-- `www.mahmoudelkousy.online`
+- `producthelpyou.online`
+- `www.producthelpyou.online`
 
 عند شركة الدومين (أو Cloudflare) غيّر الـ DNS من Easy Orders إلى Vercel:
 
@@ -163,13 +163,13 @@ CNAME  www    cname.vercel-dns.com
 
 بعد ما الـ DNS يتحدث، الصفحة هتبقى:
 
-- https://www.mahmoudelkousy.online
-- https://www.mahmoudelkousy.online/products/1000
-- https://www.mahmoudelkousy.online/admin
+- https://www.producthelpyou.online
+- https://www.producthelpyou.online/products/1000
+- https://www.producthelpyou.online/admin
 
 وWebhook كاشير:
 
-`https://www.mahmoudelkousy.online/api/kashier/webhook`
+`https://www.producthelpyou.online/api/kashier/webhook`
 
 ## الاختبار
 

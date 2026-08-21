@@ -9,7 +9,7 @@ describe("mobile ntfy alerts", () => {
   });
 
   it("derives a stable topic from the site URL and secret", () => {
-    const env = { SITE_URL: "https://www.mahmoudelkousy.online", SESSION_SECRET: "secret-a" };
+    const env = { SITE_URL: "https://www.producthelpyou.online", SESSION_SECRET: "secret-a" };
     const first = deriveNtfyTopic(env);
     const second = deriveNtfyTopic(env);
     assert.equal(first, second);

@@ -1,7 +1,7 @@
 export const PLANT_PURCHASE_EMAIL_SUBJECT =
   "🎉 تم تأكيد طلبك - دليل إنقاذ ورعاية النباتات المنزلية جاهز للاستخدام";
 
-export const PLANT_SYSTEM_URL = "https://www.mahmoudelkousy.online/products/plant";
+export const PLANT_SYSTEM_URL = "https://www.producthelpyou.online/products/plant";
 export const PLANT_DRIVE_URL =
   "https://drive.google.com/drive/u/0/folders/189YT8A2YjnXC3-GbmL5dpyj1J9lfnnZ_";
 

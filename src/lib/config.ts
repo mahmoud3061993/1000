@@ -67,7 +67,7 @@ export function mergePaymentConfig(
     plantDeliveryUrl: firstNonEmpty(
       env.PLANT_DELIVERY_URL,
       stored.plant_delivery_url,
-      "https://www.mahmoudelkousy.online/products/plant"
+      "https://www.producthelpyou.online/products/plant"
     ),
     whatsapp: firstNonEmpty(env.WHATSAPP_NUMBER, stored.whatsapp_number, "201017420379").replace(
       /\D/g,

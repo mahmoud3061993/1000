@@ -23,7 +23,7 @@ export function displayWhatsapp(raw: string) {
 
 export function emailFrom(env: NodeJS.Dict<string> = process.env) {
   if (env.EMAIL_FROM && env.EMAIL_FROM.trim()) return env.EMAIL_FROM.trim();
-  const user = env.SMTP_USER || "noreply@mahmoudelkousy.online";
+  const user = env.SMTP_USER || "noreply@producthelpyou.online";
   return `محمود القوصي <${user}>`;
 }
 
