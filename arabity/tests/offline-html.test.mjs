@@ -53,10 +53,11 @@ test("user guide html explains install and daily use", async () => {
   const src = join(dirname(fileURLToPath(import.meta.url)), "..", "src", "guide.html");
   const html = await readFile(src, "utf8");
   assert.match(html, /تثبيت التطبيق على الموبايل/);
-  assert.match(html, /arabity\.apk/);
   assert.match(html, /تفويلة كاملة/);
   assert.match(html, /النسخ الاحتياطي/);
-  assert.doesNotMatch(html, /https:\/\/fonts\.google/);
+  assert.doesNotMatch(html, /<a[\s>]/i);
+  assert.doesNotMatch(html, /https?:\/\//i);
+  assert.doesNotMatch(html, /href=/i);
 });
 
 test("offline html is a self-contained file", async () => {
