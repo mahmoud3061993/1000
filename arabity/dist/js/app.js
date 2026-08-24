@@ -182,6 +182,7 @@ function bindNative() {
 }
 
 export async function boot() {
+  document.documentElement.dataset.arabityReady = "1";
   applyTheme(localStorage.getItem("arabity-theme") || "system");
   await db.ready();
   await loadSettings();
@@ -212,6 +213,7 @@ export async function boot() {
 
 boot().catch((err) => {
   console.error(err);
+  document.documentElement.dataset.arabityReady = "1";
   document.getElementById("app-main").innerHTML = `<div class="empty-state"><h3>حصلت مشكلة أثناء فتح التطبيق</h3><p class="muted">بياناتك الحالية لسه موجودة، حدّث الصفحة وجرب تاني.</p></div>`;
 });
 

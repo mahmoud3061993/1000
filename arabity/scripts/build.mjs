@@ -1,4 +1,4 @@
-import { cp, mkdir, rm } from "node:fs/promises";
+import { cp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -15,5 +15,15 @@ await cp(join(root, "README.md"), join(dist, "README.md"));
 await rm(web, { recursive: true, force: true });
 await mkdir(web, { recursive: true });
 await cp(src, web, { recursive: true });
+
+const indexPath = join(web, "index.html");
+let html = await readFile(indexPath, "utf8");
+html = html
+  .replace('href="./"', 'href="/car/"')
+  .replaceAll('href="css/', 'href="/car/css/')
+  .replaceAll('href="assets/', 'href="/car/assets/')
+  .replace('href="manifest.json"', 'href="/car/manifest.json"')
+  .replace('src="js/app.js"', 'src="/car/js/app.js"');
+await writeFile(indexPath, html);
 
 console.log("Built arabity/dist and public/car");

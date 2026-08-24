@@ -2,6 +2,7 @@
 <html lang="ar" dir="rtl">
   <head>
     <meta charset="utf-8" />
+    <base id="app-base" href="./" />
     <meta
       name="viewport"
       content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1"
@@ -17,19 +18,44 @@
       content="كل حاجة تخص عربيتك في مكان واحد. تابع المصاريف والصيانة بدون إنترنت."
     />
     <title>عربيتي</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        min-height: 100%;
+        background: #f3f5f8;
+        color: #0f172a;
+        font-family: Tahoma, "Segoe UI", Arial, sans-serif;
+      }
+      .boot-screen {
+        min-height: 100dvh;
+        display: grid;
+        place-items: center;
+        padding: 32px 20px;
+        text-align: center;
+      }
+      .boot-screen h1 {
+        margin: 0 0 8px;
+        font-size: 1.75rem;
+      }
+      .boot-screen p {
+        margin: 0;
+        color: #5b677a;
+        line-height: 1.7;
+      }
+    </style>
     <script>
       (function () {
+        var base = document.getElementById("app-base");
+        var cap =
+          window.Capacitor &&
+          window.Capacitor.isNativePlatform &&
+          window.Capacitor.isNativePlatform();
+        var path = location.pathname || "";
+        if (!cap && /\/car(\/|$|index\.html$)/.test(path)) {
+          base.href = "/car/";
+        }
         try {
-          var cap =
-            window.Capacitor &&
-            window.Capacitor.isNativePlatform &&
-            window.Capacitor.isNativePlatform();
-          var path = location.pathname || "";
-          var base = "./";
-          if (!cap && /\/car(\/|$)/.test(path)) base = "/car/";
-          var el = document.createElement("base");
-          el.href = base;
-          document.head.appendChild(el);
           var theme = localStorage.getItem("arabity-theme") || "system";
           var dark =
             theme === "dark" ||
@@ -38,6 +64,18 @@
               window.matchMedia("(prefers-color-scheme: dark)").matches);
           document.documentElement.setAttribute("data-theme", dark ? "dark" : "light");
         } catch (e) {}
+        window.addEventListener(
+          "error",
+          function (ev) {
+            if (document.documentElement.dataset.arabityReady) return;
+            var boot = document.getElementById("boot-screen");
+            if (!boot) return;
+            boot.innerHTML =
+              "<h1>عربيتي</h1><p>حصلت مشكلة أثناء التحميل. حدّث الصفحة وجرب تاني.</p>";
+            console.error(ev.error || ev.message || ev);
+          },
+          true
+        );
       })();
     </script>
     <link rel="icon" href="assets/icons/favicon.svg" type="image/svg+xml" />
@@ -56,12 +94,21 @@
       <aside id="sidebar" class="sidebar" aria-label="القائمة الرئيسية"></aside>
       <div class="app-body">
         <header id="topbar" class="topbar"></header>
-        <main id="app-main" class="app-main" tabindex="-1"></main>
+        <main id="app-main" class="app-main" tabindex="-1">
+          <div class="boot-screen" id="boot-screen">
+            <h1>عربيتي</h1>
+            <p>جاري فتح التطبيق...</p>
+          </div>
+        </main>
       </div>
       <nav id="bottom-nav" class="bottom-nav" aria-label="التنقل السفلي"></nav>
     </div>
     <div id="overlay-root" class="overlay-root"></div>
     <div id="toast-root" class="toast-root" aria-live="polite" aria-atomic="true"></div>
     <script type="module" src="js/app.js"></script>
+    <script nomodule>
+      document.getElementById("boot-screen").innerHTML =
+        "<h1>عربيتي</h1><p>المتصفح ده قديم. افتح Chrome أو Edge المحدّث.</p>";
+    </script>
   </body>
 </html>

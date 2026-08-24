@@ -6,6 +6,7 @@ const nextConfig = {
     const list = [
       { source: "/car", destination: "/car/index.html" },
       { source: "/car/", destination: "/car/index.html" },
+      { source: "/car/index.html", destination: "/car/index.html" },
     ];
     if (plantOrigin) {
       list.push(
