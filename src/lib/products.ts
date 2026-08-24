@@ -42,7 +42,7 @@ export function getCatalogProduct(
       name: "عربيتي",
       arabicName: "عربيتي — كل حاجة تخص عربيتك في مكان واحد",
       shortName: "عربيتي",
-      price: Number(env.ARABITY_PRODUCT_PRICE || 249),
+      price: Number(env.ARABITY_PRODUCT_PRICE || 299),
       compareAtPrice: Number(env.ARABITY_COMPARE_AT_PRICE || 990),
       currency: "EGP",
       pixelName: "Arabity Car Tracker",

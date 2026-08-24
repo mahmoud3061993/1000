@@ -15,10 +15,10 @@ import {
 import { formatOrderMessage } from "../src/lib/telegram";
 
 describe("arabity catalog product", () => {
-  it("sells عربيتي on /carlanding for 249 EGP", () => {
+  it("sells عربيتي on /carlanding for 299 EGP", () => {
     const product = getCatalogProduct("arabity", {});
     assert.equal(product.slug, "arabity");
-    assert.equal(product.price, 249);
+    assert.equal(product.price, 299);
     assert.equal(product.compareAtPrice, 990);
     assert.equal(product.currency, "EGP");
     assert.equal(product.path, "/carlanding");

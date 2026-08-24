@@ -45,7 +45,7 @@ npm run dev
 | `PRODUCT_DELIVERY_URL` | لينك Google Drive لمكتبة الـ 1000 بعد الدفع |
 | `PLANT_PRODUCT_PRICE` | سعر دليل النباتات (الافتراضي 350) |
 | `PLANT_DELIVERY_URL` | لينك دخول دليل النباتات بعد الدفع |
-| `ARABITY_PRODUCT_PRICE` | سعر عربيتي (الافتراضي 249) |
+| `ARABITY_PRODUCT_PRICE` | سعر عربيتي (الافتراضي 299) |
 | `ARABITY_DELIVERY_URL` | لينك Google Drive لفولدر عربيتي بعد الدفع (HTML + APK + الدليل) |
 | `PLANT_APP_ORIGIN` | أصل نشر الدليل عشان `/products/plant` تتوجه له |
 | `ADMIN_PASSWORD` | دخول لوحة الأدمن |
