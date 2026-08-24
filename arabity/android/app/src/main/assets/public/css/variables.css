@@ -1,0 +1,159 @@
+:root {
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+
+  --radius-s: 8px;
+  --radius-m: 12px;
+  --radius-l: 16px;
+  --radius-xl: 24px;
+  --radius-pill: 999px;
+
+  --font: system-ui, -apple-system, "Segoe UI", "Tahoma", "Arial", "Noto Sans Arabic", sans-serif;
+  --font-num: ui-rounded, "Segoe UI", system-ui, sans-serif;
+
+  --fs-display: clamp(2rem, 5vw, 2.75rem);
+  --fs-title: 1.5rem;
+  --fs-section: 1.125rem;
+  --fs-card: 1.05rem;
+  --fs-body: 1rem;
+  --fs-caption: 0.875rem;
+  --fs-label: 0.8125rem;
+  --lh-body: 1.65;
+
+  --navy-950: #06182c;
+  --navy-900: #0a2540;
+  --navy-800: #123056;
+  --navy-700: #1a3d68;
+  --teal-600: #0d9b8a;
+  --teal-500: #12b3a0;
+  --teal-400: #1ec8b8;
+  --teal-100: #d8f6f2;
+  --success-600: #0f9f6e;
+  --success-100: #d9f5ea;
+  --warning-600: #d97706;
+  --warning-100: #feefd6;
+  --danger-600: #dc3d3d;
+  --danger-100: #fde8e8;
+  --info-600: #2563eb;
+  --info-100: #dbe7fe;
+
+  --ease: 180ms cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-out: 220ms cubic-bezier(0.16, 1, 0.3, 1);
+  --shadow-sm: 0 1px 2px rgba(10, 37, 64, 0.06);
+  --shadow-md: 0 8px 24px rgba(10, 37, 64, 0.08);
+  --shadow-lg: 0 18px 50px rgba(10, 37, 64, 0.14);
+  --touch: 44px;
+  --sidebar-w: 280px;
+  --content-max: 920px;
+  --nav-h: 72px;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+}
+
+:root,
+[data-theme="light"] {
+  color-scheme: light;
+  --bg: #f3f5f8;
+  --bg-elev: #eef1f6;
+  --surface: #ffffff;
+  --surface-2: #f7f8fb;
+  --text: #0f172a;
+  --text-muted: #5b677a;
+  --text-faint: #8a95a8;
+  --border: rgba(15, 23, 42, 0.08);
+  --border-strong: rgba(15, 23, 42, 0.14);
+  --primary: var(--navy-900);
+  --primary-hover: var(--navy-800);
+  --on-primary: #ffffff;
+  --accent: var(--teal-600);
+  --accent-soft: #e6f7f4;
+  --hero-from: #0a2540;
+  --hero-to: #135e62;
+  --overlay: rgba(6, 24, 44, 0.46);
+  --chart-1: #0a2540;
+  --chart-2: #0d9b8a;
+  --chart-3: #d97706;
+  --chart-4: #2563eb;
+  --chart-5: #7c3aed;
+  --chart-6: #dc3d3d;
+  --chart-grid: rgba(15, 23, 42, 0.08);
+  --focus: #12b3a0;
+  --bottom-nav-bg: rgba(255, 255, 255, 0.92);
+  --sidebar-bg: #0a2540;
+  --sidebar-text: #d7e3f2;
+  --sidebar-active: #ffffff;
+  --status-safe-bg: var(--success-100);
+  --status-safe-fg: #086b4a;
+  --status-warn-bg: var(--warning-100);
+  --status-warn-fg: #9a4d04;
+  --status-due-bg: #fde8d4;
+  --status-due-fg: #9a3412;
+  --status-danger-bg: var(--danger-100);
+  --status-danger-fg: #9f1239;
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #0b1220;
+  --bg-elev: #10192a;
+  --surface: #141c2c;
+  --surface-2: #1b2538;
+  --text: #e8eef7;
+  --text-muted: #93a0b5;
+  --text-faint: #6d7b91;
+  --border: rgba(232, 238, 247, 0.08);
+  --border-strong: rgba(232, 238, 247, 0.16);
+  --primary: #d7e8ff;
+  --primary-hover: #ffffff;
+  --on-primary: #0a2540;
+  --accent: var(--teal-400);
+  --accent-soft: rgba(30, 200, 184, 0.12);
+  --hero-from: #07101d;
+  --hero-to: #0d3d48;
+  --overlay: rgba(0, 0, 0, 0.62);
+  --chart-1: #8ab4ff;
+  --chart-2: #1ec8b8;
+  --chart-3: #fbbf24;
+  --chart-4: #60a5fa;
+  --chart-5: #c4b5fd;
+  --chart-6: #f87171;
+  --chart-grid: rgba(232, 238, 247, 0.08);
+  --focus: #1ec8b8;
+  --bottom-nav-bg: rgba(20, 28, 44, 0.94);
+  --sidebar-bg: #07101d;
+  --sidebar-text: #b7c6db;
+  --sidebar-active: #ffffff;
+  --status-safe-bg: rgba(15, 159, 110, 0.16);
+  --status-safe-fg: #5ee9b5;
+  --status-warn-bg: rgba(217, 119, 6, 0.16);
+  --status-warn-fg: #fbbf24;
+  --status-due-bg: rgba(234, 88, 12, 0.16);
+  --status-due-fg: #fdba74;
+  --status-danger-bg: rgba(220, 61, 61, 0.16);
+  --status-danger-fg: #fca5a5;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.28);
+  --shadow-md: 0 10px 28px rgba(0, 0, 0, 0.32);
+  --shadow-lg: 0 20px 50px rgba(0, 0, 0, 0.45);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --ease: 1ms linear;
+    --ease-out: 1ms linear;
+  }
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}

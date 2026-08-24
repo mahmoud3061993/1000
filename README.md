@@ -14,6 +14,14 @@
 - لوحة أدمن فيها عدد الدخول، مين ملأ البيانات، مين بيحاول يدفع، ومين دفع
 - إشعارات على الموبايل عن طريق تيليجرام
 
+## عربيتي — `/car`
+
+تطبيق إدارة مصاريف وصيانة العربية (عربي، بدون حساب وبدون إنترنت بعد التحميل):
+
+- التشغيل المحلي: `npm run arabity` ثم http://127.0.0.1:8765
+- على الموقع: https://www.producthelpyou.online/car
+- المصدر: مجلد `arabity/` — التوثيق في `arabity/README.md` وبناء الأندرويد في `arabity/BUILD-APK.md`
+
 ## التشغيل محليًا
 
 ```bash
@@ -165,6 +173,7 @@ CNAME  www    cname.vercel-dns.com
 
 - https://www.producthelpyou.online
 - https://www.producthelpyou.online/products/1000
+- https://www.producthelpyou.online/car — تطبيق **عربيتي** (مصاريف وصيانة العربية، بدون إنترنت بعد التحميل)
 - https://www.producthelpyou.online/admin
 
 وWebhook كاشير:

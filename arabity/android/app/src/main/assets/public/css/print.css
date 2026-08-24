@@ -1,0 +1,73 @@
+@page {
+  size: A4;
+  margin: 14mm;
+}
+
+@media print {
+  html,
+  body {
+    background: #fff !important;
+    color: #111 !important;
+  }
+
+  .sidebar,
+  .bottom-nav,
+  .topbar,
+  .overlay-root,
+  .toast-root,
+  .fab,
+  .skip-link,
+  .no-print,
+  .form-actions,
+  .btn,
+  .search-box,
+  .chip,
+  .bottom-nav-btn {
+    display: none !important;
+  }
+
+  .app,
+  .app-body,
+  .app-main {
+    display: block;
+    width: 100%;
+    max-width: none;
+    padding: 0;
+    margin: 0;
+    background: #fff;
+  }
+
+  .card,
+  .hero-card,
+  .kpi-card,
+  .chart-wrap,
+  .list-card {
+    box-shadow: none !important;
+    break-inside: avoid;
+    border: 1px solid #e5e7eb;
+  }
+
+  .print-header {
+    display: flex !important;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    border-bottom: 2px solid #0a2540;
+    padding-bottom: 12px;
+  }
+
+  .print-only {
+    display: block !important;
+  }
+
+  a[href]::after {
+    content: none !important;
+  }
+}
+
+.print-only {
+  display: none;
+}
+
+.print-header {
+  display: none;
+}

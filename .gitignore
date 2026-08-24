@@ -1,6 +1,15 @@
 node_modules
 .next
 out
+arabity/android/app/build
+arabity/android/.gradle
+arabity/android/build
+arabity/android/local.properties
+arabity/android/captures
+*.apk
+*.aab
+*.keystore
+!arabity/android/app/debug.keystore
 data/*.db
 data/*.db-*
 data/uploads/*
