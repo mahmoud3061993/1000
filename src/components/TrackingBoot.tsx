@@ -79,7 +79,7 @@ function writeStoredAdPath(path: AdTouch[]) {
 
 /** Keep the first Facebook click. Later ads must not overwrite _fbc or Purchase goes to the wrong ad. */
 export function ensureOriginalFbc(fbclidFromUrl?: string) {
-  const urlClick = (fbclidFromUrl ?? new URLSearchParams(window.location.search).get("fbclid") || "").trim();
+  const urlClick = (fbclidFromUrl ?? (new URLSearchParams(window.location.search).get("fbclid") || "")).trim();
   let locked = cookie(FBC_LOCK_COOKIE);
   if (!locked && urlClick) {
     locked = `fb.1.${Date.now()}.${urlClick}`;
