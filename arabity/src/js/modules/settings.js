@@ -6,7 +6,7 @@ import { applyTheme, getSettings, saveSettings } from "../storage.js";
 import { closeTop, confirmDialog, field, pageTitle, toast } from "../ui.js";
 import { go } from "../router.js";
 import { icon } from "../icons.js";
-import { androidApkUrl, isNative, isOfflineHtml, offlineHtmlUrl } from "../utils.js";
+import { androidApkUrl, guideHtmlUrl, isNative, isOfflineHtml, offlineHtmlUrl } from "../utils.js";
 
 export async function renderSettings(root) {
   const s = getSettings();
@@ -36,6 +36,12 @@ export async function renderSettings(root) {
       <p class="muted">Kia Cerato 2021 ببيانات واقعية. مش هتتمسح بياناتك الحقيقية.</p>
       <button class="btn btn-ghost" id="demo">جرب بيانات تجريبية</button>
       <button class="btn btn-ghost" id="deldemo">حذف البيانات التجريبية</button>
+    </section>
+    <section class="card stack">
+      <h3>دليل الاستخدام</h3>
+      <p class="muted">شرح عربيتي خطوة بخطوة، وطريقة تثبيت التطبيق على الموبايل من غير المتجر.</p>
+      <a class="btn btn-primary" href="${guideHtmlUrl()}" ${isNative() ? "" : `target="_blank" rel="noopener"`}>${icon("doc", 18)} فتح دليل الاستخدام</a>
+      ${isNative() ? "" : `<a class="btn btn-ghost" href="${guideHtmlUrl()}" download="دليل-عربيتي.html">${icon("download", 18)} تحميل الدليل HTML</a>`}
     </section>
     <section class="card stack">
       <h3>تطبيق أندرويد</h3>

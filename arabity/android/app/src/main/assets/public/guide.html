@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#0A2540" />
+    <meta
+      name="description"
+      content="دليل استخدام عربيتي: إزاي تسجّل المصاريف والصيانة، وإزاي تثبّت التطبيق على الموبايل من غير متجر."
+    />
+    <title>دليل استخدام عربيتي</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%230A2540'/%3E%3Cpath d='M14 36l4-10h28l4 10' fill='none' stroke='%231EC8B8' stroke-width='3' stroke-linecap='round'/%3E%3Crect x='16' y='36' width='32' height='10' rx='3' fill='%2312B3A0'/%3E%3Ccircle cx='22' cy='48' r='4' fill='%23F3F5F8'/%3E%3Ccircle cx='42' cy='48' r='4' fill='%23F3F5F8'/%3E%3C/svg%3E"
+    />
+    <style>
+      :root {
+        --navy: #0a2540;
+        --navy-800: #123056;
+        --teal: #0d9b8a;
+        --teal-400: #1ec8b8;
+        --bg: #f3f5f8;
+        --surface: #fff;
+        --text: #0f172a;
+        --muted: #5b677a;
+        --faint: #8a95a8;
+        --border: rgba(15, 23, 42, 0.08);
+        --shadow: 0 10px 28px rgba(10, 37, 64, 0.08);
+        --radius: 16px;
+        --max: 880px;
+      }
+      * { box-sizing: border-box; }
+      html { scroll-behavior: smooth; }
+      body {
+        margin: 0;
+        font-family: Tahoma, "Segoe UI", Arial, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        line-height: 1.75;
+      }
+      a { color: inherit; }
+      img, svg { max-width: 100%; }
+      .hero {
+        background: linear-gradient(135deg, #0a2540, #135e62);
+        color: #fff;
+        padding: 36px 20px 48px;
+      }
+      .hero-inner, .wrap { width: min(var(--max), calc(100% - 32px)); margin: 0 auto; }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 20px;
+      }
+      .mark {
+        width: 48px;
+        height: 48px;
+        border-radius: 14px;
+        background: #0a2540;
+        box-shadow: inset 0 0 0 2px rgba(255,255,255,.12);
+        flex-shrink: 0;
+      }
+      .hero h1 { margin: 0 0 8px; font-size: clamp(1.7rem, 4vw, 2.4rem); line-height: 1.3; }
+      .hero p { margin: 0; color: #cfe4e2; max-width: 40rem; }
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 22px;
+      }
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        min-height: 44px;
+        padding: 10px 16px;
+        border-radius: 12px;
+        font-weight: 800;
+        text-decoration: none;
+        border: 0;
+      }
+      .btn-accent { background: #12b3a0; color: #06241f; }
+      .btn-light { background: rgba(255,255,255,.12); color: #fff; }
+      .btn-navy { background: var(--navy); color: #fff; }
+      .btn-ghost { background: #eef1f6; color: var(--text); }
+      nav.toc {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        gap: 10px;
+        margin: -28px auto 28px;
+        width: min(var(--max), calc(100% - 32px));
+      }
+      nav.toc a {
+        background: var(--surface);
+        border-radius: 14px;
+        padding: 14px 14px 12px;
+        text-decoration: none;
+        box-shadow: var(--shadow);
+        font-weight: 800;
+        font-size: 0.95rem;
+      }
+      nav.toc span { display: block; color: var(--muted); font-weight: 500; font-size: 0.8rem; margin-top: 4px; }
+      section.card {
+        background: var(--surface);
+        border-radius: var(--radius);
+        padding: 22px 22px 20px;
+        margin: 0 auto 16px;
+        width: min(var(--max), calc(100% - 32px));
+        box-shadow: var(--shadow);
+      }
+      section.card h2 { margin: 0 0 10px; font-size: 1.25rem; color: var(--navy); }
+      section.card h3 { margin: 18px 0 8px; font-size: 1.05rem; }
+      section.card p, section.card li { color: var(--text); }
+      .muted { color: var(--muted); }
+      .faint { color: var(--faint); font-size: 0.9rem; }
+      ol.steps, ul.clean { margin: 0; padding: 0; list-style: none; }
+      ol.steps { counter-reset: step; }
+      ol.steps li {
+        position: relative;
+        padding: 12px 14px 12px 52px;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        margin: 10px 0;
+        background: #f7f8fb;
+      }
+      ol.steps li::before {
+        counter-increment: step;
+        content: counter(step);
+        position: absolute;
+        right: 12px;
+        top: 12px;
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: var(--navy);
+        color: #fff;
+        font-weight: 800;
+        font-size: 0.85rem;
+        display: grid;
+        place-items: center;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 10px;
+        margin-top: 12px;
+      }
+      .tile {
+        background: #f7f8fb;
+        border-radius: 12px;
+        padding: 14px;
+      }
+      .tile strong { display: block; margin-bottom: 4px; }
+      .note {
+        background: #e6f7f4;
+        border-right: 4px solid var(--teal);
+        border-radius: 12px;
+        padding: 12px 14px;
+        margin-top: 12px;
+      }
+      .warn {
+        background: #feefd6;
+        border-right: 4px solid #d97706;
+        border-radius: 12px;
+        padding: 12px 14px;
+        margin-top: 12px;
+      }
+      footer {
+        width: min(var(--max), calc(100% - 32px));
+        margin: 8px auto 40px;
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+      @media print {
+        .hero { padding: 16px 0; }
+        nav.toc, .actions, .no-print { display: none !important; }
+        section.card { box-shadow: none; border: 1px solid #ddd; break-inside: avoid; }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="hero">
+      <div class="hero-inner">
+        <div class="brand">
+          <svg class="mark" viewBox="0 0 64 64" aria-hidden="true">
+            <rect width="64" height="64" rx="16" fill="#0A2540"/>
+            <path d="M14 36l4-10h28l4 10" fill="none" stroke="#1EC8B8" stroke-width="3" stroke-linecap="round"/>
+            <rect x="16" y="36" width="32" height="10" rx="3" fill="#12B3A0"/>
+            <circle cx="22" cy="48" r="4" fill="#F3F5F8"/>
+            <circle cx="42" cy="48" r="4" fill="#F3F5F8"/>
+          </svg>
+          <div>
+            <div style="font-weight:800">عربيتي</div>
+            <div style="opacity:.75;font-size:.9rem">كل حاجة تخص عربيتك... في مكان واحد</div>
+          </div>
+        </div>
+        <h1>دليل الاستخدام وتثبيت الموبايل</h1>
+        <p>
+          التطبيق ده لمتابعة مصاريف وصيانة عربيتك من غير حساب ومن غير إنترنت.
+          الدليل ده يشرح الاستخدام اليومي، وطريقة تثبيت نسخة الأندرويد على الموبايل بنفسك.
+        </p>
+        <div class="actions">
+          <a class="btn btn-accent" href="arabity.apk" download="عربيتي.apk">تحميل تطبيق الأندرويد</a>
+          <a class="btn btn-light" href="arabity-offline.html" download="عربيتي.html">تحميل ملف HTML أوفلاين</a>
+          <a class="btn btn-light" href="index.html">فتح التطبيق</a>
+        </div>
+      </div>
+    </header>
+
+    <nav class="toc" aria-label="أقسام الدليل">
+      <a href="#what">إيه هو عربيتي؟<span>من غير حساب ولا سحابة</span></a>
+      <a href="#install">تثبيت الموبايل<span>APK من غير المتجر</span></a>
+      <a href="#start">أول استخدام<span>إضافة عربيتك</span></a>
+      <a href="#daily">الاستخدام اليومي<span>بنزين، صيانة، مصاريف</span></a>
+      <a href="#reports">التقارير والنسخ<span>طباعة ونقل البيانات</span></a>
+    </nav>
+
+    <section class="card" id="what">
+      <h2>إيه هو عربيتي؟</h2>
+      <p>
+        عربيتي تطبيق عربي (من اليمين لليسار) بيخلي عندك سجل واضح لعربيتك:
+        البنزين، الصيانة، الإصلاحات، الرخصة والتأمين، الكاوتش، البطارية، والمصاريف التانية.
+      </p>
+      <p class="muted">مفيش تسجيل دخول، مفيش سيرفر، ومفيش تتبع. كل البيانات بتتحفظ على جهازك أنت.</p>
+      <div class="grid">
+        <div class="tile"><strong>على الموقع</strong>افتح الصفحة من المتصفح وسجّل عادي.</div>
+        <div class="tile"><strong>ملف HTML</strong>حمّل ملف واحد وافتحه من اللابتوب أوفلاين.</div>
+        <div class="tile"><strong>تطبيق أندرويد</strong>ثبّت الـ APK مرة، وبعدين يشتغل من غير نت.</div>
+      </div>
+      <div class="note">
+        البيانات بتتسجل على الجهاز اللي فاتح منه. عشان تنقل السجل بين اللابتوب والموبايل، استخدم النسخ الاحتياطي من الإعدادات.
+      </div>
+    </section>
+
+    <section class="card" id="install">
+      <h2>تثبيت التطبيق على الموبايل</h2>
+      <p>النسخة دي <strong>مش على Play Store</strong>. هتحمّل ملف APK وتثبّته بإيدك. بعد التثبيت التطبيق يشتغل أوفلاين.</p>
+      <h3>1) حمّل الملف</h3>
+      <p>من الموبايل اضغط تحميل التطبيق، أو افتح الرابط واحفظ <strong>arabity.apk</strong>.</p>
+      <p class="no-print"><a class="btn btn-navy" href="arabity.apk" download="عربيتي.apk">تحميل عربيتي.apk</a></p>
+      <h3>2) اسمح بالتثبيت من خارج المتجر</h3>
+      <ol class="steps">
+        <li>
+          <strong>لو الملف اتفتح من Chrome أو الملفات:</strong>
+          هيظهر طلب «السماح بتثبيت تطبيقات من هذا المصدر». دوس السماح.
+        </li>
+        <li>
+          <strong>من الإعدادات يدويًا:</strong>
+          الإعدادات → أمان / خصوصية → تثبيت تطبيقات غير معروفة (أو مصادر غير معروفة) → اختار المتصفح أو مدير الملفات وفعّله.
+        </li>
+        <li>
+          على بعض أجهزة شاومي / هواوي / أوبو: دور على «تثبيت تطبيقات خارجية» أو «Special app access».
+        </li>
+      </ol>
+      <h3>3) ثبّت عربيتي</h3>
+      <ol class="steps">
+        <li>افتح ملف <strong>عربيتي.apk</strong> من التنزيلات.</li>
+        <li>دوس <strong>تثبيت</strong>، واستنى يخلّص.</li>
+        <li>دوس <strong>فتح</strong>. أول شاشة هتطلب إضافة عربيتك.</li>
+      </ol>
+      <div class="warn">
+        <strong>لو ظهر Play Protect:</strong> الرسالة دي طبيعية لأن التطبيق مش من المتجر.
+        اختار «تثبيت على أي حال» أو «More details» ثم Install anyway.
+        عربيتي مش بيطلب صلاحيات غريبة، ومش بيبعت بيانات لأي سيرفر.
+      </div>
+      <h3>بعد التثبيت</h3>
+      <ul class="clean">
+        <li class="tile">التطبيق يظهر باسم <strong>عربيتي</strong> على الشاشة الرئيسية.</li>
+        <li class="tile">مش محتاج إنترنت بعد كده إلا لو حابب تحمّل تحديث APK جديد.</li>
+        <li class="tile">لو حدّثت بنسخة أحدث، ثبّتها فوق القديمة عشان بياناتك تفضل موجودة.</li>
+      </ul>
+    </section>
+
+    <section class="card" id="start">
+      <h2>أول استخدام</h2>
+      <ol class="steps">
+        <li>اكتب <strong>اسم العربية</strong> — زي ما بتناديها: «سيراتو الشغل» أو «العربية البيت».</li>
+        <li>دخل <strong>العداد الحالي</strong> ونوع الوقود. دول أهم حاجة للحسابات.</li>
+        <li>الباقي اختياري: اللوحة، تاريخ الشراء، السعر، اللون.</li>
+      </ol>
+      <p>تقدر تضيف أكتر من عربية بعد كده من قائمة السيارات، وتبدّل بينهم من الشريط العلوي.</p>
+      <div class="note">
+        لو حابب تشوف الشكل الأول من غير ما تضيف عربيتك: من الإعدادات اختار «جرب بيانات تجريبية».
+        العربية التجريبية مش بتمسح بياناتك الحقيقية.
+      </div>
+    </section>
+
+    <section class="card" id="daily">
+      <h2>الاستخدام اليومي</h2>
+      <p>من الشريط السفلي دوس <strong>تسجيل</strong> واختار النوع. أو ادخل الصفحة من القائمة.</p>
+      <div class="grid">
+        <div class="tile">
+          <strong>البنزين</strong>
+          سجّل العداد واللترات والسعر. لو الخزان كان مليان علّم «تفويلة كاملة».
+          الاستهلاك بيتحسب من تفويلة كاملة للتفويلة الكاملة اللي بعدها.
+        </div>
+        <div class="tile">
+          <strong>الصيانة</strong>
+          زيت، فلاتر، تيل، صيانة دورية… حدّد المعاد الجاي بالكيلومتر أو التاريخ، والتطبيق يعرض العد التنازلي.
+        </div>
+        <div class="tile">
+          <strong>الإصلاحات</strong>
+          أي عطل أو تصليح طارئ: المشكلة، الورشة، التكلفة، والملاحظات.
+        </div>
+        <div class="tile">
+          <strong>المصاريف</strong>
+          غسيل، ركن، رسوم، مخالفات، تأمين… أي حاجة مش بنزين ومش صيانة.
+        </div>
+        <div class="tile">
+          <strong>المستندات</strong>
+          رخصة، تأمين، فحص. حط تاريخ الانتهاء عشان تتقبّل قبل الميعاد.
+        </div>
+        <div class="tile">
+          <strong>الكاوتش والبطارية</strong>
+          سجّل تاريخ التركيب/الشراء لكل كاوتشة والبطارية الحالية.
+        </div>
+      </div>
+      <h3>الشاشة الرئيسية</h3>
+      <p>
+        بتوريك عربيتك كلفتك كام الشهر ده، أقرب المواعيد، ملاحظات من أرقامك،
+        ودرجة متابعة (مش تشخيص ميكانيكي — مجرد قد إيه سجلّك مكتمل ومنتظم).
+      </p>
+      <h3>حاجات كمان مفيدة</h3>
+      <ul class="clean">
+        <li class="tile"><strong>السجل:</strong> كل اللي اتعمل بالترتيب.</li>
+        <li class="tile"><strong>مراكز الصيانة:</strong> دليل ورش تخصّك أنت، مش قائمة أونلاين.</li>
+        <li class="tile"><strong>قائمة السفر:</strong> تشيك قبل الطريق (كاوتش، زيت، أوراق…).</li>
+        <li class="tile"><strong>التذكيرات:</strong> معاد باليوم أو عند وصول العداد لرقم معيّن.</li>
+      </ul>
+    </section>
+
+    <section class="card" id="reports">
+      <h2>التقارير، الطباعة، والنسخ الاحتياطي</h2>
+      <h3>التقارير</h3>
+      <p>من التقارير تقدر تطبع أو تحفظ PDF من المتصفح:</p>
+      <ul class="clean">
+        <li class="tile">عربيتك بتكلفك كام؟ — متوسط شهري وتوزيع البنود</li>
+        <li class="tile">تقرير عربيتي الشهري</li>
+        <li class="tile">سجل صيانة العربية (مفيد عند البيع)</li>
+        <li class="tile">ملخص عربيتي — صورة ملكية سريعة</li>
+      </ul>
+      <h3>نقل البيانات بين اللابتوب والموبايل</h3>
+      <ol class="steps">
+        <li>من الجهاز اللي فيه البيانات: الإعدادات → <strong>تصدير نسخة احتياطية</strong>. هينزل ملف JSON.</li>
+        <li>انقل الملف بأي طريقة: واتساب، كابل، درايف، بلوتوث.</li>
+        <li>على الجهاز التاني: الإعدادات → <strong>استيراد</strong> → اختار دمج أو استبدال.</li>
+      </ol>
+      <div class="warn">
+        الاستبدال يمسح اللي على الجهاز التاني. خد تصدير الأول لو مش متأكد. الدمج بيحافظ على السجلات المختلفة.
+      </div>
+      <h3>ملف HTML أوفلاين للابتوب</h3>
+      <p>
+        لو مش عايز تطبيق، حمّل ملف <strong>عربيتي.html</strong> وافتحه بـ Chrome أو Edge.
+        سيبه في نفس المجلد بعد ما تبدأ تسجّل، عشان البيانات تفضل موجودة.
+      </p>
+      <p class="no-print"><a class="btn btn-ghost" href="arabity-offline.html" download="عربيتي.html">تحميل ملف عربيتي.html</a></p>
+    </section>
+
+    <section class="card">
+      <h2>أسئلة سريعة</h2>
+      <h3>التطبيق بيحتاج نت؟</h3>
+      <p>لا. بعد فتح الصفحة أو تثبيت الأندرويد، كل حاجة محلية.</p>
+      <h3>بياناتي بتروح فين؟</h3>
+      <p>على جهازك فقط (IndexedDB). مفيش سحابة. لو مسحت بيانات التطبيق أو غيّرت مكان ملف الـ HTML، السجل يختفي — عشان كده النسخة الاحتياطية مهمة.</p>
+      <h3>حصل خطأ في العداد؟</h3>
+      <p>عدّل آخر سجل أو زوّد القراءة الجديدة. التطبيق بينبّه لو الرقم أصغر من الحالي، وممكن تسمح بالقيمة الأقل لو كنت بتصحّح غلط.</p>
+      <h3>درجة المتابعة 51 أو منخفضة؟</h3>
+      <p>دي مش حالة المحرك. كل ما تسجّل صيانة ومستندات في وقتها، الدرجة تتحسّن.</p>
+    </section>
+
+    <footer>
+      عربيتي — دليل الاستخدام. البيانات ملكك إنت. احفظ الصفحة دي أو اطبعها PDF لو حابب ترجع لها من غير نت.
+    </footer>
+    <script>
+      (function () {
+        if (location.protocol !== "file:") return;
+        var base = "https://www.producthelpyou.online/car/";
+        document.querySelectorAll('a[href="arabity.apk"]').forEach(function (a) {
+          a.href = base + "arabity.apk";
+        });
+        document.querySelectorAll('a[href="arabity-offline.html"]').forEach(function (a) {
+          a.href = base + "arabity-offline.html";
+        });
+        document.querySelectorAll('a[href="index.html"]').forEach(function (a) {
+          a.href = base;
+        });
+      })();
+    </script>
+  </body>
+</html>

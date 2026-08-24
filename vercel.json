@@ -2,7 +2,8 @@
   "framework": "nextjs",
   "rewrites": [
     { "source": "/car", "destination": "/car/index.html" },
-    { "source": "/car/", "destination": "/car/index.html" }
+    { "source": "/car/", "destination": "/car/index.html" },
+    { "source": "/car/guide", "destination": "/car/guide.html" }
   ],
   "headers": [
     {

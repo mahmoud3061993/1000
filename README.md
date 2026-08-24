@@ -22,6 +22,7 @@
 - على الموقع: https://www.producthelpyou.online/car
 - ملف أوفلاين واحد: https://www.producthelpyou.online/car/arabity-offline.html (حمّله وافتحه من غير نت)
 - أندرويد بدون المتجر: https://www.producthelpyou.online/car/arabity.apk (ثبّته يدويًا ويشتغل أوفلاين)
+- دليل الاستخدام: https://www.producthelpyou.online/car/guide.html
 - المصدر: مجلد `arabity/` — التوثيق في `arabity/README.md` وبناء الأندرويد في `arabity/BUILD-APK.md`
 
 ## التشغيل محليًا

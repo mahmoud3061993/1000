@@ -230,6 +230,16 @@ export function androidApkUrl() {
   return "arabity.apk";
 }
 
+export function guideHtmlUrl() {
+  if (isNative()) return "guide.html";
+  if (isOfflineHtml() || globalThis.location?.protocol === "file:") {
+    return "https://www.producthelpyou.online/car/guide.html";
+  }
+  const path = globalThis.location?.pathname || "";
+  if (/\/car(\/|$)/.test(path)) return "/car/guide.html";
+  return "guide.html";
+}
+
 export function nativePlugin(name) {
   return globalThis.Capacitor?.Plugins?.[name] || null;
 }

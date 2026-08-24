@@ -93,6 +93,8 @@ npm run dev          # http://localhost:3000/car
 
 حمّل `arabity.apk` من https://www.producthelpyou.online/car/arabity.apk أو من **الإعدادات** داخل التطبيق.
 
+دليل الاستخدام للمستخدم: https://www.producthelpyou.online/car/guide.html (وملف `guide.html` جنب التطبيق).
+
 التفاصيل وخطوات البناء في [BUILD-APK.md](BUILD-APK.md).
 
 معرّف الحزمة: `com.arabity.cartracker`  
