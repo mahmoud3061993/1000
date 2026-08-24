@@ -178,11 +178,18 @@
   color: #06241f;
 }
 
-.onboarding-shell,
 .app.is-onboarding .sidebar,
 .app.is-onboarding .bottom-nav,
 .app.is-onboarding .topbar {
   display: none;
+}
+
+.onboarding-shell .brand-name {
+  color: var(--text);
+}
+
+.onboarding-shell .brand-lockup {
+  color: inherit;
 }
 
 .app.is-onboarding .app-body {
