@@ -474,6 +474,24 @@ export async function insertEvent(event: {
   });
 }
 
+export async function clearAnalyticsData(product = "arabity") {
+  const slug = product === "plant" || product === "1000" || product === "arabity" ? product : "arabity";
+  const database = await getDb();
+  const visits = await database.execute({
+    sql: `DELETE FROM visits WHERE product_slug = ?`,
+    args: [slug],
+  });
+  const events = await database.execute({
+    sql: `DELETE FROM events WHERE product_slug = ?`,
+    args: [slug],
+  });
+  return {
+    product: slug,
+    visitsDeleted: Number(visits.rowsAffected || 0),
+    eventsDeleted: Number(events.rowsAffected || 0),
+  };
+}
+
 async function count(sql: string, args: Array<string> = []) {
   const database = await getDb();
   const result = await database.execute({ sql, args });

@@ -400,7 +400,7 @@ export default function AdminPage() {
           </section>
         ) : null}
 
-        {tab === "analytics" ? <AdminAnalytics /> : null}
+        {tab === "analytics" ? <AdminAnalytics onCleared={() => load()} /> : null}
 
         {tab === "settings" ? (
           <form className="settings-card" onSubmit={saveSettings}>

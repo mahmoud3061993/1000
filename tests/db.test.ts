@@ -221,4 +221,48 @@ describe("order funnel and payment states", async () => {
     assert.equal(plantStats.paid >= 1, true);
     assert.equal(plantStats.revenue >= 350, true);
   });
+
+  it("clears Arabity analytics visits and events without deleting orders", async () => {
+    await db.insertVisit({ id: "v-car-1", session_id: "s-car", product_slug: "arabity" });
+    await db.insertVisit({ id: "v-plant-keep", session_id: "s-plant-keep", product_slug: "plant" });
+    await db.insertEvent({ id: "e-car-1", session_id: "s-car", name: "CheckoutView", product_slug: "arabity" });
+    await db.insertEvent({ id: "e-plant-keep", session_id: "s-plant-keep", name: "Scroll50", product_slug: "plant" });
+    await db.createOrder({
+      id: "o-car-keep",
+      session_id: "s-car",
+      name: "عميل عربيتي",
+      email: "car@b.com",
+      phone: "01000000004",
+      amount: 249,
+      currency: "EGP",
+      product_slug: "arabity",
+      payment_method: "kashier",
+      status: "paid",
+      kashier_order_id: null,
+      kashier_transaction_id: null,
+      instapay_screenshot: null,
+      purchase_event_id: null,
+      fbp: null,
+      fbc: null,
+      ip: null,
+      user_agent: null,
+      created_at: new Date().toISOString(),
+      paid_at: new Date().toISOString(),
+    });
+
+    const cleared = await db.clearAnalyticsData("arabity");
+    assert.equal(cleared.visitsDeleted >= 1, true);
+    assert.equal(cleared.eventsDeleted >= 1, true);
+
+    const carStats = await db.getFunnelStats("arabity");
+    assert.equal(carStats.visits, 0);
+    assert.equal(carStats.paid >= 1, true);
+    assert.equal(carStats.revenue >= 249, true);
+
+    const plantStats = await db.getFunnelStats("plant");
+    assert.equal(plantStats.visits >= 1, true);
+
+    const kept = await db.listOrders({ product: "arabity" });
+    assert.equal(kept.some((order) => order.id === "o-car-keep"), true);
+  });
 });

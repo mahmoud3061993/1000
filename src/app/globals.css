@@ -499,6 +499,16 @@ a { color: inherit; }
   color: #0F172A;
 }
 
+.analytics-periods .ghost-btn {
+  background: #334155;
+  color: #fff;
+}
+
+.analytics-periods .danger-btn {
+  background: #DC2626;
+  color: #fff;
+}
+
 .analytics-range {
   color: #94A3B8;
   font-weight: 700;
