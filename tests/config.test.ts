@@ -65,7 +65,7 @@ describe("payment config merge", () => {
     );
     assert.equal(cfg.plantDeliveryUrl, "https://www.producthelpyou.online/products/plant");
     assert.equal(cfg.deliveryUrl, "https://www.producthelpyou.online/products/1000");
-    assert.equal(cfg.arabityDeliveryUrl, "https://www.producthelpyou.online/car");
+    assert.equal(cfg.arabityDeliveryUrl, "https://drive.google.com/drive/u/0/folders/1g0QLdBay_9eWs_UWEHf2h5lU2tT57_3e");
   });
 
   it("falls back to the store Instapay number when nothing is configured", () => {
