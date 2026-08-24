@@ -4,6 +4,7 @@
 
 - مكتبة +1000 Canva Ads: `/` و `/products/1000`
 - دليل رعاية النباتات: الشراء `/buydoctorplant` — الدليل `/products/plant`
+- عربيتي: الشراء `/carlanding` — النظام `/car`
 
 الدفع في الاتنين واحد:
 
@@ -19,6 +20,7 @@
 تطبيق إدارة مصاريف وصيانة العربية (عربي، بدون حساب وبدون إنترنت بعد التحميل):
 
 - التشغيل المحلي: `npm run arabity` ثم http://127.0.0.1:8765
+- صفحة هبوط البيع: https://www.producthelpyou.online/carlanding
 - على الموقع: https://www.producthelpyou.online/car
 - المصدر: مجلد `arabity/` — التوثيق في `arabity/README.md` وبناء الأندرويد في `arabity/BUILD-APK.md`
 
@@ -43,6 +45,8 @@ npm run dev
 | `PRODUCT_DELIVERY_URL` | لينك Google Drive لمكتبة الـ 1000 بعد الدفع |
 | `PLANT_PRODUCT_PRICE` | سعر دليل النباتات (الافتراضي 350) |
 | `PLANT_DELIVERY_URL` | لينك دخول دليل النباتات بعد الدفع |
+| `ARABITY_PRODUCT_PRICE` | سعر عربيتي (الافتراضي 249) |
+| `ARABITY_DELIVERY_URL` | لينك Google Drive لفولدر عربيتي بعد الدفع (HTML + APK + الدليل) |
 | `PLANT_APP_ORIGIN` | أصل نشر الدليل عشان `/products/plant` تتوجه له |
 | `ADMIN_PASSWORD` | دخول لوحة الأدمن |
 | `SESSION_SECRET` | مفتاح توقيع جلسة الأدمن |

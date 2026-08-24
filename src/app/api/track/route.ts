@@ -3,6 +3,7 @@ import { sendCapiEvent } from "@/lib/capi";
 import { SITE_URL } from "@/lib/config";
 import { insertEvent, insertVisit } from "@/lib/db";
 import { isFunnelOnlyEvent } from "@/lib/funnel";
+import { getCatalogProduct, resolveProductSlug } from "@/lib/products";
 import { clientIp, getOrCreateSessionId, userAgent } from "@/lib/request";
 
 export const runtime = "nodejs";
@@ -12,7 +13,8 @@ export async function POST(req: NextRequest) {
   const sessionId = body.sessionId || getOrCreateSessionId();
   const eventName = body.eventName || "PageView";
   const eventId = body.eventId || crypto.randomUUID();
-  const productSlug = body.productSlug === "plant" ? "plant" : "1000";
+  const productSlug = resolveProductSlug(body.productSlug);
+  const product = getCatalogProduct(productSlug);
   const ip = clientIp(req);
   const ua = userAgent(req);
   const funnelOnly = isFunnelOnlyEvent(eventName);
@@ -92,7 +94,7 @@ export async function POST(req: NextRequest) {
             value: body.value,
             currency: body.currency,
             orderId: body.orderId,
-            contentName: body.productSlug === "plant" ? "Plant Care Guide" : undefined,
+            contentName: product.pixelName,
             contentIds: [productSlug],
           },
   });

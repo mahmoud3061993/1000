@@ -23,11 +23,14 @@ export type KashierCredentials = {
   mode: "live" | "test";
 };
 
+export const ARABITY_SYSTEM_URL = `${CANONICAL_SITE_URL}/car`;
+
 export type PaymentConfig = {
   instapay: { number: string; name: string };
   kashier: KashierCredentials;
   deliveryUrl: string;
   plantDeliveryUrl: string;
+  arabityDeliveryUrl: string;
   whatsapp: string;
   usesRemoteDb: boolean;
   envOverrides: {
@@ -35,6 +38,7 @@ export type PaymentConfig = {
     kashier: boolean;
     deliveryUrl: boolean;
     plantDeliveryUrl: boolean;
+    arabityDeliveryUrl: boolean;
   };
 };
 
@@ -83,6 +87,13 @@ export function mergePaymentConfig(
         `${CANONICAL_SITE_URL}/products/plant`
       )
     ),
+    arabityDeliveryUrl: rewriteRetiredSiteUrl(
+      firstNonEmpty(
+        env.ARABITY_DELIVERY_URL,
+        stored.arabity_delivery_url,
+        ARABITY_SYSTEM_URL
+      )
+    ),
     whatsapp: firstNonEmpty(env.WHATSAPP_NUMBER, stored.whatsapp_number, "201017420379").replace(
       /\D/g,
       ""
@@ -93,6 +104,7 @@ export function mergePaymentConfig(
       kashier: Boolean(env.KASHIER_MID && env.KASHIER_API_KEY),
       deliveryUrl: Boolean(env.PRODUCT_DELIVERY_URL),
       plantDeliveryUrl: Boolean(env.PLANT_DELIVERY_URL),
+      arabityDeliveryUrl: Boolean(env.ARABITY_DELIVERY_URL),
     },
   };
 }
@@ -100,6 +112,7 @@ export function mergePaymentConfig(
 export function deliveryUrlForProduct(slug: string | null | undefined, cfg: PaymentConfig) {
   const product = getCatalogProduct(slug);
   if (product.slug === "plant") return cfg.plantDeliveryUrl;
+  if (product.slug === "arabity") return cfg.arabityDeliveryUrl || ARABITY_SYSTEM_URL;
   return cfg.deliveryUrl || DEFAULT_DELIVERY_URL;
 }
 

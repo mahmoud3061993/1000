@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import type { AnalyticsPeriod, AnalyticsProductFilter, AnalyticsReport } from "@/lib/analytics";
 
 const PRODUCTS: Array<{ id: AnalyticsProductFilter; label: string }> = [
+  { id: "arabity", label: "عربيتي" },
   { id: "plant", label: "دليل النباتات" },
   { id: "1000", label: "مكتبة +1000" },
   { id: "all", label: "كل المنتجات" },

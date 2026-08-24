@@ -60,10 +60,12 @@ describe("payment config merge", () => {
       {
         plant_delivery_url: "https://www.mahmoudelkousy.online/products/plant",
         product_delivery_url: "https://mahmoudelkousy.online/products/1000",
+        arabity_delivery_url: "https://www.mahmoudelkousy.online/car",
       }
     );
     assert.equal(cfg.plantDeliveryUrl, "https://www.producthelpyou.online/products/plant");
     assert.equal(cfg.deliveryUrl, "https://www.producthelpyou.online/products/1000");
+    assert.equal(cfg.arabityDeliveryUrl, "https://www.producthelpyou.online/car");
   });
 
   it("falls back to the store Instapay number when nothing is configured", () => {
