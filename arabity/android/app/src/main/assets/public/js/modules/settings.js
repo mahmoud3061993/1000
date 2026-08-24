@@ -6,6 +6,7 @@ import { applyTheme, getSettings, saveSettings } from "../storage.js";
 import { closeTop, confirmDialog, field, pageTitle, toast } from "../ui.js";
 import { go } from "../router.js";
 import { icon } from "../icons.js";
+import { androidApkUrl, isNative, isOfflineHtml, offlineHtmlUrl } from "../utils.js";
 
 export async function renderSettings(root) {
   const s = getSettings();
@@ -35,6 +36,26 @@ export async function renderSettings(root) {
       <p class="muted">Kia Cerato 2021 ببيانات واقعية. مش هتتمسح بياناتك الحقيقية.</p>
       <button class="btn btn-ghost" id="demo">جرب بيانات تجريبية</button>
       <button class="btn btn-ghost" id="deldemo">حذف البيانات التجريبية</button>
+    </section>
+    <section class="card stack">
+      <h3>تطبيق أندرويد</h3>
+      ${
+        isNative()
+          ? `<p class="muted">أنت دلوقتي على تطبيق الموبايل. البيانات بتتحفظ على الجهاز، ومش محتاج إنترنت بعد التثبيت.</p>`
+          : `<p class="muted">APK تتثبّته بنفسك من غير Play Store. بعد التثبيت التطبيق يشتغل أوفلاين.</p>
+             <a class="btn btn-accent" href="${androidApkUrl()}" download="عربيتي.apk">${icon("download", 18)} تحميل عربيتي للأندرويد</a>
+             <p class="faint">من إعدادات الموبايل فعّل تثبيت التطبيقات من مصادر غير معروفة، افتح الملف، ودوس تثبيت.</p>`
+      }
+    </section>
+    <section class="card stack">
+      <h3>نسخة أوفلاين</h3>
+      ${
+        isOfflineHtml()
+          ? `<p class="muted">أنت دلوقتي بتستخدم ملف عربيتي الأوفلاين. انسخ الملف ده لأي مجلد وافتحه من Chrome أو Edge من غير نت.</p>
+             <p class="faint">سيب الملف في نفس المكان عشان بياناتك تفضل موجودة. لو نقلته، ممكن المتصفح يعتبره تطبيق جديد.</p>`
+          : `<p class="muted">ملف HTML واحد فيه التطبيق كله. حمّله وافتحه من جهازك من غير إنترنت.</p>
+             <a class="btn btn-accent" id="offline-dl" href="${offlineHtmlUrl()}" download="عربيتي.html">${icon("download", 18)} تحميل ملف عربيتي</a>`
+      }
     </section>
     <section class="card stack">
       <button class="btn btn-ghost" id="privacy">الخصوصية</button>

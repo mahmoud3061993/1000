@@ -220,6 +220,16 @@ export function offlineHtmlUrl() {
   return "arabity-offline.html";
 }
 
+export function androidApkUrl() {
+  if (isNative()) return "";
+  if (isOfflineHtml() || globalThis.location?.protocol === "file:") {
+    return "https://www.producthelpyou.online/car/arabity.apk";
+  }
+  const path = globalThis.location?.pathname || "";
+  if (/\/car(\/|$)/.test(path)) return "/car/arabity.apk";
+  return "arabity.apk";
+}
+
 export function nativePlugin(name) {
   return globalThis.Capacitor?.Plugins?.[name] || null;
 }

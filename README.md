@@ -21,6 +21,7 @@
 - التشغيل المحلي: `npm run arabity` ثم http://127.0.0.1:8765
 - على الموقع: https://www.producthelpyou.online/car
 - ملف أوفلاين واحد: https://www.producthelpyou.online/car/arabity-offline.html (حمّله وافتحه من غير نت)
+- أندرويد بدون المتجر: https://www.producthelpyou.online/car/arabity.apk (ثبّته يدويًا ويشتغل أوفلاين)
 - المصدر: مجلد `arabity/` — التوثيق في `arabity/README.md` وبناء الأندرويد في `arabity/BUILD-APK.md`
 
 ## التشغيل محليًا

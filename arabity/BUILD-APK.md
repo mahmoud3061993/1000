@@ -1,43 +1,51 @@
-# بناء APK لتطبيق عربيتي
+# بناء APK لتطبيق عربيتي (من غير Play Store)
 
-المشروع جاهز لـ Android Studio عبر Capacitor.
+التطبيق بيتثبّت يدويًا على الموبايل (sideload) ويشتغل أوفلاين بعد التثبيت.
 
 - اسم التطبيق: **عربيتي**
 - Package ID: `com.arabity.cartracker`
+- ملف التثبيت: `public/car/arabity.apk` وعلى الموقع `/car/arabity.apk`
 
-## المتطلبات
+## تثبيت على الموبايل
 
-- Node.js 20+
-- JDK 17 أو 21
-- Android Studio (مع Android SDK + platform tools)
-- متغيرات: `ANDROID_HOME` أو `ANDROID_SDK_ROOT`
+1. حمّل `arabity.apk` من الموقع أو من الإعدادات داخل النسخة الويب
+2. على أندرويد: **الإعدادات → الأمان → تثبيت تطبيقات غير معروفة** (أو اسمح للمتصفح/مدير الملفات بالتثبيت)
+3. افتح الملف ودوس **تثبيت**
+4. لو ظهر تحذير Play Protect: اختار **تثبيت على أي حال** — التطبيق مش على المتجر ومش بيطلب صلاحيات غريبة
 
-## الخطوات
+بعد التثبيت مش محتاج إنترنت. البيانات بتتحفظ على الموبايل. تقدر تنقلها للابتوب بنسخة احتياطية JSON من الإعدادات.
+
+## بناء الـ APK هنا
+
+```bash
+cd arabity
+npm install
+bash scripts/build-apk.sh
+```
+
+السكربت يثبّت Android SDK في `$HOME/android-sdk` لو مش موجود، يزامن Capacitor، ويطلع:
+
+- `arabity/dist/arabity.apk`
+- `public/car/arabity.apk`
+
+المتطلبات: Node.js 20+ و JDK 17 أو 21.
+
+التوقيع: `android/app/arabity-sideload.jks` (مخصص للتثبيت اليدوي، مش Play Store). نفس المفتاح لازم يتستخدم في التحديثات عشان التثبيت فوق النسخة القديمة من غير مسح بيانات.
+
+## من Android Studio
 
 ```bash
 cd arabity
 npm install
 npm run build
-npx cap add android          # مرة واحدة فقط لو مجلد android مش موجود
 npx cap sync android
 npx cap open android
 ```
 
-من Android Studio:
+**Build → Build Bundle(s) / APK(s) → Build APK(s)**
 
-1. استنى Gradle يخلّص
-2. **Build → Build Bundle(s) / APK(s) → Build APK(s)** للنسخة التجريبية
-3. **Build → Generate Signed Bundle / APK** لنسخة الإطلاق (محتاج keystore)
-
-مسار APK التجريبي عادة:
-
-`arabity/android/app/build/outputs/apk/debug/app-debug.apk`
-
-## نسخة Release
-
-1. أنشئ keystore واحفظه برا المستودع
-2. في Android Studio: Generate Signed APK واختر release
-3. أو أضف `keystore.properties` (مش هيترفع على git) واضبط `android/app/build.gradle`
+مسار التجريبي: `arabity/android/app/build/outputs/apk/debug/app-debug.apk`  
+مسار الإطلاق الموقَّع: `arabity/android/app/build/outputs/apk/release/app-release.apk`
 
 ## تغيير الاسم أو الحزمة
 
@@ -51,7 +59,7 @@ npx cap open android
 - الألوان: `arabity/src/css/variables.css` (`--navy-900`, `--accent`)
 - لون شريط الحالة: `capacitor.config.json` → `StatusBar.backgroundColor`
 - الشعار: بدّل `src/assets/icons/favicon.svg`
-- أيقونة أندرويد: Android Studio → `android/app/src/main/res/mipmap-*` أو استخدم Image Asset
+- أيقونة أندرويد: `android/app/src/main/res/drawable*` و `mipmap-*`
 
 ## العملة الافتراضية
 
@@ -62,7 +70,3 @@ npx cap open android
 ## الإشعارات
 
 التطبيق يطلب الإذن بعد الاستخدام الأول، ومش هيقف لو المستخدم رفض. تذكيرات الكيلومتر تظهر داخل التطبيق حسب العداد، مش كإشعار تقويم وهمي.
-
-## لو البناء فشل هنا
-
-البيئة دي ممكن متكونش فيها Android SDK كامل. افتح المجلد `arabity/android` في Android Studio على جهازك وابنِ الـ APK من هناك بعد `npx cap sync`.

@@ -138,6 +138,7 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
+  cursor: pointer;
   transition: transform var(--ease), background var(--ease), opacity var(--ease);
 }
 

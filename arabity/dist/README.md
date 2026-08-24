@@ -89,9 +89,11 @@ npm run dev          # http://localhost:3000/car
 
 انقل الملف بأي طريقة (كابل، درايف، واتساب) بين اللابتوب والموبايل.
 
-## أندرويد
+## أندرويد (من غير Play Store)
 
-راجع [BUILD-APK.md](BUILD-APK.md).
+حمّل `arabity.apk` من https://www.producthelpyou.online/car/arabity.apk أو من **الإعدادات** داخل التطبيق.
+
+التفاصيل وخطوات البناء في [BUILD-APK.md](BUILD-APK.md).
 
 معرّف الحزمة: `com.arabity.cartracker`  
 اسم التطبيق: عربيتي

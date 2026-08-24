@@ -10,6 +10,8 @@ arabity/android/captures
 *.aab
 *.keystore
 !arabity/android/app/debug.keystore
+!public/car/arabity.apk
+!arabity/dist/arabity.apk
 data/*.db
 data/*.db-*
 data/uploads/*

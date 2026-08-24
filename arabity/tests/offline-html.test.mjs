@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { buildOfflineHtml } from "../scripts/build-offline.mjs";
-import { isOfflineHtml, offlineHtmlUrl } from "../src/js/utils.js";
+import { androidApkUrl, isOfflineHtml, offlineHtmlUrl } from "../src/js/utils.js";
 
 test("offline html url on hosted /car", () => {
   const prevFlag = globalThis.ARABITY_OFFLINE_FILE;
@@ -25,6 +25,20 @@ test("offline html url is empty inside the single file", () => {
   try {
     assert.equal(isOfflineHtml(), true);
     assert.equal(offlineHtmlUrl(), "");
+    assert.equal(androidApkUrl(), "https://www.producthelpyou.online/car/arabity.apk");
+  } finally {
+    globalThis.ARABITY_OFFLINE_FILE = prevFlag;
+    globalThis.location = prevLoc;
+  }
+});
+
+test("android apk url on hosted /car", () => {
+  const prevFlag = globalThis.ARABITY_OFFLINE_FILE;
+  const prevLoc = globalThis.location;
+  globalThis.ARABITY_OFFLINE_FILE = false;
+  globalThis.location = { protocol: "https:", pathname: "/car/" };
+  try {
+    assert.equal(androidApkUrl(), "/car/arabity.apk");
   } finally {
     globalThis.ARABITY_OFFLINE_FILE = prevFlag;
     globalThis.location = prevLoc;
