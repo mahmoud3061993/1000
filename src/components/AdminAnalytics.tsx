@@ -1,14 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { AnalyticsPeriod, AnalyticsProductFilter, AnalyticsReport } from "@/lib/analytics";
-
-const PRODUCTS: Array<{ id: AnalyticsProductFilter; label: string }> = [
-  { id: "arabity", label: "عربيتي" },
-  { id: "plant", label: "دليل النباتات" },
-  { id: "1000", label: "مكتبة +1000" },
-  { id: "all", label: "كل المنتجات" },
-];
+import type { AnalyticsPeriod, AnalyticsReport } from "@/lib/analytics";
 
 const PERIODS: Array<{ id: AnalyticsPeriod; label: string }> = [
   { id: "day", label: "اليوم" },
@@ -34,7 +27,7 @@ function changeClass(value: number) {
 
 export default function AdminAnalytics() {
   const [period, setPeriod] = useState<AnalyticsPeriod>("week");
-  const [product, setProduct] = useState<AnalyticsProductFilter>("plant");
+  const product = "arabity";
   const [report, setReport] = useState<AnalyticsReport | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -64,22 +57,10 @@ export default function AdminAnalytics() {
   return (
     <div className="analytics-page">
       <div className="settings-card">
-        <h2>تحليل المبيعات</h2>
+        <h2>تحليل مبيعات عربيتي</h2>
         <p>
-          تحليل دليل النباتات: فتح الصفحة من كل إعلان، السكرول، السكشن اللي وصلوله، الفورم، ومين دفع. الأرقام بتوقيت مصر.
+          فتح الصفحة من كل إعلان، السكرول، السكشن، الفورم (Checkout لميتا)، مين ملأ البيانات، ومين دفع. الأرقام بتوقيت مصر.
         </p>
-        <div className="analytics-periods">
-          {PRODUCTS.map((item) => (
-            <button
-              key={item.id}
-              type="button"
-              className={product === item.id ? "active" : ""}
-              onClick={() => setProduct(item.id)}
-            >
-              {item.label}
-            </button>
-          ))}
-        </div>
         <div className="analytics-periods">
           {PERIODS.map((item) => (
             <button
@@ -117,7 +98,7 @@ export default function AdminAnalytics() {
             {[
               { label: "فتح الصفحة", value: report.funnel.opens, hint: `${report.funnel.uniqueVisitors} زائر مختلف` },
               { label: "سكرول 50%", value: report.funnel.scroll50, hint: `${report.funnel.openToScroll}% من الفتح` },
-              { label: "وصل للفورم", value: report.funnel.reachedPay, hint: `${report.funnel.scrollToPay}% بعد السكرول` },
+              { label: "Checkout — وصل للفورم", value: report.funnel.reachedPay, hint: `${report.funnel.scrollToPay}% بعد السكرول` },
               { label: "ملأ البيانات", value: report.funnel.leads, hint: `${report.funnel.payToLead}% من اللي وصلوا للفورم` },
               { label: "واقف على الدفع", value: report.funnel.waiting, hint: `${report.funnel.leadToWaiting}% من اللي ملوا الفورم` },
               { label: "دفع", value: report.funnel.purchased, hint: `${report.funnel.openToPurchase}% من الفتح` },
@@ -254,14 +235,14 @@ export default function AdminAnalytics() {
 
       <div className="settings-card">
         <h2>حسب الإعلان</h2>
-        <p>كل إعلان: كام واحد فتح، عمل سكرول، وصل للفورم، ملأ البيانات، وقف على الدفع، ودفع.</p>
+        <p>كل إعلان (أول دخول للزائر): كام واحد فتح، عمل سكرول، عمل Checkout على الفورم، ملأ البيانات، وقف على الدفع، ودفع. لو الزائر دخل من أكتر من إعلان، مسار الإعلانات يظهر في جدول الطلبات بالترتيب.</p>
         <table className="admin-table">
           <thead>
             <tr>
               <th>الإعلان</th>
               <th>فتح</th>
               <th>سكرول 50%</th>
-              <th>وصل للفورم</th>
+              <th>Checkout</th>
               <th>ملأ البيانات</th>
               <th>واقف</th>
               <th>دفع</th>

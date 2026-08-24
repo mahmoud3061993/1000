@@ -233,8 +233,8 @@ export function parseAnalyticsPeriod(value: string | null | undefined): Analytic
 }
 
 export function parseProductFilter(value: string | null | undefined): AnalyticsProductFilter {
-  if (value === "all" || value === "1000" || value === "arabity") return value;
-  return "plant";
+  if (value === "all" || value === "1000" || value === "plant" || value === "arabity") return value;
+  return "arabity";
 }
 
 function matchesProduct<T extends { product_slug?: string | null }>(
@@ -277,8 +277,14 @@ export function emptyFunnel(): AnalyticsFunnel {
 }
 
 function uniqueSessions(events: AnalyticsEvent[], name: string, from: string, to: string) {
+  return uniqueSessionsAny(events, [name], from, to);
+}
+
+function uniqueSessionsAny(events: AnalyticsEvent[], names: string[], from: string, to: string) {
   return new Set(
-    events.filter((event) => event.name === name && inRange(event.created_at, from, to)).map((event) => event.session_id)
+    events
+      .filter((event) => names.includes(event.name) && inRange(event.created_at, from, to))
+      .map((event) => event.session_id)
   ).size;
 }
 
@@ -298,7 +304,7 @@ export function buildFunnel(input: {
   const scroll50 = uniqueSessions(input.events, "Scroll50", from, to);
   const scroll75 = uniqueSessions(input.events, "Scroll75", from, to);
   const scroll100 = uniqueSessions(input.events, "Scroll100", from, to);
-  const reachedPay = uniqueSessions(input.events, "CheckoutView", from, to);
+  const reachedPay = uniqueSessionsAny(input.events, ["CheckoutView", "InitiateCheckout"], from, to);
   const created = input.orders.filter((order) => inRange(order.created_at, from, to));
   const leads = created.length;
   const waiting = created.filter(
@@ -502,7 +508,7 @@ export function summarizeSources(
     if (names.has("Scroll50")) row.scroll50 += 1;
     if (names.has("Scroll75")) row.scroll75 += 1;
     if (names.has("Scroll100")) row.scroll100 += 1;
-    if (names.has("CheckoutView")) row.reachedPay += 1;
+    if (names.has("CheckoutView") || names.has("InitiateCheckout")) row.reachedPay += 1;
     row.sections = row.sections.map((section) =>
       names.has(section.event) ? { ...section, count: section.count + 1 } : section
     );
@@ -658,7 +664,7 @@ function asEvent(row: Record<string, unknown>): AnalyticsEvent {
 export async function getAnalyticsReport(
   period: AnalyticsPeriod,
   now = new Date(),
-  product: AnalyticsProductFilter = "plant"
+  product: AnalyticsProductFilter = "arabity"
 ) {
   const range = periodRange(period, now);
   const productSql = product === "all" ? "" : ` AND COALESCE(product_slug, '1000') = ?`;

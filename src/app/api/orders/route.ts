@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sendCapiEvent } from "@/lib/capi";
 import { SITE_URL, getCatalogProduct, getPaymentConfig, kashierConfigured } from "@/lib/config";
-import { createOrder, getSessionAttribution, insertEvent, type PaymentMethod } from "@/lib/db";
-import { mergeAttribution, parseAttribution } from "@/lib/attribution";
+import { createOrder, getSessionAdPath, getSessionAttribution, hasSessionEvent, insertEvent, type PaymentMethod } from "@/lib/db";
+import { mergeAdPaths, mergeAttribution, parseAdPath, parseAttribution, serializeAdPath } from "@/lib/attribution";
 import { buildKashierHppUrl } from "@/lib/kashier";
 import { clientIp, getOrCreateSessionId, userAgent } from "@/lib/request";
 import { fileToDataUrl, validateScreenshotFile } from "@/lib/screenshot";
@@ -37,6 +37,8 @@ type OrderPayload = {
   utm_content: string;
   utm_term: string;
   fbclid: string;
+  adPath: string;
+  checkoutAlready: boolean;
   screenshot: FormDataEntryValue | null;
 };
 
@@ -62,6 +64,8 @@ async function readPayload(req: NextRequest): Promise<OrderPayload> {
       utm_content: String(form.get("utm_content") || ""),
       utm_term: String(form.get("utm_term") || ""),
       fbclid: String(form.get("fbclid") || ""),
+      adPath: String(form.get("adPath") || ""),
+      checkoutAlready: String(form.get("checkoutAlready") || "") === "true",
       screenshot: form.get("screenshot"),
     };
   }
@@ -85,6 +89,8 @@ async function readPayload(req: NextRequest): Promise<OrderPayload> {
     utm_content: String(body.utm_content || ""),
     utm_term: String(body.utm_term || ""),
     fbclid: String(body.fbclid || ""),
+    adPath: typeof body.adPath === "string" ? body.adPath : JSON.stringify(body.adPath || []),
+    checkoutAlready: body.checkoutAlready === true || body.checkoutAlready === "true",
     screenshot: null,
   };
 }
@@ -137,7 +143,10 @@ export async function POST(req: NextRequest) {
   const checkoutEventId = payload.checkoutEventId || crypto.randomUUID();
   const purchaseEventId = crypto.randomUUID();
   const fromVisit = await getSessionAttribution(sessionId);
+  const visitPath = await getSessionAdPath(sessionId);
   const attribution = mergeAttribution(parseAttribution(payload as unknown as Record<string, unknown>), fromVisit);
+  const adPath = mergeAdPaths(visitPath, parseAdPath(payload.adPath));
+  const originalFbc = payload.fbc || fromVisit?.fbc || null;
 
   const order = await createOrder({
     id: orderId,
@@ -155,13 +164,14 @@ export async function POST(req: NextRequest) {
     instapay_screenshot: screenshotDataUrl,
     purchase_event_id: purchaseEventId,
     fbp: payload.fbp || fromVisit?.fbp || null,
-    fbc: payload.fbc || fromVisit?.fbc || null,
+    fbc: originalFbc,
     utm_source: attribution.utm_source || null,
     utm_medium: attribution.utm_medium || null,
     utm_campaign: attribution.utm_campaign || null,
     utm_content: attribution.utm_content || null,
     utm_term: attribution.utm_term || null,
     fbclid: attribution.fbclid || null,
+    ad_path: serializeAdPath(adPath) || null,
     ip,
     user_agent: ua,
     created_at: new Date().toISOString(),
@@ -170,22 +180,14 @@ export async function POST(req: NextRequest) {
   await notifyOrder("lead", order);
 
   await insertEvent({ id: leadEventId, session_id: sessionId, order_id: orderId, name: "Lead", product_slug: product.slug });
-  await insertEvent({
-    id: checkoutEventId,
-    session_id: sessionId,
-    order_id: orderId,
-    name: "InitiateCheckout",
-    product_slug: product.slug,
-  });
-
   const user = {
     email,
     phone,
     firstName: name,
     ip,
     userAgent: ua,
-    fbp: payload.fbp,
-    fbc: payload.fbc,
+    fbp: payload.fbp || fromVisit?.fbp || "",
+    fbc: originalFbc || "",
     externalId: sessionId,
   };
 
@@ -196,13 +198,25 @@ export async function POST(req: NextRequest) {
     user,
     customData: { orderId, contentName: product.pixelName, contentIds: [product.slug], value: product.price, currency: product.currency },
   });
-  await sendCapiEvent({
-    eventName: "InitiateCheckout",
-    eventId: checkoutEventId,
-    eventSourceUrl,
-    user,
-    customData: { orderId, contentName: product.pixelName, contentIds: [product.slug], value: product.price, currency: product.currency },
-  });
+
+  const checkoutAlready =
+    payload.checkoutAlready || (await hasSessionEvent(sessionId, "InitiateCheckout"));
+  if (!checkoutAlready) {
+    await insertEvent({
+      id: checkoutEventId,
+      session_id: sessionId,
+      order_id: orderId,
+      name: "InitiateCheckout",
+      product_slug: product.slug,
+    });
+    await sendCapiEvent({
+      eventName: "InitiateCheckout",
+      eventId: checkoutEventId,
+      eventSourceUrl,
+      user,
+      customData: { orderId, contentName: product.pixelName, contentIds: [product.slug], value: product.price, currency: product.currency },
+    });
+  }
 
   const payEventId = payload.payEventId || crypto.randomUUID();
   await insertEvent({

@@ -10,7 +10,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ ok: false, error: "unauthorized" }, { status: 401 });
   }
   const period = parseAnalyticsPeriod(req.nextUrl.searchParams.get("period"));
-  const product = parseProductFilter(req.nextUrl.searchParams.get("product"));
+  const product = parseProductFilter(req.nextUrl.searchParams.get("product") || "arabity");
   const report = await getAnalyticsReport(period, new Date(), product);
   return NextResponse.json({ ok: true, report, usesRemoteDb: usesRemoteDb() });
 }

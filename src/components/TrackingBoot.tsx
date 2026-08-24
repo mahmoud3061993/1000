@@ -2,10 +2,16 @@
 
 import { useEffect } from "react";
 import {
+  AD_PATH_COOKIE,
   ATTR_COOKIE,
+  FBC_LOCK_COOKIE,
+  appendAdPath,
   emptyAttribution,
   mergeAttribution,
+  parseAdPath,
   parseAttribution,
+  serializeAdPath,
+  type AdTouch,
   type Attribution,
 } from "@/lib/attribution";
 
@@ -53,21 +59,53 @@ function writeStoredAttribution(attr: Attribution) {
   }
 }
 
+function readStoredAdPath(): AdTouch[] {
+  try {
+    return parseAdPath(cookie(AD_PATH_COOKIE) || sessionStorage.getItem(AD_PATH_COOKIE) || "");
+  } catch {
+    return [];
+  }
+}
+
+function writeStoredAdPath(path: AdTouch[]) {
+  const payload = serializeAdPath(path);
+  writeCookie(AD_PATH_COOKIE, payload);
+  try {
+    sessionStorage.setItem(AD_PATH_COOKIE, payload);
+  } catch {
+    // ignore
+  }
+}
+
+/** Keep the first Facebook click. Later ads must not overwrite _fbc or Purchase goes to the wrong ad. */
+export function ensureOriginalFbc(fbclidFromUrl?: string) {
+  const urlClick = (fbclidFromUrl ?? new URLSearchParams(window.location.search).get("fbclid") || "").trim();
+  let locked = cookie(FBC_LOCK_COOKIE);
+  if (!locked && urlClick) {
+    locked = `fb.1.${Date.now()}.${urlClick}`;
+    writeCookie(FBC_LOCK_COOKIE, locked);
+  }
+  if (!locked) {
+    locked = cookie("_fbc");
+    if (locked) writeCookie(FBC_LOCK_COOKIE, locked);
+  }
+  if (locked) writeCookie("_fbc", locked);
+  return locked;
+}
+
 export function captureAttribution() {
   const fromUrl = parseAttribution(new URLSearchParams(window.location.search));
-  const merged = mergeAttribution(readStoredAttribution(), fromUrl);
-  writeStoredAttribution(merged);
-  if (fromUrl.fbclid && !cookie("_fbc")) {
-    writeCookie("_fbc", `fb.1.${Date.now()}.${fromUrl.fbclid}`);
-  }
-  return merged;
+  const firstTouch = mergeAttribution(readStoredAttribution(), fromUrl);
+  writeStoredAttribution(firstTouch);
+  const path = appendAdPath(readStoredAdPath(), fromUrl);
+  writeStoredAdPath(path);
+  const fbc = ensureOriginalFbc(fromUrl.fbclid);
+  return { firstTouch, current: fromUrl, path, fbc };
 }
 
 export function getMetaCookies() {
   const fbp = cookie("_fbp");
-  const existingFbc = cookie("_fbc");
-  const fbclid = new URLSearchParams(window.location.search).get("fbclid") || "";
-  const fbc = existingFbc || (fbclid ? `fb.1.${Date.now()}.${fbclid}` : "");
+  const fbc = ensureOriginalFbc();
   return {
     sessionId: ensureSid(),
     fbp,
@@ -76,16 +114,19 @@ export function getMetaCookies() {
 }
 
 export function getTrackingContext() {
+  const captured = captureAttribution();
   const cookies = getMetaCookies();
-  const attr = captureAttribution();
   return {
     ...cookies,
-    ...attr,
-    fbclid: attr.fbclid || cookies.fbc.replace(/^fb\.\d+\.\d+\./, ""),
+    ...captured.firstTouch,
+    fbc: captured.fbc || cookies.fbc,
+    fbclid: captured.firstTouch.fbclid || (cookies.fbc || "").replace(/^fb\.\d+\.\d+\./, ""),
+    adPath: captured.path,
   };
 }
 
 export function firePixel(event: string, extra: Record<string, unknown> = {}, eventId?: string) {
+  ensureOriginalFbc();
   if (typeof window.fbq === "function") {
     window.fbq("track", event, extra, eventId ? { eventID: eventId } : undefined);
   }
@@ -127,11 +168,14 @@ export function TrackingBoot({
   trackFunnel?: boolean;
 }) {
   useEffect(() => {
-    const attr = captureAttribution();
+    const captured = captureAttribution();
     const cookies = getMetaCookies();
     const payload = {
       ...cookies,
-      ...attr,
+      ...captured.current,
+      fbc: captured.fbc || cookies.fbc,
+      fbclid: captured.current.fbclid || captured.firstTouch.fbclid,
+      adPath: captured.path,
       referrer: document.referrer,
       eventSourceUrl: window.location.href,
       productSlug,
@@ -158,6 +202,19 @@ export function TrackingBoot({
       postEvent({ eventName, eventId: crypto.randomUUID(), ...payload });
     };
 
+    const sendCheckoutToMeta = () => {
+      if (!markOnce(productSlug, "CheckoutView")) return;
+      postEvent({ eventName: "CheckoutView", eventId: crypto.randomUUID(), ...payload });
+      if (!markOnce(productSlug, "InitiateCheckout")) return;
+      const checkoutId = crypto.randomUUID();
+      firePixel(
+        "InitiateCheckout",
+        { value: price, currency: "EGP", content_name: contentName, content_ids: [productSlug] },
+        checkoutId
+      );
+      postEvent({ eventName: "InitiateCheckout", eventId: checkoutId, ...payload });
+    };
+
     const onScroll = () => {
       const doc = document.documentElement;
       const max = doc.scrollHeight - doc.clientHeight;
@@ -173,12 +230,12 @@ export function TrackingBoot({
 
     const observers: IntersectionObserver[] = [];
     if ("IntersectionObserver" in window) {
-      const watch = (el: Element | null, eventName: string, ratio = 0.25) => {
+      const watch = (el: Element | null, onHit: () => void, ratio = 0.25) => {
         if (!el) return;
         const observer = new IntersectionObserver(
           (entries) => {
             if (entries.some((entry) => entry.isIntersecting && entry.intersectionRatio >= ratio)) {
-              sendNamed(eventName);
+              onHit();
               observer.disconnect();
             }
           },
@@ -188,10 +245,10 @@ export function TrackingBoot({
         observers.push(observer);
       };
 
-      watch(document.getElementById("order-form"), "CheckoutView");
+      watch(document.getElementById("order-form") || document.getElementById("price"), sendCheckoutToMeta, 0.2);
       document.querySelectorAll<HTMLElement>("[data-track-section]").forEach((el) => {
         const eventName = el.dataset.trackSection;
-        if (eventName) watch(el, eventName, 0.2);
+        if (eventName) watch(el, () => sendNamed(eventName), 0.2);
       });
     }
 

@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import AdminAnalytics from "@/components/AdminAnalytics";
-import { formatAttribution } from "@/lib/attribution";
+import { formatAdPath, parseAdPath } from "@/lib/attribution";
 import { orderEmailStatus } from "@/lib/orders";
 
 type Order = {
@@ -25,6 +25,7 @@ type Order = {
   utm_term?: string | null;
   fbclid?: string | null;
   fbc?: string | null;
+  ad_path?: string | null;
 };
 
 type Stats = {
@@ -93,7 +94,7 @@ export default function AdminPage() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);
   const [status, setStatus] = useState("all");
-  const [product, setProduct] = useState("plant");
+  const [product] = useState("arabity");
   const [q, setQ] = useState("");
   const [integrations, setIntegrations] = useState({
     kashier: false,
@@ -408,15 +409,7 @@ export default function AdminPage() {
               حط رقم إنستاباي ومفاتيح كاشير هنا. إنستاباي هيظهر للعميل عشان يحوّل ويرفع سكرين ويدوس «دفعت». الفيزا والمحفظة هتروح على كاشير.
             </p>
             <p>
-              عشان الأدمن يعرف كل طلب جاي من أنهي إعلان، في Ads Manager حط لينك صفحة المنتج زي ما هو بالظبط (سيب الأقواس زي ما هي):
-              <code className="settings-code" dir="ltr">
-                {"https://www.producthelpyou.online/products/1000?utm_source=facebook&utm_medium=paid&utm_campaign={{campaign.name}}&utm_content={{ad.name}}&utm_term={{adset.name}}"}
-              </code>
-              ودليل النباتات:
-              <code className="settings-code" dir="ltr">
-                {"https://www.producthelpyou.online/buydoctorplant?utm_source=facebook&utm_medium=paid&utm_campaign={{campaign.name}}&utm_content={{ad.name}}&utm_term={{adset.name}}"}
-              </code>
-              وعربيتي:
+              عشان الأدمن يعرف كل طلب جاي من أنهي إعلان، في Ads Manager حط لينك صفحة عربيتي زي ما هو بالظبط (سيب الأقواس زي ما هي):
               <code className="settings-code" dir="ltr">
                 {"https://www.producthelpyou.online/carlanding?utm_source=facebook&utm_medium=paid&utm_campaign={{campaign.name}}&utm_content={{ad.name}}&utm_term={{adset.name}}"}
               </code>
@@ -492,24 +485,6 @@ export default function AdminPage() {
                 />
               </div>
               <div className="field settings-wide">
-                <label>لينك مكتبة الـ 1000 بعد الدفع (Google Drive)</label>
-                <input
-                  value={settings.product_delivery_url}
-                  onChange={(e) => setSettings({ ...settings, product_delivery_url: e.target.value })}
-                  placeholder="https://drive.google.com/..."
-                  dir="ltr"
-                />
-              </div>
-              <div className="field settings-wide">
-                <label>لينك دليل النباتات بعد الدفع</label>
-                <input
-                  value={settings.plant_delivery_url}
-                  onChange={(e) => setSettings({ ...settings, plant_delivery_url: e.target.value })}
-                  placeholder="https://..."
-                  dir="ltr"
-                />
-              </div>
-              <div className="field settings-wide">
                 <label>لينك فولدر عربيتي بعد الدفع (Google Drive: HTML + APK + الدليل)</label>
                 <input
                   value={settings.arabity_delivery_url}
@@ -576,19 +551,6 @@ export default function AdminPage() {
               />
               <select
                 className="admin-filter"
-                value={product}
-                onChange={(e) => {
-                  setProduct(e.target.value);
-                  load(status, q, e.target.value);
-                }}
-              >
-                <option value="all">كل المنتجات</option>
-                <option value="arabity">عربيتي</option>
-                <option value="plant">دليل النباتات</option>
-                <option value="1000">مكتبة +1000</option>
-              </select>
-              <select
-                className="admin-filter"
                 value={status}
                 onChange={(e) => {
                   setStatus(e.target.value);
@@ -639,13 +601,7 @@ export default function AdminPage() {
                     <td>
                       {order.id}
                       <div>{order.amount} {order.currency}</div>
-                      <div style={{ color: "#64748B" }}>
-                        {order.product_slug === "plant"
-                          ? "دليل النباتات"
-                          : order.product_slug === "arabity"
-                            ? "عربيتي"
-                            : "مكتبة +1000"}
-                      </div>
+                      <div style={{ color: "#64748B" }}>عربيتي</div>
                     </td>
                     <td>
                       <div>{order.name}</div>
@@ -654,11 +610,19 @@ export default function AdminPage() {
                     </td>
                     <td>
                       {(() => {
-                        const source = formatAttribution(order);
+                        const source = formatAdPath(parseAdPath(order.ad_path), order);
                         return (
                           <>
                             <div>{source.title}</div>
-                            <div style={{ color: "#94A3B8" }}>{source.detail}</div>
+                            {source.steps.length > 1
+                              ? source.steps.map((step) => (
+                                  <div key={step} style={{ color: "#94A3B8", fontSize: 12, lineHeight: 1.6 }}>
+                                    {step}
+                                  </div>
+                                ))
+                              : (
+                                <div style={{ color: "#94A3B8" }}>{source.detail}</div>
+                              )}
                           </>
                         );
                       })()}
