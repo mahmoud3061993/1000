@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
+  ARABITY_DRIVE_URL,
   ARABITY_PURCHASE_EMAIL_SUBJECT,
   ARABITY_SYSTEM_URL,
   buildArabityPurchaseEmail,
@@ -46,10 +47,10 @@ describe("arabity catalog product", () => {
 });
 
 describe("arabity delivery and purchase email", () => {
-  it("uses /car until a Drive folder is configured", () => {
+  it("defaults delivery to the Google Drive folder", () => {
     const cfg = mergePaymentConfig({}, {});
-    assert.equal(cfg.arabityDeliveryUrl, ARABITY_SYSTEM_URL);
-    assert.equal(deliveryUrlForProduct("arabity", cfg), ARABITY_SYSTEM_URL);
+    assert.equal(cfg.arabityDeliveryUrl, ARABITY_DRIVE_URL);
+    assert.equal(deliveryUrlForProduct("arabity", cfg), ARABITY_DRIVE_URL);
   });
 
   it("prefers ARABITY_DELIVERY_URL for the Drive folder", () => {
@@ -59,7 +60,7 @@ describe("arabity delivery and purchase email", () => {
     assert.equal(cfg.envOverrides.arabityDeliveryUrl, true);
   });
 
-  it("sends the system link, Drive files, and how to start", () => {
+  it("explains the Drive folder, the 3 files, and how to start after the greeting", () => {
     const drive = "https://drive.google.com/drive/folders/arabity-files";
     const email = buildArabityPurchaseEmail({
       name: "أحمد",
@@ -68,17 +69,31 @@ describe("arabity delivery and purchase email", () => {
     });
     assert.equal(email.subject, ARABITY_PURCHASE_EMAIL_SUBJECT);
     assert.match(email.subject, /عربيتي/);
-    assert.equal(email.text.includes(ARABITY_SYSTEM_URL), true);
+    assert.match(email.text, /^أهلًا أحمد/);
+    assert.match(email.text, /مبروك شراء عربيتي/);
     assert.equal(email.text.includes(drive), true);
-    assert.equal(email.html.includes(ARABITY_SYSTEM_URL), true);
     assert.equal(email.html.includes(drive), true);
     assert.match(email.html, /dir="rtl"/);
-    assert.match(email.text, /ملف النظام للكمبيوتر/);
-    assert.match(email.text, /ملف الأندرويد/);
-    assert.match(email.text, /دليل الاستخدام/);
-    assert.match(email.text, /من تموين لتاني/);
+    assert.match(email.text, /3 ملفات/);
+    assert.match(email.text, /HTML/);
+    assert.match(email.text, /APK/);
+    assert.match(email.text, /الدليل/);
+    assert.match(email.text, /اللاب/);
+    assert.match(email.text, /تطبيق الموبايل/);
+    assert.match(email.text, /الملف التاني بتاع السيستم/);
     assert.match(email.text, /01017420379/);
     assert.match(email.text, /محمود القوصي/);
+    assert.equal(email.text.includes(ARABITY_SYSTEM_URL), false);
+  });
+
+  it("uses the default Drive folder when delivery is still the /car link", () => {
+    const email = buildArabityPurchaseEmail({
+      name: "سارة",
+      deliveryUrl: ARABITY_SYSTEM_URL,
+      whatsappDisplay: "01017420379",
+    });
+    assert.equal(email.text.includes(ARABITY_DRIVE_URL), true);
+    assert.equal(email.html.includes(ARABITY_DRIVE_URL), true);
   });
 });
 

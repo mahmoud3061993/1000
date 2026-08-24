@@ -1,82 +1,44 @@
+import { ARABITY_DRIVE_URL, ARABITY_SYSTEM_URL } from "./config";
+
 export const ARABITY_PURCHASE_EMAIL_SUBJECT = "🎉 تم تأكيد طلبك - عربيتي جاهز للاستخدام";
-export const ARABITY_SYSTEM_URL = "https://www.producthelpyou.online/car";
+export { ARABITY_DRIVE_URL, ARABITY_SYSTEM_URL };
+
+function driveFolderForEmail(deliveryUrl: string) {
+  const url = deliveryUrl.trim();
+  if (/drive\.google\.com/i.test(url)) return url;
+  return ARABITY_DRIVE_URL;
+}
 
 export function buildArabityPurchaseEmail(input: {
   name?: string;
   deliveryUrl: string;
   whatsappDisplay: string;
 }) {
-  const systemUrl = ARABITY_SYSTEM_URL;
-  const driveUrl = input.deliveryUrl.trim() && input.deliveryUrl.trim() !== systemUrl ? input.deliveryUrl.trim() : "";
+  const driveUrl = driveFolderForEmail(input.deliveryUrl);
   const whatsapp = input.whatsappDisplay || "01017420379";
+  const name = (input.name || "").trim();
+  const hello = name ? `أهلًا ${name} 👋` : "أهلًا بيك 👋";
 
-  const driveBlock = driveUrl
-    ? `📂 فولدر الملفات على Google Drive:
+  const text = `${hello}
+
+مبروك شراء عربيتي! 🎉
+تم تأكيد طلبك بنجاح، ودلوقتي تقدر تبدأ تستخدم النظام.
+
+من خلال لينك الدرايف ده هتلاقي ملفاتك:
 
 ${driveUrl}
 
-هتلاقي جوه الفولدر 3 ملفات في مكان واحد:
+هتلاقي جوه 3 ملفات:
+- 2 بصيغة HTML
+- وواحد بصيغة APK
 
-✅ ملف النظام للكمبيوتر (HTML)
-افتحه من Chrome أو Edge على اللابتوب. البيانات بتتحفظ على الجهاز، ومش محتاج نت بعد التحميل.
+عندك ملف HTML اسمه الدليل: نزّله وافتحه على اللاب عشان تعرف إزاي تثبّت تطبيق الموبايل، وإزاي أصلاً تستخدم السيستم.
 
-✅ ملف الأندرويد (APK)
-ثبّته يدويًا على الموبايل (مش من Google Play). ابدأ بملف الدليل قبل التثبيت لو دي أول مرة.
-
-✅ دليل الاستخدام والتثبيت
-شرح أول فتح، تسجيل العربية، البنزين، الصيانة، التقارير، والنسخ الاحتياطي.
-`
-    : `الملفات الثلاثة (HTML للكمبيوتر + APK للأندرويد + دليل الاستخدام) هتلاقيها مع لينك السيستم، أو ابعتلنا على واتساب لو محتاجهم في فولدر منفصل.
-`;
-
-  const text = `أهلًا بيك 👋
-مبروك! 🎉
-تم تأكيد طلبك بنجاح، ودلوقتي تقدر تبدأ تستخدم عربيتي.
-
-🚗 لينك السيستم للاستخدام المباشر:
-
-${systemUrl}
-
-افتح اللينك من الموبايل أو الكمبيوتر. مفيش تسجيل دخول ولا اشتراك شهري، والنظام بالعربي من اليمين لليسار.
-
-${driveBlock}
-🎨 هتلاقي إيه جوه عربيتي؟
-
-✅ لوحة التحكم
-حالة العربية، درجة الصحة، وأقرب صيانة أو مصروف جاي.
-
-✅ البنزين (من تموين لتاني)
-الاستهلاك واللتر/100 كم من غير تخمين.
-
-✅ الصيانة والإصلاحات والمصاريف
-سجل الورشة، القطع، والرخص في مكان واحد.
-
-✅ الإطارات والبطارية والمستندات
-تواريخ التغيير والتجديد قدامك.
-
-✅ التقارير والطباعة
-تقرير جاهز تطبعه أو تحتفظ بيه.
-
-✅ أكثر من عربية + نسخة احتياطية JSON
-البيانات على جهازك. تقدر تعمل نسخة وترجعها.
-
-💡 أفضل طريقة تبدأ بيها:
-
-افتح لينك السيستم اللي فوق وسجّل عربيتك.
-لو عايز نفس النظام أوفلاين على الكمبيوتر: افتح ملف HTML.
-لو عايزه على الموبايل: ثبّت ملف الأندرويد بعد ما تقرأ الدليل.
-لو عربية تجريبية: في النظام فيه مثال كيا سيراتو 2021 تقدر تلغيه بعدين.
-
-⚠️ نصيحة مهمة:
-عربيتي مش اشتراك شهري ومش محتاج حساب. القيمة في السجل اللي بيتبني عندك: بنزين، صيانة، مصاريف، وتقرير.
-
-ملف الموبايل لأندرويد فقط. على آيفون استخدم لينك السيستم فوق.
+وتقدر تفتح الملف التاني بتاع السيستم على طول: نزّله عندك على الجهاز من الدرايف، وافتحه، وتبدأ تستخدمه وتسجّل فيه كل خطواتك.
 
 💬 ولو واجهتك أي مشكلة في الوصول للينك أو الملفات أو التثبيت، تواصل معايا مباشرة على واتساب:
 
 ${whatsapp}
-
-أتمنى عربيتي يوفّر عليك الورق والإكسل، ويخليك تعرف عربيتك بتصرف كام. 🤍
 
 بالتوفيق،
 محمود القوصي`;
@@ -85,14 +47,9 @@ ${whatsapp}
     .replaceAll("\n\n", "</p><p>")
     .replaceAll("\n", "<br/>");
 
-  const urls = [systemUrl, driveUrl].filter(Boolean);
-  const htmlLinked = urls.reduce(
-    (html, url) =>
-      html.replaceAll(
-        escapeHtml(url),
-        `<a href="${escapeHtml(url)}" style="color:#12b3a0;font-weight:800" target="_blank" rel="noreferrer">${escapeHtml(url)}</a>`
-      ),
-    htmlBody
+  const htmlLinked = htmlBody.replaceAll(
+    escapeHtml(driveUrl),
+    `<a href="${escapeHtml(driveUrl)}" style="color:#12b3a0;font-weight:800" target="_blank" rel="noreferrer">${escapeHtml(driveUrl)}</a>`
   );
 
   const html = `<!doctype html>

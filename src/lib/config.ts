@@ -24,6 +24,8 @@ export type KashierCredentials = {
 };
 
 export const ARABITY_SYSTEM_URL = `${CANONICAL_SITE_URL}/car`;
+export const ARABITY_DRIVE_URL =
+  "https://drive.google.com/drive/u/0/folders/1g0QLdBay_9eWs_UWEHf2h5lU2tT57_3e";
 
 export type PaymentConfig = {
   instapay: { number: string; name: string };
@@ -47,6 +49,16 @@ function firstNonEmpty(...values: Array<string | undefined>) {
     if (value && value.trim()) return value.trim();
   }
   return "";
+}
+
+function firstArabityDelivery(...values: Array<string | undefined>) {
+  for (const value of values) {
+    if (!value || !value.trim()) continue;
+    const url = rewriteRetiredSiteUrl(value.trim());
+    if (url === ARABITY_SYSTEM_URL || /\/car\/?$/.test(url)) continue;
+    return url;
+  }
+  return ARABITY_DRIVE_URL;
 }
 
 export function mergePaymentConfig(
@@ -87,13 +99,7 @@ export function mergePaymentConfig(
         `${CANONICAL_SITE_URL}/products/plant`
       )
     ),
-    arabityDeliveryUrl: rewriteRetiredSiteUrl(
-      firstNonEmpty(
-        env.ARABITY_DELIVERY_URL,
-        stored.arabity_delivery_url,
-        ARABITY_SYSTEM_URL
-      )
-    ),
+    arabityDeliveryUrl: firstArabityDelivery(env.ARABITY_DELIVERY_URL, stored.arabity_delivery_url),
     whatsapp: firstNonEmpty(env.WHATSAPP_NUMBER, stored.whatsapp_number, "201017420379").replace(
       /\D/g,
       ""
@@ -112,7 +118,7 @@ export function mergePaymentConfig(
 export function deliveryUrlForProduct(slug: string | null | undefined, cfg: PaymentConfig) {
   const product = getCatalogProduct(slug);
   if (product.slug === "plant") return cfg.plantDeliveryUrl;
-  if (product.slug === "arabity") return cfg.arabityDeliveryUrl || ARABITY_SYSTEM_URL;
+  if (product.slug === "arabity") return cfg.arabityDeliveryUrl || ARABITY_DRIVE_URL;
   return cfg.deliveryUrl || DEFAULT_DELIVERY_URL;
 }
 
