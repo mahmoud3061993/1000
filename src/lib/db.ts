@@ -1,6 +1,7 @@
 import fs from "fs";
 import path from "path";
 import { createClient, type Client } from "@libsql/client";
+import { appendAdPath, toAdTouch, type AdTouch } from "./attribution";
 
 export type OrderStatus =
   | "form_filled"
@@ -35,6 +36,7 @@ export type Order = {
   utm_content?: string | null;
   utm_term?: string | null;
   fbclid?: string | null;
+  ad_path?: string | null;
   ip: string | null;
   user_agent: string | null;
   created_at: string;
@@ -164,6 +166,7 @@ async function migrate(database: Client) {
   await ensureColumn(database, "orders", "product_slug", "TEXT");
   await ensureColumn(database, "visits", "product_slug", "TEXT");
   await ensureColumn(database, "events", "product_slug", "TEXT");
+  await ensureColumn(database, "orders", "ad_path", "TEXT");
   await database.execute(`CREATE INDEX IF NOT EXISTS idx_events_session ON events(session_id)`);
   await database.execute(`CREATE INDEX IF NOT EXISTS idx_events_created ON events(created_at)`);
 }
@@ -263,9 +266,9 @@ export async function createOrder(
     sql: `INSERT INTO orders (
         id, session_id, name, email, phone, amount, currency, product_slug, payment_method, status,
         kashier_order_id, kashier_transaction_id, instapay_screenshot, purchase_event_id,
-        fbp, fbc, utm_source, utm_medium, utm_campaign, utm_content, utm_term, fbclid,
+        fbp, fbc, utm_source, utm_medium, utm_campaign, utm_content, utm_term, fbclid, ad_path,
         ip, user_agent, created_at, updated_at, paid_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     args: [
       order.id,
       order.session_id,
@@ -289,6 +292,7 @@ export async function createOrder(
       order.utm_content ?? null,
       order.utm_term ?? null,
       order.fbclid ?? null,
+      order.ad_path ?? null,
       order.ip,
       order.user_agent,
       order.created_at,
@@ -310,7 +314,7 @@ export async function updateOrder(id: string, patch: Partial<Order>) {
         currency=?, product_slug=?, payment_method=?, status=?,
         kashier_order_id=?, kashier_transaction_id=?,
         instapay_screenshot=?, purchase_event_id=?,
-        fbp=?, fbc=?, utm_source=?, utm_medium=?, utm_campaign=?, utm_content=?, utm_term=?, fbclid=?,
+        fbp=?, fbc=?, utm_source=?, utm_medium=?, utm_campaign=?, utm_content=?, utm_term=?, fbclid=?, ad_path=?,
         ip=?, user_agent=?, created_at=?,
         updated_at=?, paid_at=?, email_sent_at=?
       WHERE id=?`,
@@ -336,6 +340,7 @@ export async function updateOrder(id: string, patch: Partial<Order>) {
       next.utm_content ?? null,
       next.utm_term ?? null,
       next.fbclid ?? null,
+      next.ad_path ?? null,
       next.ip,
       next.user_agent,
       next.created_at,
@@ -391,6 +396,33 @@ export async function getSessionAttribution(sessionId: string) {
     });
   }
   return merged;
+}
+
+export async function getSessionAdPath(sessionId: string): Promise<AdTouch[]> {
+  if (!sessionId) return [];
+  const database = await getDb();
+  const result = await database.execute({
+    sql: `SELECT utm_source, utm_campaign, utm_content, utm_term, fbclid
+          FROM visits
+          WHERE session_id = ?
+          ORDER BY created_at ASC`,
+    args: [sessionId],
+  });
+  let adPath: AdTouch[] = [];
+  for (const row of result.rows) {
+    adPath = appendAdPath(adPath, toAdTouch(row as Record<string, unknown>));
+  }
+  return adPath;
+}
+
+export async function hasSessionEvent(sessionId: string, name: string) {
+  if (!sessionId || !name) return false;
+  const database = await getDb();
+  const result = await database.execute({
+    sql: `SELECT id FROM events WHERE session_id = ? AND name = ? LIMIT 1`,
+    args: [sessionId, name],
+  });
+  return result.rows.length > 0;
 }
 
 export async function getOrder(id: string) {

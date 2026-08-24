@@ -63,11 +63,24 @@ export function CheckoutForm({
       const leadEventId = crypto.randomUUID();
       const checkoutEventId = crypto.randomUUID();
       const payEventId = crypto.randomUUID();
-      firePixel("Lead", { content_name: pixelName }, leadEventId);
-      firePixel("InitiateCheckout", { value: price, currency: "EGP", content_name: pixelName }, checkoutEventId);
-      firePixel("AddPaymentInfo", { value: price, currency: "EGP", content_name: pixelName }, payEventId);
+      firePixel("Lead", { content_name: pixelName, content_ids: [productSlug] }, leadEventId);
+      let checkoutAlready = false;
+      try {
+        checkoutAlready = Boolean(sessionStorage.getItem(`elkousy-funnel:${productSlug}:InitiateCheckout`));
+      } catch {
+        checkoutAlready = false;
+      }
+      if (!checkoutAlready) {
+        firePixel(
+          "InitiateCheckout",
+          { value: price, currency: "EGP", content_name: pixelName, content_ids: [productSlug] },
+          checkoutEventId
+        );
+      }
+      firePixel("AddPaymentInfo", { value: price, currency: "EGP", content_name: pixelName, content_ids: [productSlug] }, payEventId);
 
       const common = {
+        ...cookies,
         name,
         email,
         phone,
@@ -76,7 +89,8 @@ export function CheckoutForm({
         leadEventId,
         checkoutEventId,
         payEventId,
-        ...cookies,
+        checkoutAlready,
+        adPath: JSON.stringify(cookies.adPath || []),
       };
 
       let res: Response;

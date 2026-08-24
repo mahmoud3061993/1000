@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { firePixel } from "@/components/TrackingBoot";
+import { firePixel, ensureOriginalFbc } from "@/components/TrackingBoot";
 
 type OrderInfo = {
   id: string;
@@ -62,6 +62,7 @@ function ThankYouClient({
 
   useEffect(() => {
     if (!order || order.status !== "paid") return;
+    ensureOriginalFbc();
     const eventId = order.purchase_event_id || order.id;
     firePixel(
       "Purchase",

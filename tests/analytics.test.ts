@@ -151,6 +151,23 @@ describe("admin analytics periods", () => {
     assert.equal(report.current.income, 350);
   });
 
+  it("counts InitiateCheckout as reaching the form even without CheckoutView", () => {
+    const range = periodRange("week", now);
+    const inCurrent = new Date(Date.parse(range.from) + 2 * 60 * 60 * 1000).toISOString();
+    const report = buildAnalyticsReport({
+      period: "week",
+      now,
+      product: "arabity",
+      visits: [{ session_id: "car1", created_at: inCurrent, product_slug: "arabity" }],
+      events: [
+        { session_id: "car1", name: "InitiateCheckout", created_at: inCurrent, product_slug: "arabity" },
+      ],
+      orders: [],
+    });
+    assert.equal(report.funnel.opens, 1);
+    assert.equal(report.funnel.reachedPay, 1);
+  });
+
   it("breaks the plant funnel down by ad and landing section", () => {
     const range = periodRange("week", now);
     const inCurrent = new Date(Date.parse(range.from) + 2 * 60 * 60 * 1000).toISOString();
