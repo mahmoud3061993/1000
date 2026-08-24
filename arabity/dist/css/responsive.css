@@ -1,0 +1,81 @@
+@media (max-width: 359px) {
+  .hero-value {
+    font-size: 2rem;
+  }
+  .kpi-card .value {
+    font-size: 1.05rem;
+  }
+  .app-main {
+    padding-inline: 12px;
+  }
+}
+
+@media (min-width: 768px) {
+  .kpi-grid.four {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .desktop-only {
+    display: initial;
+  }
+}
+
+@media (max-width: 1023px) {
+  .desktop-only {
+    display: none !important;
+  }
+}
+
+@media (min-width: 1366px) {
+  :root {
+    --content-max: 980px;
+  }
+}
+
+@media (min-width: 1920px) {
+  :root {
+    --content-max: 1040px;
+  }
+}
+
+html,
+body {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+.table-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.more-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.more-tile {
+  background: var(--surface);
+  border-radius: var(--radius-l);
+  padding: 16px 12px;
+  min-height: 108px;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  text-align: right;
+}
+
+.more-tile svg {
+  color: var(--accent);
+}
+
+@media (min-width: 430px) {
+  .more-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}

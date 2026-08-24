@@ -1,0 +1,29 @@
+{
+  "appId": "com.arabity.cartracker",
+  "appName": "عربيتي",
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "https"
+  },
+  "android": {
+    "backgroundColor": "#0A2540",
+    "allowMixedContent": false,
+    "captureInput": true,
+    "webContentsDebuggingEnabled": false
+  },
+  "plugins": {
+    "Keyboard": {
+      "resize": "body",
+      "resizeOnFullScreen": true
+    },
+    "LocalNotifications": {
+      "smallIcon": "ic_stat_icon",
+      "iconColor": "#0D9B8A",
+      "sound": "beep.wav"
+    },
+    "StatusBar": {
+      "style": "DARK",
+      "backgroundColor": "#0A2540"
+    }
+  }
+}
