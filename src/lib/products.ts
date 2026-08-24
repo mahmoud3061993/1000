@@ -1,4 +1,4 @@
-export type ProductSlug = "1000" | "plant";
+export type ProductSlug = "1000" | "plant" | "arabity";
 
 export type CatalogProduct = {
   slug: ProductSlug;
@@ -19,13 +19,45 @@ export type CatalogProduct = {
 };
 
 export function isProductSlug(value: string | null | undefined): value is ProductSlug {
-  return value === "1000" || value === "plant";
+  return value === "1000" || value === "plant" || value === "arabity";
+}
+
+export function resolveProductSlug(value: string | null | undefined): ProductSlug {
+  return isProductSlug(value) ? value : "1000";
+}
+
+export function productAdminLabel(slug?: string | null) {
+  if (slug === "plant") return "دليل النباتات";
+  if (slug === "arabity") return "عربيتي";
+  return "مكتبة +1000";
 }
 
 export function getCatalogProduct(
   slug?: string | null,
   env: NodeJS.Dict<string> = process.env
 ): CatalogProduct {
+  if (slug === "arabity") {
+    return {
+      slug: "arabity",
+      name: "عربيتي",
+      arabicName: "عربيتي — كل حاجة تخص عربيتك في مكان واحد",
+      shortName: "عربيتي",
+      price: Number(env.ARABITY_PRODUCT_PRICE || 249),
+      compareAtPrice: Number(env.ARABITY_COMPARE_AT_PRICE || 990),
+      currency: "EGP",
+      pixelName: "Arabity Car Tracker",
+      kashierDescription: "عربيتي — نظام إدارة العربية",
+      checkoutTitle: "عربيتي — نظام إدارة العربية",
+      whatsappMessage: "أهلاً، حابب أعرف تفاصيل أكتر عن عربيتي",
+      path: "/carlanding",
+      thankYouCta: "افتح عربيتي دلوقتي",
+      thankYouBody:
+        "شكراً {name}. لينك السيستم تحت، وملف الكمبيوتر وملف الأندرويد ودليل الاستخدام هتوصلك على الإيميل.",
+      pendingBody:
+        "استلمنا سكرين شوت إنستاباي. أول ما نتأكد من التحويل هنبعتلك عربيتي على الإيميل.",
+    };
+  }
+
   if (slug === "plant") {
     return {
       slug: "plant",

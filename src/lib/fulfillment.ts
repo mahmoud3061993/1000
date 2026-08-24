@@ -3,6 +3,7 @@ import { SITE_URL } from "./config";
 import { Order, markOrderPaid, nowIso, updateOrder } from "./db";
 import { sendPurchaseEmail } from "./email";
 import { notifyOrder } from "./notify";
+import { getCatalogProduct } from "./products";
 
 export async function fulfillPaidOrder(
   order: Order,
@@ -37,7 +38,7 @@ export async function fulfillPaidOrder(
       value: paid.amount,
       currency: paid.currency,
       orderId: paid.id,
-      contentName: paid.product_slug === "plant" ? "Plant Care Guide" : undefined,
+      contentName: getCatalogProduct(paid.product_slug).pixelName,
       contentIds: [paid.product_slug || "1000"],
     },
   });

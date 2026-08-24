@@ -6,6 +6,7 @@ import {
   emailConfigured,
   getPaymentConfig,
 } from "./config";
+import { buildArabityPurchaseEmail } from "./arabity-email";
 import { buildPlantPurchaseEmail } from "./plant-email";
 import { getCatalogProduct } from "./products";
 
@@ -204,11 +205,17 @@ export async function sendPurchaseEmail(order: Pick<Order, "name" | "email" | "p
           deliveryUrl,
           whatsappDisplay: displayWhatsapp(cfg.whatsapp),
         })
-      : buildPurchaseEmail({
-          name: order.name,
-          deliveryUrl: deliveryUrl || DEFAULT_DELIVERY_URL,
-          whatsappDisplay: displayWhatsapp(cfg.whatsapp),
-        });
+      : product.slug === "arabity"
+        ? buildArabityPurchaseEmail({
+            name: order.name,
+            deliveryUrl,
+            whatsappDisplay: displayWhatsapp(cfg.whatsapp),
+          })
+        : buildPurchaseEmail({
+            name: order.name,
+            deliveryUrl: deliveryUrl || DEFAULT_DELIVERY_URL,
+            whatsappDisplay: displayWhatsapp(cfg.whatsapp),
+          });
 
   try {
     if (process.env.RESEND_API_KEY) {

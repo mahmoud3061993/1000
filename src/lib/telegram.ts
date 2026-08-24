@@ -1,4 +1,5 @@
 import { TELEGRAM } from "./config";
+import { productAdminLabel } from "./products";
 import { fileNameForMime, parseStoredScreenshot } from "./screenshot";
 
 type NotifyOrder = {
@@ -38,7 +39,7 @@ export function formatOrderMessage(kind: "lead" | "trying" | "pending" | "paid" 
     `الاسم: ${order.name}`,
     `الموبايل: ${order.phone}`,
     `الإيميل: ${order.email}`,
-    `المنتج: ${order.product_slug === "plant" ? "دليل النباتات" : "مكتبة +1000 Canva"}`,
+    `المنتج: ${productAdminLabel(order.product_slug)}`,
     `المبلغ: ${order.amount} ${order.currency}`,
     `الوسيلة: ${method}`,
     `الحالة: ${STATUS_AR[order.status] || order.status}`,

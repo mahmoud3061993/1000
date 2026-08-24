@@ -47,6 +47,7 @@ type PaymentSettings = {
   kashier_mode: "live" | "test";
   product_delivery_url: string;
   plant_delivery_url: string;
+  arabity_delivery_url: string;
   whatsapp_number: string;
   ntfy_topic: string;
 };
@@ -79,6 +80,7 @@ const emptySettings: PaymentSettings = {
   kashier_mode: "live",
   product_delivery_url: "",
   plant_delivery_url: "",
+  arabity_delivery_url: "",
   whatsapp_number: "",
   ntfy_topic: "",
 };
@@ -145,6 +147,7 @@ export default function AdminPage() {
       kashier_mode: json.settings.kashier_mode === "test" ? "test" : "live",
       product_delivery_url: json.settings.product_delivery_url || "",
       plant_delivery_url: json.settings.plant_delivery_url || "",
+      arabity_delivery_url: json.settings.arabity_delivery_url || "",
       whatsapp_number: json.settings.whatsapp_number || "",
       ntfy_topic: json.settings.ntfy_topic || json.notifications?.topic || "",
     });
@@ -258,6 +261,7 @@ export default function AdminPage() {
         kashier_mode: settings.kashier_mode,
         product_delivery_url: settings.product_delivery_url,
         plant_delivery_url: settings.plant_delivery_url,
+        arabity_delivery_url: settings.arabity_delivery_url,
         whatsapp_number: settings.whatsapp_number,
         ntfy_topic: settings.ntfy_topic,
       }),
@@ -412,6 +416,10 @@ export default function AdminPage() {
               <code className="settings-code" dir="ltr">
                 {"https://www.producthelpyou.online/buydoctorplant?utm_source=facebook&utm_medium=paid&utm_campaign={{campaign.name}}&utm_content={{ad.name}}&utm_term={{adset.name}}"}
               </code>
+              وعربيتي:
+              <code className="settings-code" dir="ltr">
+                {"https://www.producthelpyou.online/carlanding?utm_source=facebook&utm_medium=paid&utm_campaign={{campaign.name}}&utm_content={{ad.name}}&utm_term={{adset.name}}"}
+              </code>
             </p>
             {!usesRemoteDb ? (
               <div className="form-error">
@@ -502,6 +510,15 @@ export default function AdminPage() {
                 />
               </div>
               <div className="field settings-wide">
+                <label>لينك فولدر عربيتي بعد الدفع (Google Drive: HTML + APK + الدليل)</label>
+                <input
+                  value={settings.arabity_delivery_url}
+                  onChange={(e) => setSettings({ ...settings, arabity_delivery_url: e.target.value })}
+                  placeholder="https://drive.google.com/..."
+                  dir="ltr"
+                />
+              </div>
+              <div className="field settings-wide">
                 <label>قناة إشعار الموبايل (اختياري)</label>
                 <input
                   value={settings.ntfy_topic}
@@ -566,6 +583,7 @@ export default function AdminPage() {
                 }}
               >
                 <option value="all">كل المنتجات</option>
+                <option value="arabity">عربيتي</option>
                 <option value="plant">دليل النباتات</option>
                 <option value="1000">مكتبة +1000</option>
               </select>
@@ -622,7 +640,11 @@ export default function AdminPage() {
                       {order.id}
                       <div>{order.amount} {order.currency}</div>
                       <div style={{ color: "#64748B" }}>
-                        {order.product_slug === "plant" ? "دليل النباتات" : "مكتبة +1000"}
+                        {order.product_slug === "plant"
+                          ? "دليل النباتات"
+                          : order.product_slug === "arabity"
+                            ? "عربيتي"
+                            : "مكتبة +1000"}
                       </div>
                     </td>
                     <td>
