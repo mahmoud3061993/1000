@@ -25,13 +25,15 @@ function changeClass(value: number) {
   return "flat";
 }
 
-export default function AdminAnalytics() {
+export default function AdminAnalytics({ onCleared }: { onCleared?: () => void }) {
   const [period, setPeriod] = useState<AnalyticsPeriod>("week");
   const product = "arabity";
   const [report, setReport] = useState<AnalyticsReport | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [usesRemoteDb, setUsesRemoteDb] = useState(true);
+  const [clearing, setClearing] = useState(false);
+  const [message, setMessage] = useState("");
 
   async function load(nextPeriod = period) {
     setLoading(true);
@@ -45,6 +47,36 @@ export default function AdminAnalytics() {
     }
     setReport(json.report);
     if (typeof json.usesRemoteDb === "boolean") setUsesRemoteDb(json.usesRemoteDb);
+  }
+
+  async function clearAnalytics() {
+    if (clearing || loading) return;
+    const ok = window.confirm(
+      "هتتمسح الزيارات وأحداث التحليلات (فتح الصفحة، سكرول، سكشنز، Checkout).\n\nالطلبات والإيراد والعملاء هيفضلوا زي ما هم.\n\nمتأكد؟"
+    );
+    if (!ok) return;
+    setClearing(true);
+    setError("");
+    setMessage("");
+    try {
+      const res = await fetch("/api/admin/analytics", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "clear" }),
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok || !json.ok) {
+        setError(json.error || "فشل مسح بيانات التحليلات");
+        return;
+      }
+      setMessage(
+        `اتمسحت ${json.visitsDeleted || 0} زيارة و ${json.eventsDeleted || 0} حدث. الطلبات والإيراد زي ما هم.`
+      );
+      await load(period);
+      onCleared?.();
+    } finally {
+      setClearing(false);
+    }
   }
 
   useEffect(() => {
@@ -72,16 +104,23 @@ export default function AdminAnalytics() {
               {item.label}
             </button>
           ))}
-          <button type="button" className="ghost-btn" onClick={() => load(period)} disabled={loading}>
+          <button type="button" className="ghost-btn" onClick={() => load(period)} disabled={loading || clearing}>
             {loading ? "جاري التحميل..." : "تحديث"}
           </button>
+          <button type="button" className="danger-btn" onClick={clearAnalytics} disabled={loading || clearing}>
+            {clearing ? "جاري المسح..." : "مسح بيانات التحليلات"}
+          </button>
         </div>
+        <p style={{ marginTop: 10, color: "#64748B", fontSize: 13 }}>
+          المسح بيشيل الزيارات وأحداث الصفحة بس. الطلبات والدفع والإيراد مش بيتلمسوا.
+        </p>
         {report ? (
           <div className="analytics-range">
             من {report.range.fromLabel} إلى {report.range.toLabel}
           </div>
         ) : null}
         {error ? <div className="form-error">{error}</div> : null}
+        {message ? <div className="form-ok">{message}</div> : null}
         {!usesRemoteDb ? (
           <div className="form-error">
             التحليل ممكن يتصفر بين الزيارات لأن الموقع على Vercel من غير قاعدة بيانات ثابتة. عشان الأرقام تثبت، نربط Turso.
