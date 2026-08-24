@@ -72,13 +72,14 @@ describe("arabity delivery and purchase email", () => {
     assert.match(email.text, /^أهلًا بيك 👋/);
     assert.match(email.text, /مبروك! 🎉/);
     assert.match(email.text, /تم تأكيد طلبك بنجاح، ودلوقتي تقدر تبدأ تستخدم عربيتي/);
-    assert.equal(email.text.includes(ARABITY_SYSTEM_URL), true);
     assert.equal(email.text.includes(drive), true);
-    assert.equal(email.html.includes(ARABITY_SYSTEM_URL), true);
     assert.equal(email.html.includes(drive), true);
+    assert.equal(email.text.includes(ARABITY_SYSTEM_URL), false);
+    assert.equal(email.html.includes(ARABITY_SYSTEM_URL), false);
+    assert.equal(email.text.includes("producthelpyou.online/car"), false);
     assert.match(email.html, /dir="rtl"/);
-    assert.match(email.text, /لينك السيستم للاستخدام المباشر/);
     assert.match(email.text, /رابط فولدر الملفات على Google Drive/);
+    assert.equal(email.text.includes("لينك السيستم للاستخدام المباشر"), false);
     assert.match(email.text, /3 ملفات في مكان واحد/);
     assert.match(email.text, /ملف السيستم للكمبيوتر \(HTML\)/);
     assert.match(email.text, /ملف الدليل \(HTML\)/);
@@ -101,6 +102,7 @@ describe("arabity delivery and purchase email", () => {
     });
     assert.equal(email.text.includes(ARABITY_DRIVE_URL), true);
     assert.equal(email.html.includes(ARABITY_DRIVE_URL), true);
+    assert.equal(email.text.includes(ARABITY_SYSTEM_URL), false);
   });
 });
 
