@@ -3,7 +3,7 @@ import { isAdminRequest } from "@/lib/auth";
 import { getOrder, updateOrder, deleteOrder, nowIso } from "@/lib/db";
 import { sendPurchaseEmail } from "@/lib/email";
 import { fulfillPaidOrder } from "@/lib/fulfillment";
-import { canConfirmInstapay, canRejectInstapay } from "@/lib/orders";
+import { canConfirmManualPayment, canRejectInstapay } from "@/lib/orders";
 import { notifyText } from "@/lib/notify";
 
 export const runtime = "nodejs";
@@ -46,7 +46,7 @@ export async function POST(
   }
 
   if (action === "confirm") {
-    if (!canConfirmInstapay(order) && order.status !== "awaiting_payment") {
+    if (!canConfirmManualPayment(order) && order.status !== "awaiting_payment") {
       return NextResponse.json({ ok: false, error: "مفيش حاجة تتأكد في الطلب ده" }, { status: 400 });
     }
     const paid = await fulfillPaidOrder(order);
@@ -59,8 +59,8 @@ export async function POST(
     }
     const rejected = await updateOrder(order.id, { status: "rejected" });
     await notifyText(
-      `طلب مرفوض بعد مراجعة إنستاباي\nالاسم: ${order.name}\nالموبايل: ${order.phone}\nرقم الطلب: ${order.id}`,
-      { title: "طلب إنستاباي مرفوض", priority: 4, tags: ["x"] }
+      `طلب مرفوض بعد مراجعة التحويل\nالاسم: ${order.name}\nالموبايل: ${order.phone}\nرقم الطلب: ${order.id}`,
+      { title: "طلب مرفوض", priority: 4, tags: ["x"] }
     );
     return NextResponse.json({ ok: true, order: rejected });
   }

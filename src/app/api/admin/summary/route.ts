@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { isAdminRequest } from "@/lib/auth";
-import { getPaymentConfig, kashierConfigured, metaConfigured, telegramConfigured, emailConfigured } from "@/lib/config";
+import { getPaymentConfig, metaConfigured, telegramConfigured, emailConfigured } from "@/lib/config";
 import { getFunnelStats, listOrders, usesRemoteDb } from "@/lib/db";
 import { getNotificationInfo } from "@/lib/notify";
 
@@ -21,10 +21,10 @@ export async function GET(req: NextRequest) {
     orders: await listOrders({ status, q, product }),
     notifications,
     integrations: {
-      kashier: kashierConfigured(cfg.kashier),
       meta: metaConfigured(),
       telegram: telegramConfigured(),
       instapay: Boolean(cfg.instapay.number),
+      wallet: Boolean(cfg.wallet.number),
       mobile: notifications.mobile,
       email: emailConfigured(),
     },

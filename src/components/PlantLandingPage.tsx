@@ -373,7 +373,7 @@ export function PlantLandingPage({ whatsapp, price }: { whatsapp: string; price:
             <div className="lp-step">
               <div className="lp-step-no">1</div>
               <h3>سجل طلبك</h3>
-              <p>املأ بياناتك تحت، وادفع بفيزا أو محفظة أو إنستاباي.</p>
+              <p>املأ بياناتك تحت، وحوّل بإنستاباي أو محفظة كاش وارفع سكرين التحويل.</p>
             </div>
             <div className="lp-step">
               <div className="lp-step-no">2</div>

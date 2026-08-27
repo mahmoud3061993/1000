@@ -29,6 +29,7 @@ export const ARABITY_DRIVE_URL =
 
 export type PaymentConfig = {
   instapay: { number: string; name: string };
+  wallet: { number: string; name: string };
   kashier: KashierCredentials;
   deliveryUrl: string;
   plantDeliveryUrl: string;
@@ -37,6 +38,7 @@ export type PaymentConfig = {
   usesRemoteDb: boolean;
   envOverrides: {
     instapay: boolean;
+    wallet: boolean;
     kashier: boolean;
     deliveryUrl: boolean;
     plantDeliveryUrl: boolean;
@@ -75,11 +77,14 @@ export function mergePaymentConfig(
     stored.instapay_name,
     "mahmoud a i m"
   );
+  const walletNumber = firstNonEmpty(env.WALLET_NUMBER, stored.wallet_number, instapayNumber);
+  const walletName = firstNonEmpty(env.WALLET_NAME, stored.wallet_name, instapayName);
   const kashierMid = firstNonEmpty(env.KASHIER_MID, stored.kashier_mid, "MID-40746-226");
   const kashierApiKey = firstNonEmpty(env.KASHIER_API_KEY, stored.kashier_api_key);
   const modeRaw = firstNonEmpty(env.KASHIER_MODE, stored.kashier_mode, "live").toLowerCase();
   return {
     instapay: { number: instapayNumber, name: instapayName },
+    wallet: { number: walletNumber, name: walletName },
     kashier: {
       mid: kashierMid,
       apiKey: kashierApiKey,
@@ -107,6 +112,7 @@ export function mergePaymentConfig(
     usesRemoteDb: Boolean(env.TURSO_DATABASE_URL || env.LIBSQL_URL),
     envOverrides: {
       instapay: Boolean(env.INSTAPAY_NUMBER),
+      wallet: Boolean(env.WALLET_NUMBER),
       kashier: Boolean(env.KASHIER_MID && env.KASHIER_API_KEY),
       deliveryUrl: Boolean(env.PRODUCT_DELIVERY_URL),
       plantDeliveryUrl: Boolean(env.PLANT_DELIVERY_URL),
@@ -150,6 +156,11 @@ export const WHATSAPP_NUMBER = (process.env.WHATSAPP_NUMBER || "201017420379").r
 export const INSTAPAY = {
   number: process.env.INSTAPAY_NUMBER || "01017420379",
   name: process.env.INSTAPAY_NAME || "mahmoud a i m",
+};
+
+export const WALLET = {
+  number: process.env.WALLET_NUMBER || INSTAPAY.number,
+  name: process.env.WALLET_NAME || INSTAPAY.name,
 };
 
 export const KASHIER = {

@@ -3,12 +3,13 @@
 import { useMemo, useState } from "react";
 import { firePixel, getTrackingContext } from "./TrackingBoot";
 
-type Method = "kashier" | "instapay";
+type Method = "instapay" | "wallet";
 
 export function CheckoutForm({
   instapayNumber,
   instapayName,
-  kashierReady,
+  walletNumber,
+  walletName,
   price = 235,
   compareAtPrice = 2870,
   productSlug = "1000",
@@ -17,7 +18,8 @@ export function CheckoutForm({
 }: {
   instapayNumber: string;
   instapayName: string;
-  kashierReady: boolean;
+  walletNumber: string;
+  walletName: string;
   price?: number;
   compareAtPrice?: number;
   productSlug?: string;
@@ -27,20 +29,21 @@ export function CheckoutForm({
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
-  const [method, setMethod] = useState<Method>(
-    kashierReady ? "kashier" : instapayNumber ? "instapay" : "kashier"
-  );
+  const [method, setMethod] = useState<Method>(instapayNumber ? "instapay" : "wallet");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [copied, setCopied] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState("");
 
+  const transferNumber = method === "wallet" ? walletNumber : instapayNumber;
+  const transferName = method === "wallet" ? walletName : instapayName;
+  const payReady = Boolean(instapayNumber || walletNumber);
+
   const canSubmit = useMemo(() => {
-    if (!name || !email || !phone || busy) return false;
-    if (method === "instapay") return Boolean(instapayNumber && file);
-    return kashierReady;
-  }, [name, email, phone, busy, method, instapayNumber, file, kashierReady]);
+    if (!name || !email || !phone || busy || !file) return false;
+    return Boolean(transferNumber);
+  }, [name, email, phone, busy, file, transferNumber]);
 
   function pickFile(next: File | null) {
     setFile(next);
@@ -48,13 +51,18 @@ export function CheckoutForm({
     setPreview(next ? URL.createObjectURL(next) : "");
   }
 
+  function chooseMethod(next: Method) {
+    setMethod(next);
+    setCopied(false);
+  }
+
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
     setBusy(true);
     try {
-      if (method === "instapay" && !file) {
-        setError("ارفع سكرين شوت التحويل من إنستاباي وبعدين دوس دفعت");
+      if (!file) {
+        setError("ارفع سكرين شوت التحويل وبعدين دوس دفعت");
         setBusy(false);
         return;
       }
@@ -79,6 +87,7 @@ export function CheckoutForm({
       }
       firePixel("AddPaymentInfo", { value: price, currency: "EGP", content_name: pixelName, content_ids: [productSlug] }, payEventId);
 
+      const data = new FormData();
       const common = {
         ...cookies,
         name,
@@ -92,32 +101,16 @@ export function CheckoutForm({
         checkoutAlready,
         adPath: JSON.stringify(cookies.adPath || []),
       };
+      Object.entries(common).forEach(([key, value]) => {
+        if (value) data.set(key, String(value));
+      });
+      data.set("screenshot", file);
 
-      let res: Response;
-      if (method === "instapay" && file) {
-        const data = new FormData();
-        Object.entries(common).forEach(([key, value]) => {
-          if (value) data.set(key, String(value));
-        });
-        data.set("screenshot", file);
-        res = await fetch("/api/orders", { method: "POST", body: data });
-      } else {
-        res = await fetch("/api/orders", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(common),
-        });
-      }
-
+      const res = await fetch("/api/orders", { method: "POST", body: data });
       const json = await res.json();
       if (!res.ok || !json.ok) {
         setError(json.error || "حصل خطأ، جرّب تاني");
         setBusy(false);
-        return;
-      }
-
-      if (json.method === "kashier" && json.checkoutUrl) {
-        window.location.href = json.checkoutUrl;
         return;
       }
 
@@ -139,9 +132,9 @@ export function CheckoutForm({
         <h3>يرجى ادخال معلوماتك لإكمال الطلب</h3>
         <form onSubmit={submit}>
           {error ? <div className="form-error">{error}</div> : null}
-          {!kashierReady && !instapayNumber ? (
+          {!payReady ? (
             <div className="form-error">
-              الدفع مش متظبط لسه. من لوحة الأدمن حط رقم إنستاباي أو مفاتيح كاشير.
+              الدفع مش متظبط لسه. من لوحة الأدمن حط رقم إنستاباي أو رقم محفظة كاش.
             </div>
           ) : null}
           <div className="field">
@@ -160,34 +153,38 @@ export function CheckoutForm({
           <div className="pay-grid">
             <button
               type="button"
-              className={`pay-option ${method === "kashier" ? "active" : ""}`}
-              onClick={() => setMethod("kashier")}
-              disabled={!kashierReady}
-            >
-              فيزا / محفظة
-              <small>{kashierReady ? "دفع فوري عبر كاشير" : "كاشير مش متظبط لسه — من الأدمن"}</small>
-            </button>
-            <button
-              type="button"
               className={`pay-option ${method === "instapay" ? "active" : ""}`}
-              onClick={() => setMethod("instapay")}
+              onClick={() => chooseMethod("instapay")}
               disabled={!instapayNumber}
             >
               إنستاباي
-              <small>{instapayNumber ? "حوّل وارفع السكرين ودوس دفعت" : "ضيف رقم إنستاباي من الأدمن"}</small>
+              <small>{instapayNumber ? "حوّل وارفع السكرين" : "ضيف الرقم من الأدمن"}</small>
+            </button>
+            <button
+              type="button"
+              className={`pay-option ${method === "wallet" ? "active" : ""}`}
+              onClick={() => chooseMethod("wallet")}
+              disabled={!walletNumber}
+            >
+              محفظة كاش
+              <small>{walletNumber ? "فودافون / أورنج / وي / اتصالات" : "ضيف الرقم من الأدمن"}</small>
             </button>
           </div>
 
-          {method === "instapay" && instapayNumber ? (
+          {transferNumber ? (
             <div className="instapay-box">
-              <div className="instapay-steps">حوّل {price} جنيه إنستاباي، ارفع سكرين التحويل، وبعدين دوس دفعت.</div>
-              {instapayName ? <div>{instapayName}</div> : null}
-              <code>{instapayNumber}</code>
+              <div className="instapay-steps">
+                {method === "wallet"
+                  ? `حوّل ${price} جنيه على محفظة كاش، ارفع سكرين التحويل، وبعدين دوس دفعت.`
+                  : `حوّل ${price} جنيه إنستاباي، ارفع سكرين التحويل، وبعدين دوس دفعت.`}
+              </div>
+              {transferName ? <div>{transferName}</div> : null}
+              <code>{transferNumber}</code>
               <button
                 type="button"
                 className="copy-btn"
                 onClick={async () => {
-                  await navigator.clipboard.writeText(instapayNumber);
+                  await navigator.clipboard.writeText(transferNumber);
                   setCopied(true);
                 }}
               >
@@ -213,13 +210,7 @@ export function CheckoutForm({
             <span>{price} ج.م</span>
           </div>
           <button className="buy-btn" disabled={!canSubmit}>
-            {busy
-              ? method === "kashier"
-                ? "جاري التحويل لكاشير..."
-                : "جاري إرسال الإيصال..."
-              : method === "instapay"
-                ? "دفعت"
-                : "ادفع بفيزا أو محفظة"}
+            {busy ? "جاري إرسال الإيصال..." : "دفعت"}
           </button>
         </form>
       </div>

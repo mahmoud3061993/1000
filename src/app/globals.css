@@ -103,6 +103,14 @@ a { color: inherit; }
   color: #075A9C;
 }
 
+.pay-option small {
+  display: block;
+  margin-top: 4px;
+  font-size: 12px;
+  font-weight: 700;
+  opacity: 0.8;
+}
+
 .pay-option:disabled {
   opacity: 0.55;
   cursor: not-allowed;

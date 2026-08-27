@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import AdminAnalytics from "@/components/AdminAnalytics";
 import { formatAdPath, parseAdPath } from "@/lib/attribution";
-import { orderEmailStatus } from "@/lib/orders";
+import { orderEmailStatus, paymentMethodLabel } from "@/lib/orders";
 
 type Order = {
   id: string;
@@ -42,10 +42,8 @@ type Stats = {
 type PaymentSettings = {
   instapay_number: string;
   instapay_name: string;
-  kashier_mid: string;
-  kashier_api_key: string;
-  kashier_api_key_set: boolean;
-  kashier_mode: "live" | "test";
+  wallet_number: string;
+  wallet_name: string;
   product_delivery_url: string;
   plant_delivery_url: string;
   arabity_delivery_url: string;
@@ -75,10 +73,8 @@ const STATUS_AR: Record<string, string> = {
 const emptySettings: PaymentSettings = {
   instapay_number: "",
   instapay_name: "",
-  kashier_mid: "",
-  kashier_api_key: "",
-  kashier_api_key_set: false,
-  kashier_mode: "live",
+  wallet_number: "",
+  wallet_name: "",
   product_delivery_url: "",
   plant_delivery_url: "",
   arabity_delivery_url: "",
@@ -97,10 +93,10 @@ export default function AdminPage() {
   const [product] = useState("arabity");
   const [q, setQ] = useState("");
   const [integrations, setIntegrations] = useState({
-    kashier: false,
     meta: false,
     telegram: false,
     instapay: false,
+    wallet: false,
     mobile: false,
     email: false,
   });
@@ -109,7 +105,7 @@ export default function AdminPage() {
   const [settings, setSettings] = useState<PaymentSettings>(emptySettings);
   const [envOverrides, setEnvOverrides] = useState({
     instapay: false,
-    kashier: false,
+    wallet: false,
     deliveryUrl: false,
   });
   const [saving, setSaving] = useState(false);
@@ -142,10 +138,8 @@ export default function AdminPage() {
     setSettings({
       instapay_number: json.settings.instapay_number || "",
       instapay_name: json.settings.instapay_name || "",
-      kashier_mid: json.settings.kashier_mid || "",
-      kashier_api_key: "",
-      kashier_api_key_set: Boolean(json.settings.kashier_api_key_set),
-      kashier_mode: json.settings.kashier_mode === "test" ? "test" : "live",
+      wallet_number: json.settings.wallet_number || "",
+      wallet_name: json.settings.wallet_name || "",
       product_delivery_url: json.settings.product_delivery_url || "",
       plant_delivery_url: json.settings.plant_delivery_url || "",
       arabity_delivery_url: json.settings.arabity_delivery_url || "",
@@ -257,9 +251,8 @@ export default function AdminPage() {
       body: JSON.stringify({
         instapay_number: settings.instapay_number,
         instapay_name: settings.instapay_name,
-        kashier_mid: settings.kashier_mid,
-        kashier_api_key: settings.kashier_api_key,
-        kashier_mode: settings.kashier_mode,
+        wallet_number: settings.wallet_number,
+        wallet_name: settings.wallet_name,
         product_delivery_url: settings.product_delivery_url,
         plant_delivery_url: settings.plant_delivery_url,
         arabity_delivery_url: settings.arabity_delivery_url,
@@ -274,7 +267,6 @@ export default function AdminPage() {
       return;
     }
     setMessage("اتحفظت إعدادات الدفع. ارجع للصفحة الرئيسية وجرّب الطلب.");
-    setSettings((prev) => ({ ...prev, kashier_api_key: "" }));
     await load();
     await loadSettings();
   }
@@ -361,7 +353,7 @@ export default function AdminPage() {
         </div>
 
         <div style={{ marginBottom: 16, color: "#94A3B8" }}>
-          الربط: كاشير {integrations.kashier ? "✅" : "❌"} — ميتا CAPI {integrations.meta ? "✅" : "❌"} — إشعارات الموبايل {integrations.mobile ? "✅" : "❌"} — إنستاباي {integrations.instapay ? "✅" : "❌"} — إيميل العملاء {integrations.email ? "✅" : "❌"}
+          الربط: إنستاباي {integrations.instapay ? "✅" : "❌"} — محفظة كاش {integrations.wallet ? "✅" : "❌"} — ميتا CAPI {integrations.meta ? "✅" : "❌"} — إشعارات الموبايل {integrations.mobile ? "✅" : "❌"} — إيميل العملاء {integrations.email ? "✅" : "❌"}
         </div>
 
         {tab !== "analytics" ? (
@@ -404,9 +396,9 @@ export default function AdminPage() {
 
         {tab === "settings" ? (
           <form className="settings-card" onSubmit={saveSettings}>
-            <h2>تفعيل الدفع عشان تجرب الطلب</h2>
+            <h2>تفعيل الدفع اليدوي</h2>
             <p>
-              حط رقم إنستاباي ومفاتيح كاشير هنا. إنستاباي هيظهر للعميل عشان يحوّل ويرفع سكرين ويدوس «دفعت». الفيزا والمحفظة هتروح على كاشير.
+              العميل بيحوّل إنستاباي أو محفظة كاش، يرفع سكرين التحويل، والطلب بيفضل قيد المراجعة لحد ما تتأكد بنفسك وتضغط «تأكيد الدفع».
             </p>
             <p>
               عشان الأدمن يعرف كل طلب جاي من أنهي إعلان، في Ads Manager حط لينك صفحة عربيتي زي ما هو بالظبط (سيب الأقواس زي ما هي):
@@ -419,7 +411,7 @@ export default function AdminPage() {
                 قاعدة البيانات لسه ملف محلي. على Vercel الإعدادات ممكن تضيع بين الطلبات. الأفضل تربط Turso أو تحط نفس القيم في Environment Variables.
               </div>
             ) : null}
-            {envOverrides.instapay || envOverrides.kashier ? (
+            {envOverrides.instapay || envOverrides.wallet ? (
               <div className="form-ok">
                 في قيم متظبطة من Vercel Environment Variables وهتغلب اللي هتحفظه هنا.
               </div>
@@ -436,7 +428,7 @@ export default function AdminPage() {
                 />
               </div>
               <div className="field">
-                <label>اسم الحساب</label>
+                <label>اسم حساب إنستاباي</label>
                 <input
                   value={settings.instapay_name}
                   onChange={(e) => setSettings({ ...settings, instapay_name: e.target.value })}
@@ -444,36 +436,21 @@ export default function AdminPage() {
                 />
               </div>
               <div className="field">
-                <label>كاشير Merchant ID</label>
+                <label>رقم محفظة كاش</label>
                 <input
-                  value={settings.kashier_mid}
-                  onChange={(e) => setSettings({ ...settings, kashier_mid: e.target.value })}
-                  placeholder="MID-xx-xx"
+                  value={settings.wallet_number}
+                  onChange={(e) => setSettings({ ...settings, wallet_number: e.target.value })}
+                  placeholder="01xxxxxxxxx"
                   dir="ltr"
                 />
               </div>
               <div className="field">
-                <label>كاشير API Key {settings.kashier_api_key_set ? "(متسجل)" : ""}</label>
+                <label>اسم محفظة كاش</label>
                 <input
-                  type="password"
-                  value={settings.kashier_api_key}
-                  onChange={(e) => setSettings({ ...settings, kashier_api_key: e.target.value })}
-                  placeholder={settings.kashier_api_key_set ? "سيب فاضي لو مش هتغيره" : "Payment API Key"}
-                  dir="ltr"
+                  value={settings.wallet_name}
+                  onChange={(e) => setSettings({ ...settings, wallet_name: e.target.value })}
+                  placeholder="Mahmoud Elkousy"
                 />
-              </div>
-              <div className="field">
-                <label>وضع كاشير</label>
-                <select
-                  className="admin-filter"
-                  value={settings.kashier_mode}
-                  onChange={(e) =>
-                    setSettings({ ...settings, kashier_mode: e.target.value === "test" ? "test" : "live" })
-                  }
-                >
-                  <option value="live">live</option>
-                  <option value="test">test</option>
-                </select>
               </div>
               <div className="field">
                 <label>واتساب</label>
@@ -528,7 +505,7 @@ export default function AdminPage() {
               <div className="stat">
                 بيحاول يدفع
                 <b>{stats?.tryingToPay ?? 0}</b>
-                <small>{stats?.pendingReview ?? 0} إنستاباي مستني مراجعة</small>
+                <small>{stats?.pendingReview ?? 0} تحويل مستني مراجعتك</small>
               </div>
               <div className="stat">
                 دفعوا
@@ -627,7 +604,7 @@ export default function AdminPage() {
                         );
                       })()}
                     </td>
-                    <td>{order.payment_method === "instapay" ? "إنستاباي" : "كاشير"}</td>
+                    <td>{paymentMethodLabel(order.payment_method)}</td>
                     <td>
                       <span className={`badge ${order.status}`}>{STATUS_AR[order.status] || order.status}</span>
                     </td>

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { CheckoutForm } from "@/components/CheckoutForm";
 import { PlantLandingPage } from "@/components/PlantLandingPage";
 import { TrackingBoot } from "@/components/TrackingBoot";
-import { getCatalogProduct, getPaymentConfig, kashierConfigured } from "@/lib/config";
+import { getCatalogProduct, getPaymentConfig } from "@/lib/config";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -35,7 +35,8 @@ export default async function PlantProductPage() {
       <CheckoutForm
         instapayNumber={cfg.instapay.number}
         instapayName={cfg.instapay.name}
-        kashierReady={kashierConfigured(cfg.kashier)}
+        walletNumber={cfg.wallet.number}
+        walletName={cfg.wallet.name}
         price={plant.price}
         compareAtPrice={plant.compareAtPrice}
         productSlug={plant.slug}
