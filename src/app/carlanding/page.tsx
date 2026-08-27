@@ -12,7 +12,7 @@ const product = getCatalogProduct("arabity");
 export const metadata: Metadata = {
   title: product.arabicName,
   description:
-    "سيستم عربيتي يخليك تعرف عربيتك بتكلفك كام، إيه اللي اتعمل فيها، وإيه اللي قرب ميعاده. 299 جنيه — دفع مرة واحدة.",
+    "سيستم عربيتي يخليك تعرف عربيتك بتكلفك كام، إيه اللي اتعمل فيها، وإيه اللي قرب ميعاده. 400 جنيه — دفع مرة واحدة.",
   openGraph: {
     title: product.arabicName,
     description: "اعرف عربيتك بتكلفك كام قبل ما المصاريف تفاجئك. دفع مرة واحدة.",

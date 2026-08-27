@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 
 const ARABITY_DEMO_VIDEO_SRC = "/arabity-demo.mp4";
 
@@ -187,27 +187,65 @@ function ReportsScreen() {
 }
 
 function DemoVideo() {
-  if (ARABITY_DEMO_VIDEO_SRC) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [started, setStarted] = useState(false);
+  const [failed, setFailed] = useState(false);
+
+  async function startPlayback() {
+    const video = videoRef.current;
+    if (!video) return;
+    setStarted(true);
+    try {
+      video.muted = false;
+      await video.play();
+    } catch {
+      try {
+        video.muted = true;
+        await video.play();
+      } catch {
+        /* Native controls stay visible so the visitor can try again. */
+      }
+    }
+  }
+
+  if (failed) {
     return (
-      <video
-        className="ar-demo-video"
-        controls
-        playsInline
-        preload="metadata"
-        title="شوف عربيتي وهو شغال"
-      >
-        <source src={ARABITY_DEMO_VIDEO_SRC} type="video/mp4" />
-      </video>
+      <div className="ar-demo-placeholder">
+        <strong>الفيديو مش قادر يشتغل على المتصفح ده</strong>
+        <p>
+          افتحه مباشرة من{" "}
+          <a href={ARABITY_DEMO_VIDEO_SRC} target="_blank" rel="noreferrer">
+            اللينك ده
+          </a>
+        </p>
+      </div>
     );
   }
 
   return (
-    <div className="ar-demo-placeholder" data-replace="arabity-demo-video">
-      <span className="ar-demo-play" aria-hidden="true">
-        ▶
-      </span>
-      <strong>مكان فيديو عربيتي وهو شغال</strong>
-      <p>حط ملف الفيديو في public باسم arabity-demo.mp4 وغيّر المسار في الصفحة.</p>
+    <div className="ar-demo-frame">
+      <video
+        ref={videoRef}
+        className="ar-demo-video"
+        src={ARABITY_DEMO_VIDEO_SRC}
+        poster="/arabity-demo.jpg"
+        controls
+        playsInline
+        preload="metadata"
+        title="شوف عربيتي وهو شغال"
+        dir="ltr"
+        onPlay={() => setStarted(true)}
+        onError={() => setFailed(true)}
+        {...{ "webkit-playsinline": "true" }}
+      />
+      {started ? null : (
+        <button type="button" className="ar-demo-start" onClick={startPlayback} aria-label="تشغيل الفيديو">
+          <span className="ar-demo-play" aria-hidden="true">
+            ▶
+          </span>
+          تشغيل الفيديو
+        </button>
+      )}
     </div>
   );
 }
@@ -382,11 +420,8 @@ export function ArabityLandingPage({
             </ul>
             <div className="ar-hero-price">{price} جنيه — دفع مرة واحدة</div>
             <div className="ar-hero-cta">
-              <button type="button" className="ar-btn" onClick={scrollToOrder}>
-                عايز أعرف تفاصيل السيستم
-              </button>
-              <button type="button" className="ar-btn ar-btn-ghost" onClick={() => scrollToId("ar-demo")}>
-                شوف تفاصيل أكتر
+              <button type="button" className="ar-btn" onClick={() => scrollToId("ar-demo")}>
+                شوف عربيتي وهو شغال
               </button>
             </div>
             <div className="ar-hero-meta">يشتغل أوفلاين — مفيش اشتراك شهري — بياناتك محفوظة عندك</div>
@@ -402,8 +437,8 @@ export function ArabityLandingPage({
           <div className="ar-section-head">
             <h2>شوف عربيتي وهو شغال</h2>
             <p>
-              في أقل من دقيقة شوف إزاي تسجل مصروف أو صيانة، والسيستم يحسبلك عربيتك كلفتك كام ويقولك
-              إيه اللي قرب ميعاده.
+              شوف إزاي تسجل مصروف أو صيانة، والسيستم يحسبلك عربيتك كلفتك كام ويقولك إيه اللي قرب
+              ميعاده.
             </p>
           </div>
           <DemoVideo />
@@ -618,6 +653,10 @@ export function ArabityCheckoutLead({ price }: { price: number }) {
         <li>دفع مرة واحدة</li>
       </ul>
       <div className="ar-checkout-lead-price">{price} جنيه</div>
+      <div className="ar-delivery-note">
+        <strong>الاستلام على الإيميل</strong>
+        <p>ملفات السيستم هتوصلك على نفس الإيميل اللي هتسجّل بيه في الطلب. تأكد إنه إيميل تقدر تفتحه.</p>
+      </div>
       <p className="ar-pay-note">الدفع بفيزا أو محفظة عبر كاشير، أو إنستاباي.</p>
     </div>
   );
