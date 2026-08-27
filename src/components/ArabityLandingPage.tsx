@@ -187,28 +187,30 @@ function ReportsScreen() {
 }
 
 function DemoVideo() {
-  if (ARABITY_DEMO_VIDEO_SRC) {
+  const [failed, setFailed] = useState(false);
+
+  if (failed) {
     return (
-      <video
-        className="ar-demo-video"
-        controls
-        playsInline
-        preload="metadata"
-        title="شوف عربيتي وهو شغال"
-      >
-        <source src={ARABITY_DEMO_VIDEO_SRC} type="video/mp4" />
-      </video>
+      <div className="ar-demo-placeholder">
+        <span className="ar-demo-play" aria-hidden="true">
+          ▶
+        </span>
+        <strong>الفيديو لسه مش قادر يشتغل</strong>
+        <p>الملف المرفوع تالف أو مش مكتمل. ارفع نسخة MP4 جديدة (H.264) باسم arabity-demo.mp4.</p>
+      </div>
     );
   }
 
   return (
-    <div className="ar-demo-placeholder" data-replace="arabity-demo-video">
-      <span className="ar-demo-play" aria-hidden="true">
-        ▶
-      </span>
-      <strong>مكان فيديو عربيتي وهو شغال</strong>
-      <p>حط ملف الفيديو في public باسم arabity-demo.mp4 وغيّر المسار في الصفحة.</p>
-    </div>
+    <video
+      className="ar-demo-video"
+      controls
+      playsInline
+      preload="auto"
+      src={ARABITY_DEMO_VIDEO_SRC}
+      title="شوف عربيتي وهو شغال"
+      onError={() => setFailed(true)}
+    />
   );
 }
 
