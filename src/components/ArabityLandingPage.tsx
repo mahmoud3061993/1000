@@ -538,23 +538,6 @@ export function ArabityLandingPage({
         </div>
       </section>
 
-      <section className="ar-section ar-proof" data-track-section="SectionProof">
-        <div className="ar-wrap">
-          <div className="ar-section-head">
-            <h2>ناس بدأت تستخدم عربيتي</h2>
-            <p>بنضيف آراء المستخدمين الحقيقية أول بأول.</p>
-          </div>
-          <div className="ar-proof-grid">
-            {["رأي 1", "رأي 2", "رأي 3"].map((label) => (
-              <article key={label} className="ar-proof-slot" data-replace="arabity-testimonial">
-                <span>مكان رأي عميل حقيقي</span>
-                <small>حط هنا سكرين واتساب أو تقييم حقيقي</small>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
-
       <section className="ar-section ar-trust" data-track-section="SectionTrust">
         <div className="ar-wrap">
           <div className="ar-trust-box">
