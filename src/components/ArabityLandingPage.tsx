@@ -1,6 +1,16 @@
 "use client";
 
-import { type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
+
+/** Drop `/arabity-demo.mp4` in `public/` and set this to that path. */
+const ARABITY_DEMO_VIDEO_SRC = "";
+
+function scrollToId(id: string) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const top = el.getBoundingClientRect().top + window.scrollY - 12;
+  window.scrollTo({ top, behavior: "smooth" });
+}
 
 function scrollToOrder() {
   const el = document.getElementById("price") || document.getElementById("order-form");
@@ -110,6 +120,37 @@ function FuelScreen() {
   );
 }
 
+function MaintenanceScreen() {
+  return (
+    <div className="ar-screen" dir="rtl">
+      <div className="ar-screen-top">
+        <div>
+          <small>الصيانة</small>
+          <strong>الجاي واللي اتعمل</strong>
+        </div>
+      </div>
+      <div className="ar-health">
+        <div className="ar-health-copy">
+          <p>تغيير الزيت</p>
+          <small>باقي 850 كم — قبل ما العربية تفاجئك</small>
+        </div>
+      </div>
+      <div className="ar-row">
+        <span>كاوتش</span>
+        <em>باقي 3,200 كم</em>
+      </div>
+      <div className="ar-row ar-row-warn">
+        <span>رخصة العربية</span>
+        <em>بعد 18 يوم</em>
+      </div>
+      <div className="ar-row">
+        <span>البطارية</span>
+        <em>اتغيرت من 11 شهر</em>
+      </div>
+    </div>
+  );
+}
+
 function ReportsScreen() {
   return (
     <div className="ar-screen" dir="rtl">
@@ -122,7 +163,7 @@ function ReportsScreen() {
       </div>
       <div className="ar-report-total">
         <small>إجمالي المصاريف</small>
-        <b>4,720 جنيه</b>
+        <b>7,420 جنيه</b>
       </div>
       <div className="ar-split">
         <div>
@@ -142,116 +183,208 @@ function ReportsScreen() {
           <em>12%</em>
         </div>
       </div>
-      <div className="ar-chart">
-        <span style={{ height: "70%" }} />
-        <span style={{ height: "48%" }} />
-        <span style={{ height: "86%" }} />
-        <span style={{ height: "40%" }} />
-        <span style={{ height: "62%" }} />
-      </div>
     </div>
   );
 }
 
-const OUTCOMES = [
+function DemoVideo() {
+  if (ARABITY_DEMO_VIDEO_SRC) {
+    return (
+      <video className="ar-demo-video" controls playsInline preload="metadata">
+        <source src={ARABITY_DEMO_VIDEO_SRC} type="video/mp4" />
+      </video>
+    );
+  }
+
+  return (
+    <div className="ar-demo-placeholder" data-replace="arabity-demo-video">
+      <span className="ar-demo-play" aria-hidden="true">
+        ▶
+      </span>
+      <strong>مكان فيديو عربيتي وهو شغال</strong>
+      <p>حط ملف الفيديو في public باسم arabity-demo.mp4 وغيّر المسار في الصفحة.</p>
+    </div>
+  );
+}
+
+const PAINS = [
   {
-    n: "01",
-    title: "تعرف عربيتك بتصرف كام… بالظبط",
-    text: "تموين كامل لتاني تموين كامل. الاستهلاك واللتر على الـ 100 كم بيتحسبوا من غير تخمين ومن غير ورقة في الدرج.",
+    title: "مصاريف مفاجئة",
+    text: "صيانة، زيت، كاوتش، ترخيص أو إصلاح يظهر فجأة ويلخبط ميزانية الشهر.",
   },
   {
-    n: "02",
-    title: "متأجلش صيانة ولا رخصة",
-    text: "الزيت، الإطارات، البطارية، الرخصة، والتأمين قدامك بتاريخ. النظام ينبّهك قبل ما الحاجة تبوظ أو الغرامة تلحقك.",
+    title: "مش فاكر آخر صيانة",
+    text: "آخر تغيير زيت؟ البطارية بقالها قد إيه؟ الرخصة هتخلص إمتى؟",
   },
   {
-    n: "03",
-    title: "سجل الورشة والإصلاحات في مكان واحد",
-    text: "القطعة، السعر، الورشة، والكيلومتر. لما العربية تتروح تاني، يبقى عندك التاريخ كامل مش من الذاكرة.",
+    title: "المعلومات في كذا مكان",
+    text: "فاتورة هنا، صورة على واتساب، رقم في الملاحظات... ومفيش سجل واحد مرتب.",
   },
   {
-    n: "04",
-    title: "تقرير جاهز للطباعة",
-    text: "مصاريف الشهر، البنزين، والصيانة في تقرير واحد. تنفع لنفسك أو لو بتسلّم حساب لحد تاني.",
+    title: "مش عارف التكلفة الحقيقية",
+    text: "البنزين مش هو تكلفة العربية كلها.",
+  },
+];
+
+const VALUE_ITEMS = [
+  "نسخة الكمبيوتر Offline",
+  "تطبيق Android",
+  "متابعة البنزين",
+  "متابعة الصيانة",
+  "تسجيل الإصلاحات والمصاريف",
+  "متابعة الترخيص والتأمين",
+  "تقارير المصاريف",
+  "سجل كامل للعربية",
+  "Backup / Restore",
+  "دليل استخدام سريع",
+  "فيديو شرح الاستخدام",
+];
+
+const FAQS = [
+  {
+    q: "هل السيستم محتاج إنترنت؟",
+    a: "لا، نسخة الكمبيوتر وتطبيق أندرويد يقدروا يشتغلوا أوفلاين.",
   },
   {
-    n: "05",
-    title: "بياناتك على جهازك… مش على السحابة",
-    text: "مفيش حساب، مفيش اشتراك، ومفيش نت بعد التحميل. تقدر تشغّل النسخة على الكمبيوتر أو تثبّتها على أندرويد.",
+    q: "هل فيه اشتراك شهري؟",
+    a: "لا، الدفع مرة واحدة.",
+  },
+  {
+    q: "بيشتغل على الموبايل؟",
+    a: "أيوه، فيه نسخة تطبيق Android.",
+  },
+  {
+    q: "بيشتغل على الكمبيوتر؟",
+    a: "أيوه، فيه نسخة للكمبيوتر تقدر تستخدمها من غير إنترنت.",
+  },
+  {
+    q: "بيشتغل على iPhone؟",
+    a: "نسخة التطبيق الحالية مخصصة لأندرويد. تقدر تستخدم نسخة الكمبيوتر بشكل منفصل.",
+  },
+  {
+    q: "لو غيرت الموبايل أعمل إيه؟",
+    a: "تقدر تستخدم خاصية Backup / Restore لنقل بياناتك.",
+  },
+  {
+    q: "هل بياناتي بتترفع على سيرفر؟",
+    a: "لا، بياناتك محفوظة عندك على جهازك.",
+  },
+  {
+    q: "ينفع أضيف أكتر من عربية؟",
+    a: "أيوه، السيستم يدعم أكتر من عربية.",
+  },
+  {
+    q: "هل لازم أكون فاهم في العربيات؟",
+    a: "لا، السيستم معمول لصاحب العربية العادي ومصمم بطريقة بسيطة.",
+  },
+  {
+    q: "هستلم المنتج إزاي؟",
+    a: "بعد تأكيد الدفع هيوصلك إيميل بفولدر Google Drive فيه 3 ملفات: ملف السيستم للكمبيوتر (HTML)، ملف الدليل، وتطبيق الأندرويد (APK).",
   },
 ];
 
 const SCREENS = [
   {
     title: "لوحة التحكم",
-    kicker: "من جوه النظام — الشاشة الرئيسية",
-    text: "حالة العربية، درجة الصحة، أقرب صيانة، ومصاريف الشهر في نظرة واحدة.",
+    text: "اعرف إجمالي مصاريف عربيتك في ثواني",
     screen: "dashboard" as const,
   },
   {
-    title: "سجل البنزين",
-    kicker: "من جوه النظام — التموين",
-    text: "كل تموين بيتسجل، والاستهلاك بيتحسب من تموين كامل للتاني.",
+    title: "البنزين",
+    text: "تابع البنزين ومتوسط الاستهلاك",
     screen: "fuel" as const,
   },
   {
-    title: "التقارير والطباعة",
-    kicker: "من جوه النظام — الملخص",
-    text: "شوف الفلوس راحت فين، واطبع تقرير جاهز من غير إكسل.",
+    title: "الصيانة",
+    text: "خليك عارف الصيانة الجاية إمتى",
+    screen: "maintenance" as const,
+  },
+  {
+    title: "التقارير",
+    text: "شوف فلوسك راحت فين",
     screen: "reports" as const,
   },
 ];
 
-const WHO = [
-  "صاحب عربية زهق يعد على الورق أو الإكسل",
-  "ناس عندهم أكتر من عربية وعايزين سجل منفصل لكل واحدة",
-  "اللي بيروح الورشة وعايز يعرف اتدفع إيه واتغيّر إيه",
-  "اللي عايز يعرف البنزين بياكل كام من غير تطبيقات سحابية",
-];
+function ScreenCard({ item }: { item: (typeof SCREENS)[number] }) {
+  return (
+    <article className="ar-screen-card">
+      <div className="ar-screen-card-media">
+        <PhoneChrome>
+          {item.screen === "dashboard" ? <DashboardScreen /> : null}
+          {item.screen === "fuel" ? <FuelScreen /> : null}
+          {item.screen === "maintenance" ? <MaintenanceScreen /> : null}
+          {item.screen === "reports" ? <ReportsScreen /> : null}
+        </PhoneChrome>
+      </div>
+      <div className="ar-screen-card-copy">
+        <h3>{item.title}</h3>
+        <p>{item.text}</p>
+      </div>
+    </article>
+  );
+}
 
 export function ArabityLandingPage({
   whatsapp,
   price,
-  compareAtPrice,
 }: {
   whatsapp: string;
   price: number;
-  compareAtPrice: number;
 }) {
+  const [showSticky, setShowSticky] = useState(false);
   const wa = `https://wa.me/${whatsapp}?text=${encodeURIComponent("أهلاً، حابب أعرف تفاصيل أكتر عن عربيتي")}`;
 
-  return (
-    <div className="arabity-lp">
-      <div className="ar-topbar">
-        سعر خاص — النظام كامل بـ <strong>{price} جنيه</strong> · شراء لمرة واحدة
-      </div>
+  useEffect(() => {
+    const hero = document.getElementById("ar-hero");
+    const checkout = document.getElementById("price") || document.getElementById("order-form");
+    if (!hero || !("IntersectionObserver" in window)) return;
 
-      <section className="ar-hero" data-track-section="SectionHero">
+    const state = { hero: true, checkout: false };
+    const sync = () => setShowSticky(!state.hero && !state.checkout);
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.target.id === "ar-hero") state.hero = entry.isIntersecting;
+          else state.checkout = entry.isIntersecting;
+        }
+        sync();
+      },
+      { threshold: 0.12 }
+    );
+    observer.observe(hero);
+    if (checkout) observer.observe(checkout);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <div className={`arabity-lp${showSticky ? " ar-has-sticky" : ""}`}>
+      <div className="ar-topbar">عربيتي — {price} جنيه · دفع مرة واحدة · بدون اشتراك</div>
+
+      <section id="ar-hero" className="ar-hero" data-track-section="SectionHero">
         <div className="ar-wrap ar-hero-grid">
           <div className="ar-hero-copy">
-            <div className="ar-kicker">تطبيق عربي · بدون حساب · بدون نت بعد التحميل</div>
-            <h1>
-              كل حاجة تخص عربيتك… <em>في مكان واحد.</em>
-            </h1>
+            <div className="ar-kicker">لأصحاب العربيات في مصر</div>
+            <h1>كل شوية عربيتك تفاجئك بمصروف مكنتش عامل حسابه؟</h1>
             <p>
-              سجّل البنزين والصيانة والمصاريف والمستندات. شوف التقرير واطبعه.
-              البيانات بتفضل على جهازك — مش على حساب سحابي، ومش اشتراك شهري.
+              سيستم عربيتي يخليك تعرف عربيتك بتكلفك كام، إيه اللي اتعمل فيها، وإيه اللي قرب ميعاده...
+              قبل ما المصاريف تفاجئك.
             </p>
-            <ul className="ar-hero-points">
-              <li>بنزين من تموين كامل لتاني تموين كامل</li>
-              <li>صيانة، إطارات، بطارية، رخص، وورش</li>
-              <li>أكتر من عربية + نسخة احتياطية JSON</li>
+            <ul className="ar-hero-points ar-checks">
+              <li>اعرف عربيتك بتكلفك كام كل شهر</li>
+              <li>متنساش مواعيد الصيانة والتجديدات</li>
+              <li>سجل كل حاجة تخص عربيتك في مكان واحد</li>
             </ul>
+            <div className="ar-hero-price">{price} جنيه — دفع مرة واحدة</div>
             <div className="ar-hero-cta">
               <button type="button" className="ar-btn" onClick={scrollToOrder}>
-                احصل على عربيتي دلوقتي
+                عايز أعرف تفاصيل السيستم
               </button>
-              <div className="ar-price-inline">
-                <b>{price} جنيه</b>
-                <s>{compareAtPrice.toLocaleString("en-EG")} جنيه</s>
-              </div>
+              <button type="button" className="ar-btn ar-btn-ghost" onClick={() => scrollToId("ar-demo")}>
+                شوف تفاصيل أكتر
+              </button>
             </div>
-            <div className="ar-hero-meta">وصول فوري · ويب + كمبيوتر أوفلاين + أندرويد</div>
+            <div className="ar-hero-meta">يشتغل أوفلاين — مفيش اشتراك شهري — بياناتك محفوظة عندك</div>
           </div>
           <PhoneChrome label="من جوه عربيتي — لوحة التحكم">
             <DashboardScreen />
@@ -259,20 +392,32 @@ export function ArabityLandingPage({
         </div>
       </section>
 
+      <section id="ar-demo" className="ar-section ar-demo" data-track-section="SectionDemo">
+        <div className="ar-wrap">
+          <div className="ar-section-head">
+            <h2>شوف عربيتي وهو شغال</h2>
+            <p>
+              في أقل من دقيقة شوف إزاي تسجل مصروف أو صيانة، والسيستم يحسبلك عربيتك كلفتك كام ويقولك
+              إيه اللي قرب ميعاده.
+            </p>
+          </div>
+          <DemoVideo />
+          <div className="ar-center-cta">
+            <button type="button" className="ar-btn" onClick={scrollToOrder}>
+              عايز السيستم
+            </button>
+          </div>
+        </div>
+      </section>
+
       <section className="ar-section" data-track-section="SectionProblem">
         <div className="ar-wrap">
           <div className="ar-section-head">
-            <span>01</span>
-            <h2>من أول التموين لأول تقرير… إيه اللي هتقدر تعمله بنفسك؟</h2>
-            <p>
-              عربيتي مش مفكرة ملاحظات. هو سجل تشغيل للعربية: فلوس، كيلومتر، مواعيد، وورشة —
-              مترتبين زي ما بتستخدم العربية في اليوم العادي.
-            </p>
+            <h2>المشكلة مش إن العربية بتصرف... المشكلة إنك غالبًا مش عارف بتصرف كام وإمتى.</h2>
           </div>
-          <div className="ar-outcomes">
-            {OUTCOMES.map((item) => (
-              <article key={item.n} className="ar-outcome">
-                <div className="ar-outcome-n">{item.n}</div>
+          <div className="ar-pain-grid">
+            {PAINS.map((item) => (
+              <article key={item.title} className="ar-pain-card">
                 <h3>{item.title}</h3>
                 <p>{item.text}</p>
               </article>
@@ -281,88 +426,132 @@ export function ArabityLandingPage({
         </div>
       </section>
 
+      <section className="ar-section ar-outcomes-section" data-track-section="SectionOutcomes">
+        <div className="ar-wrap">
+          <div className="ar-section-head">
+            <h2>عربيتي بيحول كل ده لصورة واضحة</h2>
+          </div>
+          <div className="ar-kpi-grid">
+            <article className="ar-kpi-card">
+              <h3>اعرف عربيتك بتكلفك كام</h3>
+              <b>7,420 جنيه</b>
+              <small>في الشهر</small>
+            </article>
+            <article className="ar-kpi-card">
+              <h3>اعرف إيه اللي قرب ميعاده</h3>
+              <b>تغيير الزيت</b>
+              <small>باقي 850 كم</small>
+            </article>
+            <article className="ar-kpi-card ar-kpi-timeline">
+              <h3>اعرف اتعمل إيه قبل كده</h3>
+              <ol>
+                <li>تفويلة</li>
+                <li>تغيير زيت</li>
+                <li>كاوتش</li>
+                <li>إصلاح</li>
+              </ol>
+            </article>
+          </div>
+          <div className="ar-center-cta">
+            <button type="button" className="ar-btn" onClick={scrollToOrder}>
+              اطلب سيستم عربيتي
+            </button>
+          </div>
+        </div>
+      </section>
+
       <section className="ar-section ar-section-screens" data-track-section="SectionPreview">
         <div className="ar-wrap">
           <div className="ar-section-head">
-            <span>02</span>
-            <h2>شوف شكل النظام من جوه… مش كلام على المنتج.</h2>
-            <p>السكاشن دي من نفس الشاشات اللي هتفتحها بعد الدفع. مكان الفيديو: سكرين حقيقي من عربيتي.</p>
+            <h2>شوف السيستم من جوه</h2>
+            <p>السكاشن دي من نفس الشاشات اللي هتفتحها بعد الدفع.</p>
           </div>
           <div className="ar-screen-grid">
             {SCREENS.map((item) => (
-              <article key={item.title} className="ar-screen-card">
-                <div className="ar-screen-card-media">
-                  {item.screen === "dashboard" ? (
-                    <PhoneChrome>
-                      <DashboardScreen />
-                    </PhoneChrome>
-                  ) : null}
-                  {item.screen === "fuel" ? (
-                    <PhoneChrome>
-                      <FuelScreen />
-                    </PhoneChrome>
-                  ) : null}
-                  {item.screen === "reports" ? (
-                    <PhoneChrome>
-                      <ReportsScreen />
-                    </PhoneChrome>
-                  ) : null}
-                </div>
-                <div className="ar-screen-card-copy">
-                  <small>{item.kicker}</small>
-                  <h3>{item.title}</h3>
-                  <p>{item.text}</p>
-                </div>
+              <ScreenCard key={item.title} item={item} />
+            ))}
+          </div>
+          <div className="ar-center-cta">
+            <button type="button" className="ar-btn" onClick={scrollToOrder}>
+              اطلب سيستم عربيتي
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section className="ar-section" data-track-section="SectionReceive">
+        <div className="ar-wrap">
+          <div className="ar-section-head">
+            <h2>لما تطلب عربيتي هيوصلك إيه؟</h2>
+          </div>
+          <ul className="ar-package">
+            {VALUE_ITEMS.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
+          <p className="ar-package-note">كل ده بدفع مرة واحدة.</p>
+          <div className="ar-center-cta">
+            <button type="button" className="ar-btn" onClick={scrollToOrder}>
+              اطلب سيستم عربيتي
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section className="ar-section ar-proof" data-track-section="SectionProof">
+        <div className="ar-wrap">
+          <div className="ar-section-head">
+            <h2>ناس بدأت تستخدم عربيتي</h2>
+            <p>بنضيف آراء المستخدمين الحقيقية أول بأول.</p>
+          </div>
+          <div className="ar-proof-grid">
+            {["رأي 1", "رأي 2", "رأي 3"].map((label) => (
+              <article key={label} className="ar-proof-slot" data-replace="arabity-testimonial">
+                <span>مكان رأي عميل حقيقي</span>
+                <small>حط هنا سكرين واتساب أو تقييم حقيقي</small>
               </article>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="ar-section" data-track-section="SectionTools">
+      <section className="ar-section ar-trust" data-track-section="SectionTrust">
         <div className="ar-wrap">
-          <div className="ar-section-head">
-            <span>03</span>
-            <h2>إيه بالضبط اللي هتوصلك بعد الدفع؟</h2>
-            <p>تدفع مرة واحدة. مفيش اشتراك. هتستلم السيستم تشتغل عليه على طول، وثلاث ملفات على الدرايف.</p>
-          </div>
-          <div className="ar-deliver">
-            <article>
-              <div className="ar-deliver-n">1</div>
-              <h3>لينك السيستم</h3>
-              <p>تفتح عربيتي من الموبايل أو الكمبيوتر وتبدأ تسجّل عربيتك. مفيش تسجيل دخول.</p>
-            </article>
-            <article>
-              <div className="ar-deliver-n">2</div>
-              <h3>ملف HTML أوفلاين</h3>
-              <p>نفس النظام ملف واحد على اللابتوب. تفتحه من غير نت، والبيانات بتتحفظ عندك.</p>
-            </article>
-            <article>
-              <div className="ar-deliver-n">3</div>
-              <h3>تطبيق أندرويد + الدليل</h3>
-              <p>APK تثبّته يدويًا، ودليل استخدام بالعربي يشرح أول فتح والنسخ الاحتياطي.</p>
-            </article>
+          <div className="ar-trust-box">
+            <h2>بيانات عربيتك ملكك إنت</h2>
+            <p>عربيتي مش محتاج حساب أو تسجيل دخول، وبياناتك بتفضل محفوظة على جهازك.</p>
+            <div className="ar-trust-icons">
+              <div>
+                <b>أوفلاين</b>
+                <span>من غير نت بعد التحميل</span>
+              </div>
+              <div>
+                <b>من غير حساب</b>
+                <span>مفيش تسجيل دخول</span>
+              </div>
+              <div>
+                <b>على جهازك</b>
+                <span>مش على سيرفر</span>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      <section className="ar-section ar-who" data-track-section="SectionReceive">
-        <div className="ar-wrap ar-who-grid">
-          <div>
-            <div className="ar-section-head ar-section-head-left">
-              <span>04</span>
-              <h2>المنتج ده معمول لمين؟</h2>
-            </div>
-            <ul>
-              {WHO.map((item) => (
-                <li key={item}>{item}</li>
-              ))}
-            </ul>
+      <section className="ar-section" data-track-section="SectionFaq">
+        <div className="ar-wrap ar-faq">
+          <div className="ar-section-head">
+            <h2>أسئلة ممكن تكون في بالك</h2>
           </div>
-          <div className="ar-who-aside">
-            <p>مش كورس فيديو. مش اشتراك شهري. القيمة في السجل اللي بيتبني عندك كل تموين وكل صيانة.</p>
-            <button type="button" className="ar-btn ar-btn-ghost" onClick={scrollToOrder}>
-              انزل على سعر العرض
+          {FAQS.map((item) => (
+            <details key={item.q} className="ar-faq-item">
+              <summary>{item.q}</summary>
+              <p>{item.a}</p>
+            </details>
+          ))}
+          <div className="ar-center-cta">
+            <button type="button" className="ar-btn" onClick={scrollToOrder}>
+              اطلب سيستم عربيتي
             </button>
           </div>
         </div>
@@ -371,42 +560,30 @@ export function ArabityLandingPage({
       <section className="ar-section ar-offer" data-track-section="SectionOffer">
         <div className="ar-wrap">
           <div className="ar-offer-box">
-            <div className="ar-offer-label">شراء لمرة واحدة</div>
-            <h2>عربيتي كامل — ويب، كمبيوتر، وأندرويد</h2>
-            <div className="ar-stack">
-              <div>
-                <span>نظام إدارة العربية كامل</span>
-                <b>490 جنيه</b>
-              </div>
-              <div>
-                <span>نسخة أوفلاين للكمبيوتر + أندرويد</span>
-                <b>300 جنيه</b>
-              </div>
-              <div>
-                <span>دليل الاستخدام والنسخ الاحتياطي</span>
-                <b>200 جنيه</b>
-              </div>
-            </div>
-            <div className="ar-offer-total">
-              <span>إجمالي القيمة</span>
-              <s>{compareAtPrice.toLocaleString("en-EG")} جنيه</s>
-            </div>
+            <div className="ar-offer-label">باكدج عربيتي كاملة</div>
+            <h2>كل الملفات والأدوات في طلب واحد</h2>
+            <ul className="ar-offer-list">
+              <li>نسخة الكمبيوتر أوفلاين</li>
+              <li>تطبيق Android</li>
+              <li>دليل الاستخدام</li>
+              <li>سجل البنزين والصيانة والمصاريف</li>
+              <li>Backup / Restore</li>
+            </ul>
             <div className="ar-offer-now">
-              <small>بدل {compareAtPrice.toLocaleString("en-EG")} جنيه</small>
-              <strong>{price} جنيه فقط</strong>
+              <small>السعر الحالي</small>
+              <strong>{price} جنيه</strong>
             </div>
+            <p className="ar-offer-note">دفع مرة واحدة — بدون اشتراك</p>
             <button type="button" className="ar-btn" onClick={scrollToOrder}>
-              اطلب عربيتي دلوقتي
+              اطلب سيستم عربيتي
             </button>
-            <p className="ar-offer-note">الدفع بفيزا أو محفظة أو إنستاباي — نفس طرق المتجر</p>
           </div>
         </div>
       </section>
 
-      <div className="ar-sticky">
+      <div className={`ar-sticky${showSticky ? " is-on" : ""}`}>
         <div>
-          عربيتي كامل
-          <strong>{price} جنيه</strong>
+          عربيتي — {price} جنيه
         </div>
         <button type="button" onClick={scrollToOrder}>
           اطلب دلوقتي
@@ -420,5 +597,38 @@ export function ArabityLandingPage({
         </svg>
       </a>
     </div>
+  );
+}
+
+export function ArabityCheckoutLead({ price }: { price: number }) {
+  return (
+    <div className="ar-checkout-lead">
+      <h2>اطلب سيستم عربيتي</h2>
+      <p>هتاخد:</p>
+      <ul>
+        <li>نسخة الكمبيوتر</li>
+        <li>تطبيق Android</li>
+        <li>دليل الاستخدام</li>
+        <li>استخدام أوفلاين</li>
+        <li>دفع مرة واحدة</li>
+      </ul>
+      <div className="ar-checkout-lead-price">{price} جنيه</div>
+      <p className="ar-pay-note">الدفع بفيزا أو محفظة عبر كاشير، أو إنستاباي.</p>
+    </div>
+  );
+}
+
+export function ArabityClosing({ price }: { price: number }) {
+  return (
+    <section className="ar-section ar-close">
+      <div className="ar-wrap">
+        <h2>بدل ما عربيتك تفاجئك... خليك إنت عارف كل حاجة عنها.</h2>
+        <p>مصاريفها، صيانتها، مواعيدها، وكل اللي اتعمل فيها — في مكان واحد.</p>
+        <div className="ar-hero-price">{price} جنيه — مرة واحدة</div>
+        <button type="button" className="ar-btn" onClick={scrollToOrder}>
+          اطلب عربيتي دلوقتي
+        </button>
+      </div>
+    </section>
   );
 }

@@ -133,7 +133,7 @@ export function CheckoutForm({
       <h2 className="checkout-title">{productTitle}</h2>
       <div className="checkout-price">
         <strong>{price} ج.م</strong>
-        <s>{compareAtPrice} ج.م</s>
+        {compareAtPrice > price ? <s>{compareAtPrice} ج.م</s> : null}
       </div>
       <div className="checkout-box">
         <h3>يرجى ادخال معلوماتك لإكمال الطلب</h3>
