@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 
 const ARABITY_DEMO_VIDEO_SRC = "/arabity-demo.mp4";
 
@@ -187,27 +187,65 @@ function ReportsScreen() {
 }
 
 function DemoVideo() {
-  if (ARABITY_DEMO_VIDEO_SRC) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [started, setStarted] = useState(false);
+  const [failed, setFailed] = useState(false);
+
+  async function startPlayback() {
+    const video = videoRef.current;
+    if (!video) return;
+    setStarted(true);
+    try {
+      video.muted = false;
+      await video.play();
+    } catch {
+      try {
+        video.muted = true;
+        await video.play();
+      } catch {
+        /* Native controls stay visible so the visitor can try again. */
+      }
+    }
+  }
+
+  if (failed) {
     return (
-      <video
-        className="ar-demo-video"
-        controls
-        playsInline
-        preload="metadata"
-        title="شوف عربيتي وهو شغال"
-      >
-        <source src={ARABITY_DEMO_VIDEO_SRC} type="video/mp4" />
-      </video>
+      <div className="ar-demo-placeholder">
+        <strong>الفيديو مش قادر يشتغل على المتصفح ده</strong>
+        <p>
+          افتحه مباشرة من{" "}
+          <a href={ARABITY_DEMO_VIDEO_SRC} target="_blank" rel="noreferrer">
+            اللينك ده
+          </a>
+        </p>
+      </div>
     );
   }
 
   return (
-    <div className="ar-demo-placeholder" data-replace="arabity-demo-video">
-      <span className="ar-demo-play" aria-hidden="true">
-        ▶
-      </span>
-      <strong>مكان فيديو عربيتي وهو شغال</strong>
-      <p>حط ملف الفيديو في public باسم arabity-demo.mp4 وغيّر المسار في الصفحة.</p>
+    <div className="ar-demo-frame">
+      <video
+        ref={videoRef}
+        className="ar-demo-video"
+        src={ARABITY_DEMO_VIDEO_SRC}
+        poster="/arabity-demo.jpg"
+        controls
+        playsInline
+        preload="metadata"
+        title="شوف عربيتي وهو شغال"
+        dir="ltr"
+        onPlay={() => setStarted(true)}
+        onError={() => setFailed(true)}
+        {...{ "webkit-playsinline": "true" }}
+      />
+      {started ? null : (
+        <button type="button" className="ar-demo-start" onClick={startPlayback} aria-label="تشغيل الفيديو">
+          <span className="ar-demo-play" aria-hidden="true">
+            ▶
+          </span>
+          تشغيل الفيديو
+        </button>
+      )}
     </div>
   );
 }

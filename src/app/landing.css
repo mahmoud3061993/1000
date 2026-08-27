@@ -1222,7 +1222,7 @@ MOBILE
     color: #e8eef7;
     direction: rtl;
     font-family: "Almarai", Tahoma, Arial, sans-serif;
-    overflow-x: hidden;
+    overflow-x: clip;
 }
 
 .arabity-lp {
@@ -1233,7 +1233,7 @@ MOBILE
         radial-gradient(700px 380px at 0% 20%, rgba(37, 99, 235, 0.12), transparent 55%),
         #06101c;
     color: #e8eef7;
-    overflow: hidden;
+    overflow-x: clip;
 }
 
 .ar-wrap {
@@ -1973,7 +1973,7 @@ MOBILE
     background: rgba(10, 37, 64, 0.4);
 }
 
-.ar-demo-video,
+.ar-demo-frame,
 .ar-demo-placeholder {
     width: 100%;
     max-width: 860px;
@@ -1986,8 +1986,47 @@ MOBILE
     box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
 }
 
+.ar-demo-frame {
+    position: relative;
+    isolation: isolate;
+    direction: ltr;
+}
+
 .ar-demo-video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
     object-fit: contain;
+    background: #000;
+    border: 0;
+    border-radius: 20px;
+    z-index: 1;
+}
+
+.ar-demo-start {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    border: 0;
+    background: rgba(6, 16, 28, 0.34);
+    color: #fff;
+    font: inherit;
+    font-weight: 800;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    border-radius: 20px;
+}
+
+.ar-demo-start:hover,
+.ar-demo-start:focus-visible {
+    background: rgba(6, 16, 28, 0.48);
 }
 
 .ar-demo-placeholder {
@@ -1998,6 +2037,11 @@ MOBILE
     text-align: center;
     padding: 24px;
     color: #d7e3f2;
+}
+
+.ar-demo-placeholder a {
+    color: #1ec8b8;
+    font-weight: 800;
 }
 
 .ar-demo-play {
