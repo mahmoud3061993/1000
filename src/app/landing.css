@@ -1981,9 +1981,13 @@ MOBILE
     display: block;
     aspect-ratio: 16 / 9;
     border-radius: 20px;
-    background: #0a1628;
+    background: #06101c;
     border: 1px solid rgba(30, 200, 184, 0.28);
     box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+}
+
+.ar-demo-video {
+    object-fit: contain;
 }
 
 .ar-demo-placeholder {
