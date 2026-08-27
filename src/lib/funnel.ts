@@ -6,7 +6,6 @@ export const LANDING_SECTIONS = [
   { id: "preview", event: "SectionPreview", label: "صور النظام" },
   { id: "tools", event: "SectionTools", label: "الأدوات" },
   { id: "receive", event: "SectionReceive", label: "هتستلم إيه" },
-  { id: "proof", event: "SectionProof", label: "آراء العملاء" },
   { id: "trust", event: "SectionTrust", label: "الخصوصية" },
   { id: "faq", event: "SectionFaq", label: "الأسئلة" },
   { id: "offer", event: "SectionOffer", label: "سعر العرض" },

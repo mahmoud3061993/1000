@@ -2064,7 +2064,6 @@ MOBILE
 
 .ar-pain-grid,
 .ar-kpi-grid,
-.ar-proof-grid,
 .ar-trust-icons {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -2072,8 +2071,7 @@ MOBILE
 }
 
 .ar-pain-card,
-.ar-kpi-card,
-.ar-proof-slot {
+.ar-kpi-card {
     background: rgba(255, 255, 255, 0.03);
     border: 1px solid rgba(232, 238, 247, 0.08);
     border-radius: 20px;
@@ -2158,21 +2156,6 @@ MOBILE
     color: #1ec8b8;
     font-weight: 800;
     font-size: 18px;
-}
-
-.ar-proof-slot {
-    min-height: 140px;
-    display: grid;
-    place-items: center;
-    text-align: center;
-    border-style: dashed;
-    color: #93a0b5;
-}
-
-.ar-proof-slot span {
-    display: block;
-    color: #fff;
-    font-weight: 800;
 }
 
 .ar-trust-box {
@@ -2357,7 +2340,6 @@ MOBILE
     .ar-outcomes,
     .ar-pain-grid,
     .ar-kpi-grid,
-    .ar-proof-grid,
     .ar-trust-icons {
         grid-template-columns: 1fr;
     }
