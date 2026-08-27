@@ -2,8 +2,7 @@
 
 import { useEffect, useState, type ReactNode } from "react";
 
-/** Drop `/arabity-demo.mp4` in `public/` and set this to that path. */
-const ARABITY_DEMO_VIDEO_SRC = "";
+const ARABITY_DEMO_VIDEO_SRC = "/arabity-demo.mp4";
 
 function scrollToId(id: string) {
   const el = document.getElementById(id);
@@ -190,7 +189,13 @@ function ReportsScreen() {
 function DemoVideo() {
   if (ARABITY_DEMO_VIDEO_SRC) {
     return (
-      <video className="ar-demo-video" controls playsInline preload="metadata">
+      <video
+        className="ar-demo-video"
+        controls
+        playsInline
+        preload="metadata"
+        title="شوف عربيتي وهو شغال"
+      >
         <source src={ARABITY_DEMO_VIDEO_SRC} type="video/mp4" />
       </video>
     );
