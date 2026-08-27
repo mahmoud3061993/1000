@@ -420,11 +420,8 @@ export function ArabityLandingPage({
             </ul>
             <div className="ar-hero-price">{price} جنيه — دفع مرة واحدة</div>
             <div className="ar-hero-cta">
-              <button type="button" className="ar-btn" onClick={scrollToOrder}>
-                عايز أعرف تفاصيل السيستم
-              </button>
-              <button type="button" className="ar-btn ar-btn-ghost" onClick={() => scrollToId("ar-demo")}>
-                شوف تفاصيل أكتر
+              <button type="button" className="ar-btn" onClick={() => scrollToId("ar-demo")}>
+                شوف عربيتي وهو شغال
               </button>
             </div>
             <div className="ar-hero-meta">يشتغل أوفلاين — مفيش اشتراك شهري — بياناتك محفوظة عندك</div>
@@ -440,8 +437,8 @@ export function ArabityLandingPage({
           <div className="ar-section-head">
             <h2>شوف عربيتي وهو شغال</h2>
             <p>
-              في أقل من دقيقة شوف إزاي تسجل مصروف أو صيانة، والسيستم يحسبلك عربيتك كلفتك كام ويقولك
-              إيه اللي قرب ميعاده.
+              شوف إزاي تسجل مصروف أو صيانة، والسيستم يحسبلك عربيتك كلفتك كام ويقولك إيه اللي قرب
+              ميعاده.
             </p>
           </div>
           <DemoVideo />
@@ -656,6 +653,10 @@ export function ArabityCheckoutLead({ price }: { price: number }) {
         <li>دفع مرة واحدة</li>
       </ul>
       <div className="ar-checkout-lead-price">{price} جنيه</div>
+      <div className="ar-delivery-note">
+        <strong>الاستلام على الإيميل</strong>
+        <p>ملفات السيستم هتوصلك على نفس الإيميل اللي هتسجّل بيه في الطلب. تأكد إنه إيميل تقدر تفتحه.</p>
+      </div>
       <p className="ar-pay-note">الدفع بفيزا أو محفظة عبر كاشير، أو إنستاباي.</p>
     </div>
   );

@@ -2296,6 +2296,29 @@ MOBILE
     margin-bottom: 8px;
 }
 
+.ar-delivery-note {
+    background: rgba(18, 179, 160, 0.12);
+    border: 1px solid rgba(30, 200, 184, 0.32);
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin: 12px 0 14px;
+}
+
+.ar-delivery-note strong {
+    display: block;
+    color: #e8eef7;
+    font-size: 15px;
+    margin-bottom: 4px;
+}
+
+.ar-delivery-note p {
+    margin: 0;
+    color: #c5d4e6;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.7;
+}
+
 .ar-pay-note {
     color: #6d7b91;
     font-size: 14px;
