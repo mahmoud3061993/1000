@@ -7,7 +7,7 @@ import {
 } from "../src/lib/config";
 
 describe("payment config merge", () => {
-  it("uses admin-stored Instapay and Kashier when env is empty", () => {
+  it("uses admin-stored Instapay and falls wallet back to the same number", () => {
     const cfg = mergePaymentConfig({}, {
       instapay_number: "01017420379",
       instapay_name: "Mahmoud",
@@ -16,6 +16,8 @@ describe("payment config merge", () => {
       kashier_mode: "test",
     });
     assert.equal(cfg.instapay.number, "01017420379");
+    assert.equal(cfg.wallet.number, "01017420379");
+    assert.equal(cfg.wallet.name, "Mahmoud");
     assert.equal(cfg.kashier.mid, "MID-1-1");
     assert.equal(cfg.kashier.mode, "test");
     assert.equal(kashierConfigured(cfg.kashier), true);
@@ -26,22 +28,28 @@ describe("payment config merge", () => {
     const cfg = mergePaymentConfig(
       {
         INSTAPAY_NUMBER: "01111111111",
+        WALLET_NUMBER: "01555555555",
+        WALLET_NAME: "Cash Wallet",
         KASHIER_MID: "MID-ENV",
         KASHIER_API_KEY: "env-key",
         KASHIER_MODE: "live",
       },
       {
         instapay_number: "01000000000",
+        wallet_number: "01000000000",
         kashier_mid: "MID-DB",
         kashier_api_key: "db-key",
         kashier_mode: "test",
       }
     );
     assert.equal(cfg.instapay.number, "01111111111");
+    assert.equal(cfg.wallet.number, "01555555555");
+    assert.equal(cfg.wallet.name, "Cash Wallet");
     assert.equal(cfg.kashier.mid, "MID-ENV");
     assert.equal(cfg.kashier.apiKey, "env-key");
     assert.equal(cfg.kashier.mode, "live");
     assert.equal(cfg.envOverrides.instapay, true);
+    assert.equal(cfg.envOverrides.wallet, true);
     assert.equal(cfg.envOverrides.kashier, true);
   });
 
@@ -71,6 +79,7 @@ describe("payment config merge", () => {
   it("falls back to the store Instapay number when nothing is configured", () => {
     const cfg = mergePaymentConfig({}, {});
     assert.equal(cfg.instapay.number, "01017420379");
+    assert.equal(cfg.wallet.number, "01017420379");
     assert.equal(cfg.kashier.mid, "MID-40746-226");
     assert.equal(cfg.kashier.mode, "live");
     assert.equal(kashierConfigured(cfg.kashier), false);

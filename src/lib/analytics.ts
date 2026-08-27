@@ -81,8 +81,10 @@ export type AnalyticsTotals = {
   visitConversion: number;
   leadConversion: number;
   instapayClosed: number;
+  walletClosed: number;
   kashierClosed: number;
   instapayIncome: number;
+  walletIncome: number;
   kashierIncome: number;
 };
 
@@ -390,8 +392,10 @@ export function emptyTotals(): AnalyticsTotals {
     visitConversion: 0,
     leadConversion: 0,
     instapayClosed: 0,
+    walletClosed: 0,
     kashierClosed: 0,
     instapayIncome: 0,
+    walletIncome: 0,
     kashierIncome: 0,
   };
 }
@@ -413,6 +417,7 @@ export function summarizeWindow(
   const uniqueVisitors = new Set(visitsIn.map((visit) => visit.session_id)).size;
   const income = paid.reduce((sum, order) => sum + Number(order.amount || 0), 0);
   const instapayPaid = paid.filter((order) => order.payment_method === "instapay");
+  const walletPaid = paid.filter((order) => order.payment_method === "wallet");
   const kashierPaid = paid.filter((order) => order.payment_method === "kashier");
   const closed = paid.length;
   const leads = created.length;
@@ -429,8 +434,10 @@ export function summarizeWindow(
     visitConversion: uniqueVisitors ? round1((closed / uniqueVisitors) * 100) : 0,
     leadConversion: leads ? round1((closed / leads) * 100) : 0,
     instapayClosed: instapayPaid.length,
+    walletClosed: walletPaid.length,
     kashierClosed: kashierPaid.length,
     instapayIncome: roundMoney(instapayPaid.reduce((sum, order) => sum + Number(order.amount || 0), 0)),
+    walletIncome: roundMoney(walletPaid.reduce((sum, order) => sum + Number(order.amount || 0), 0)),
     kashierIncome: roundMoney(kashierPaid.reduce((sum, order) => sum + Number(order.amount || 0), 0)),
   };
 }

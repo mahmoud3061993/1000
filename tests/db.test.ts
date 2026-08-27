@@ -73,16 +73,14 @@ describe("order funnel and payment states", async () => {
     assert.equal(stats.revenue, 235);
   });
 
-  it("stores admin payment settings for Instapay and Kashier", async () => {
+  it("stores admin payment settings for Instapay and cash wallet", async () => {
     await db.setSettings({
       instapay_number: "01017420379",
-      kashier_mid: "MID-22-22",
-      kashier_api_key: "k-secret",
+      wallet_number: "01017420379",
     });
     const stored = await db.getSettings();
     assert.equal(stored.instapay_number, "01017420379");
-    assert.equal(stored.kashier_mid, "MID-22-22");
-    assert.equal(stored.kashier_api_key, "k-secret");
+    assert.equal(stored.wallet_number, "01017420379");
   });
 
   it("stores campaign and ad names on the order", async () => {

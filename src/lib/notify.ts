@@ -22,7 +22,7 @@ type NotifyOrder = {
 const ORDER_TITLES: Record<NotifyKind, string> = {
   lead: "طلب جديد — ملأ البيانات",
   trying: "بيحاول يدفع دلوقتي",
-  pending: "طلب إنستاباي جديد — محتاج مراجعة",
+  pending: "طلب جديد — محتاج مراجعة التحويل",
   paid: "تم الدفع بنجاح",
   failed: "فشل دفع",
 };

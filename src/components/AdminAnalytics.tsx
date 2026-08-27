@@ -201,7 +201,7 @@ export default function AdminAnalytics({ onCleared }: { onCleared?: () => void }
           متوسط الطلب
           <b>{money(current?.avgOrder || 0)}</b>
           <small>
-            إنستاباي {current?.instapayClosed ?? 0} — كاشير {current?.kashierClosed ?? 0}
+            إنستاباي {current?.instapayClosed ?? 0} — محفظة كاش {current?.walletClosed ?? 0}
           </small>
         </div>
       </div>
@@ -222,7 +222,7 @@ export default function AdminAnalytics({ onCleared }: { onCleared?: () => void }
           </small>
         </div>
         <div className="stat">
-          إنستاباي مستني مراجعة
+          تحويلات مستنية مراجعة
           <b>{current?.pendingReview ?? 0}</b>
           <small>دول محتاجين تأكيد أو رفض</small>
         </div>
@@ -230,7 +230,7 @@ export default function AdminAnalytics({ onCleared }: { onCleared?: () => void }
           فشل / مرفوض
           <b>{current?.failed ?? 0}</b>
           <small>
-            دخل إنستاباي {money(current?.instapayIncome || 0)} — كاشير {money(current?.kashierIncome || 0)}
+            دخل إنستاباي {money(current?.instapayIncome || 0)} — محفظة كاش {money(current?.walletIncome || 0)}
           </small>
         </div>
       </div>

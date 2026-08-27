@@ -11,7 +11,7 @@ export type OrderStatus =
   | "failed"
   | "rejected";
 
-export type PaymentMethod = "kashier" | "instapay";
+export type PaymentMethod = "kashier" | "instapay" | "wallet";
 
 export type Order = {
   id: string;

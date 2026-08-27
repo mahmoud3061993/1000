@@ -18,7 +18,7 @@ type NotifyOrder = {
 const STATUS_AR: Record<string, string> = {
   form_filled: "ملأ البيانات",
   awaiting_payment: "بيحاول يدفع",
-  pending_review: "إنستاباي — قيد المراجعة",
+  pending_review: "تحويل يدوي — قيد المراجعة",
   paid: "تم الدفع",
   failed: "فشل الدفع",
   rejected: "مرفوض",
@@ -28,11 +28,18 @@ export function formatOrderMessage(kind: "lead" | "trying" | "pending" | "paid" 
   const titles = {
     lead: "طلب جديد — العميل ملأ بياناته",
     trying: "بيحاول يدفع دلوقتي",
-    pending: "طلب إنستاباي جديد — محتاج مراجعة",
+    pending: "طلب جديد — محتاج مراجعة التحويل",
     paid: "تم الدفع بنجاح",
     failed: "فشل دفع",
   };
-  const method = order.payment_method === "instapay" ? "إنستاباي" : "كاشير (فيزا/محفظة)";
+  const method =
+    order.payment_method === "instapay"
+      ? "إنستاباي"
+      : order.payment_method === "wallet"
+        ? "محفظة كاش"
+        : order.payment_method === "kashier"
+          ? "كاشير (قديم)"
+          : "تحويل يدوي";
   return [
     titles[kind],
     "",

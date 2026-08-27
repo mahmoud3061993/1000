@@ -101,6 +101,7 @@ describe("admin analytics periods", () => {
     assert.equal(report.current.uniqueVisitors, 2);
     assert.equal(report.current.instapayClosed, 1);
     assert.equal(report.current.kashierClosed, 1);
+    assert.equal(report.current.walletClosed, 0);
     assert.equal(report.previous.closed, 1);
     assert.equal(report.previous.income, 235);
     assert.equal(report.change.income, 100);

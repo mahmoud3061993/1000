@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sendCapiEvent } from "@/lib/capi";
-import { SITE_URL, getCatalogProduct, getPaymentConfig, kashierConfigured } from "@/lib/config";
-import { createOrder, getSessionAdPath, getSessionAttribution, hasSessionEvent, insertEvent, type PaymentMethod } from "@/lib/db";
+import { SITE_URL, getCatalogProduct, getPaymentConfig } from "@/lib/config";
+import { createOrder, getSessionAdPath, getSessionAttribution, hasSessionEvent, insertEvent } from "@/lib/db";
 import { mergeAdPaths, mergeAttribution, parseAdPath, parseAttribution, serializeAdPath } from "@/lib/attribution";
-import { buildKashierHppUrl } from "@/lib/kashier";
+import { parseManualPaymentMethod } from "@/lib/orders";
 import { clientIp, getOrCreateSessionId, userAgent } from "@/lib/request";
 import { fileToDataUrl, validateScreenshotFile } from "@/lib/screenshot";
 import { notifyOrder } from "@/lib/notify";
@@ -23,7 +23,7 @@ type OrderPayload = {
   name: string;
   email: string;
   phone: string;
-  method: PaymentMethod;
+  method: ReturnType<typeof parseManualPaymentMethod>;
   productSlug: string;
   sessionId: string;
   leadEventId: string;
@@ -50,7 +50,7 @@ async function readPayload(req: NextRequest): Promise<OrderPayload> {
       name: String(form.get("name") || "").trim(),
       email: String(form.get("email") || "").trim(),
       phone: String(form.get("phone") || "").trim(),
-      method: (String(form.get("method") || "") === "instapay" ? "instapay" : "kashier") as PaymentMethod,
+      method: parseManualPaymentMethod(form.get("method")),
       productSlug: String(form.get("productSlug") || "1000"),
       sessionId: String(form.get("sessionId") || ""),
       leadEventId: String(form.get("leadEventId") || ""),
@@ -75,7 +75,7 @@ async function readPayload(req: NextRequest): Promise<OrderPayload> {
     name: String(body.name || "").trim(),
     email: String(body.email || "").trim(),
     phone: String(body.phone || "").trim(),
-    method: (body.method === "instapay" ? "instapay" : "kashier") as PaymentMethod,
+    method: parseManualPaymentMethod(body.method),
     productSlug: String(body.productSlug || "1000"),
     sessionId: String(body.sessionId || ""),
     leadEventId: String(body.leadEventId || ""),
@@ -115,9 +115,9 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  if (method === "kashier" && !kashierConfigured(cfg.kashier)) {
+  if (!method) {
     return NextResponse.json(
-      { ok: false, error: "بوابة كاشير غير مفعّلة حالياً. حط مفاتيح كاشير من الأدمن أو استخدم إنستاباي." },
+      { ok: false, error: "اختار إنستاباي أو محفظة كاش وارفع سكرين التحويل" },
       { status: 400 }
     );
   }
@@ -129,14 +129,18 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  let screenshotDataUrl: string | null = null;
-  if (method === "instapay") {
-    const screenshot = validateScreenshotFile(payload.screenshot);
-    if (!screenshot.ok) {
-      return NextResponse.json({ ok: false, error: screenshot.error }, { status: 400 });
-    }
-    screenshotDataUrl = await fileToDataUrl(screenshot.file);
+  if (method === "wallet" && !cfg.wallet.number) {
+    return NextResponse.json(
+      { ok: false, error: "بيانات محفظة كاش غير مضافة بعد. ضيف الرقم من لوحة الأدمن." },
+      { status: 400 }
+    );
   }
+
+  const screenshot = validateScreenshotFile(payload.screenshot);
+  if (!screenshot.ok) {
+    return NextResponse.json({ ok: false, error: screenshot.error }, { status: 400 });
+  }
+  const screenshotDataUrl = await fileToDataUrl(screenshot.file);
 
   const orderId = `ord_${Date.now().toString(36)}_${crypto.randomUUID().slice(0, 8)}`;
   const leadEventId = payload.leadEventId || crypto.randomUUID();
@@ -158,8 +162,8 @@ export async function POST(req: NextRequest) {
     currency: product.currency,
     product_slug: product.slug,
     payment_method: method,
-    status: method === "kashier" ? "awaiting_payment" : "pending_review",
-    kashier_order_id: method === "kashier" ? orderId : null,
+    status: "pending_review",
+    kashier_order_id: null,
     kashier_transaction_id: null,
     instapay_screenshot: screenshotDataUrl,
     purchase_event_id: purchaseEventId,
@@ -233,27 +237,6 @@ export async function POST(req: NextRequest) {
     user,
     customData: { orderId, contentName: product.pixelName, contentIds: [product.slug], value: product.price, currency: product.currency },
   });
-
-  if (method === "kashier") {
-    const checkoutUrl = buildKashierHppUrl({
-      orderId,
-      amount: product.price,
-      currency: product.currency,
-      customerName: name,
-      customerEmail: email,
-      customerPhone: phone,
-      allowedMethods: "card,wallet",
-      credentials: cfg.kashier,
-      description: product.kashierDescription,
-    });
-    return NextResponse.json({
-      ok: true,
-      orderId,
-      method,
-      checkoutUrl,
-      purchaseEventId,
-    });
-  }
 
   await notifyOrder("pending", order);
   return NextResponse.json({

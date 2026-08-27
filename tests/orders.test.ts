@@ -30,10 +30,14 @@ function order(patch: Record<string, unknown> = {}) {
 }
 
 describe("admin order actions and mobile alerts", () => {
-  it("keeps Instapay orders pending until admin confirms", () => {
+  it("keeps Instapay and wallet orders pending until admin confirms", () => {
     const pending = order({ status: "pending_review", payment_method: "instapay" });
     assert.equal(canConfirmInstapay(pending), true);
     assert.equal(canRejectInstapay(pending), true);
+    assert.equal(
+      canConfirmInstapay(order({ status: "pending_review", payment_method: "wallet" })),
+      true
+    );
     assert.equal(canConfirmInstapay(order({ status: "paid" })), false);
     assert.equal(
       canConfirmInstapay(order({ payment_method: "kashier", status: "awaiting_payment" })),
@@ -44,16 +48,16 @@ describe("admin order actions and mobile alerts", () => {
   it("formats Arabic Telegram alerts for trying/paid/pending", () => {
     const paid = formatOrderMessage(
       "paid",
-      order({ status: "paid", payment_method: "kashier" })
+      order({ status: "paid", payment_method: "wallet" })
     );
     assert.match(paid, /تم الدفع بنجاح/);
-    assert.match(paid, /كاشير/);
+    assert.match(paid, /محفظة كاش/);
     const pending = formatOrderMessage("pending", order({}));
     assert.match(pending, /إنستاباي/);
     assert.match(pending, /01017420379/);
-    const lead = formatOrderMessage("lead", order({ status: "awaiting_payment", payment_method: "kashier" }));
+    const lead = formatOrderMessage("lead", order({ status: "pending_review", payment_method: "wallet" }));
     assert.match(lead, /ملأ بياناته/);
-    assert.match(lead, /كاشير/);
+    assert.match(lead, /محفظة كاش/);
   });
 
   it("shows whether the purchase email was sent", () => {

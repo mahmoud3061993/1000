@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { isAdminRequest } from "@/lib/auth";
-import { getPaymentConfig, kashierConfigured, emailConfigured } from "@/lib/config";
+import { getPaymentConfig, emailConfigured } from "@/lib/config";
 import { setSettings, usesRemoteDb } from "@/lib/db";
 import { getNotificationInfo, sanitizeNtfyTopic } from "@/lib/notify";
 
@@ -21,9 +21,8 @@ export async function GET() {
     settings: {
       instapay_number: cfg.instapay.number,
       instapay_name: cfg.instapay.name,
-      kashier_mid: cfg.kashier.mid,
-      kashier_api_key_set: Boolean(cfg.kashier.apiKey),
-      kashier_mode: cfg.kashier.mode,
+      wallet_number: cfg.wallet.number,
+      wallet_name: cfg.wallet.name,
       product_delivery_url: cfg.deliveryUrl,
       plant_delivery_url: cfg.plantDeliveryUrl,
       arabity_delivery_url: cfg.arabityDeliveryUrl,
@@ -32,8 +31,8 @@ export async function GET() {
     },
     notifications,
     integrations: {
-      kashier: kashierConfigured(cfg.kashier),
       instapay: Boolean(cfg.instapay.number),
+      wallet: Boolean(cfg.wallet.number),
       mobile: notifications.mobile,
       telegram: notifications.telegram,
       email: emailConfigured(),
@@ -53,10 +52,8 @@ export async function POST(req: NextRequest) {
 
   if ("instapay_number" in body) patch.instapay_number = asString(body.instapay_number);
   if ("instapay_name" in body) patch.instapay_name = asString(body.instapay_name);
-  if ("kashier_mid" in body) patch.kashier_mid = asString(body.kashier_mid);
-  if ("kashier_mode" in body) {
-    patch.kashier_mode = asString(body.kashier_mode).toLowerCase() === "test" ? "test" : "live";
-  }
+  if ("wallet_number" in body) patch.wallet_number = asString(body.wallet_number);
+  if ("wallet_name" in body) patch.wallet_name = asString(body.wallet_name);
   if ("product_delivery_url" in body) {
     patch.product_delivery_url = asString(body.product_delivery_url);
   }
@@ -73,11 +70,6 @@ export async function POST(req: NextRequest) {
     patch.ntfy_topic = sanitizeNtfyTopic(asString(body.ntfy_topic));
   }
 
-  const apiKey = asString(body.kashier_api_key);
-  if (apiKey) {
-    patch.kashier_api_key = apiKey;
-  }
-
   await setSettings(patch);
   const cfg = await getPaymentConfig();
   const notifications = await getNotificationInfo();
@@ -85,8 +77,8 @@ export async function POST(req: NextRequest) {
     ok: true,
     notifications,
     integrations: {
-      kashier: kashierConfigured(cfg.kashier),
       instapay: Boolean(cfg.instapay.number),
+      wallet: Boolean(cfg.wallet.number),
       mobile: notifications.mobile,
       telegram: notifications.telegram,
       email: emailConfigured(),
