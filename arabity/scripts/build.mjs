@@ -1,6 +1,7 @@
 import { cp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { writeOfflineHtml } from "./build-offline.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const src = join(root, "src");
@@ -26,4 +27,7 @@ html = html
   .replace('src="js/app.js"', 'src="/car/js/app.js"');
 await writeFile(indexPath, html);
 
+const { targets } = await writeOfflineHtml();
+
 console.log("Built arabity/dist and public/car");
+console.log("Offline file:", targets.join(", "));

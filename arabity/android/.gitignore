@@ -91,3 +91,4 @@ lint/tmp/
 
 # Cordova plugins for Capacitor
 # Keep generated web assets so Android Studio can build without a prior cap sync.
+app/src/main/assets/public/arabity-offline.html

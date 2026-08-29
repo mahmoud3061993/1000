@@ -181,10 +181,26 @@ function bindNative() {
   nativePlugin("StatusBar")?.setBackgroundColor?.({ color: "#0A2540" });
 }
 
+function storageBlockedMessage() {
+  return `<div class="empty-state"><h3>المتصفح منع حفظ البيانات من الملف المحلي</h3>
+    <p class="muted">افتح الملف في Google Chrome أو Microsoft Edge. Firefox أحيانًا بيمنع التخزين لما الملف يتفتح من الجهاز مباشرة.</p>
+    <p class="faint">سيب الملف في نفس المجلد بعد ما تبدأ تسجّل بيانات، عشان السجلات تفضل موجودة.</p></div>`;
+}
+
 export async function boot() {
   document.documentElement.dataset.arabityReady = "1";
   applyTheme(localStorage.getItem("arabity-theme") || "system");
-  await db.ready();
+  if (!window.indexedDB) {
+    document.getElementById("app-main").innerHTML = storageBlockedMessage();
+    return;
+  }
+  try {
+    await db.ready();
+  } catch (err) {
+    console.error(err);
+    document.getElementById("app-main").innerHTML = storageBlockedMessage();
+    return;
+  }
   await loadSettings();
   applyTheme(getSettings().theme);
   registerRoutes();

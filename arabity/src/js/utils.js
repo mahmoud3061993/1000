@@ -209,6 +209,37 @@ export function isNative() {
   }
 }
 
+export function isOfflineHtml() {
+  return Boolean(globalThis.ARABITY_OFFLINE_FILE) || globalThis.location?.protocol === "file:";
+}
+
+export function offlineHtmlUrl() {
+  if (isOfflineHtml() || isNative()) return "";
+  const path = globalThis.location?.pathname || "";
+  if (/\/car(\/|$)/.test(path)) return "/car/arabity-offline.html";
+  return "arabity-offline.html";
+}
+
+export function androidApkUrl() {
+  if (isNative()) return "";
+  if (isOfflineHtml() || globalThis.location?.protocol === "file:") {
+    return "https://www.producthelpyou.online/car/arabity.apk";
+  }
+  const path = globalThis.location?.pathname || "";
+  if (/\/car(\/|$)/.test(path)) return "/car/arabity.apk";
+  return "arabity.apk";
+}
+
+export function guideHtmlUrl() {
+  if (isNative()) return "guide.html";
+  if (isOfflineHtml() || globalThis.location?.protocol === "file:") {
+    return "https://www.producthelpyou.online/car/guide.html";
+  }
+  const path = globalThis.location?.pathname || "";
+  if (/\/car(\/|$)/.test(path)) return "/car/guide.html";
+  return "guide.html";
+}
+
 export function nativePlugin(name) {
   return globalThis.Capacitor?.Plugins?.[name] || null;
 }

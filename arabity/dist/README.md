@@ -43,7 +43,20 @@ public/car/            نفس المصدر ليشتغل على الموقع تح
 3. لينكس: `bash arabity/desktop/start-linux.sh`
 4. هيفتح http://127.0.0.1:8765
 
-التشغيل من `file://` ممكن يمنع IndexedDB في بعض المتصفحات؛ السيرفر المحلي البسيط هو الطريقة الموثوقة.
+التشغيل من `file://` على المجلد متعدد الملفات ممكن يمنع IndexedDB في بعض المتصفحات؛ السيرفر المحلي البسيط هو الطريقة الموثوقة.
+
+## ملف HTML أوفلاين (ملف واحد)
+
+التطبيق كله في ملف واحد: `arabity/dist/arabity-offline.html` (ونسخة على الموقع `/car/arabity-offline.html`).
+
+1. حمّل الملف من الإعدادات داخل التطبيق، أو من https://www.producthelpyou.online/car/arabity-offline.html
+2. احفظه باسم `عربيتي.html` على اللابتوب أو الموبايل
+3. افتحه في **Chrome** أو **Edge** (دبل كليك)
+4. كل الميزات شغالة أوفلاين، والبيانات بتتحفظ على الجهاز
+
+سيب الملف في نفس المكان بعد التسجيل. لو نقلته لمجلد تاني، المتصفح ممكن يعتبره تطبيق جديد فتلاقي بيانات فاضية.
+
+Firefox أحيانًا بيمنع التخزين على `file://` — استخدم Chrome أو Edge.
 
 ## تشغيل التطوير
 
@@ -76,9 +89,13 @@ npm run dev          # http://localhost:3000/car
 
 انقل الملف بأي طريقة (كابل، درايف، واتساب) بين اللابتوب والموبايل.
 
-## أندرويد
+## أندرويد (من غير Play Store)
 
-راجع [BUILD-APK.md](BUILD-APK.md).
+حمّل `arabity.apk` من https://www.producthelpyou.online/car/arabity.apk أو من **الإعدادات** داخل التطبيق.
+
+دليل الاستخدام للمستخدم: https://www.producthelpyou.online/car/guide.html (وملف `guide.html` جنب التطبيق).
+
+التفاصيل وخطوات البناء في [BUILD-APK.md](BUILD-APK.md).
 
 معرّف الحزمة: `com.arabity.cartracker`  
 اسم التطبيق: عربيتي
