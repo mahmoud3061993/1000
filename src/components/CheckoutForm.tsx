@@ -2,6 +2,8 @@
 
 import { useMemo, useState } from "react";
 import { firePixel, getTrackingContext } from "./TrackingBoot";
+import { messageForOrderSubmitFailure } from "@/lib/order-errors";
+import { compressReceiptImage } from "@/lib/receipt-image";
 
 type Method = "instapay" | "wallet";
 
@@ -67,6 +69,15 @@ export function CheckoutForm({
         return;
       }
 
+      let screenshot = file;
+      try {
+        screenshot = await compressReceiptImage(file);
+      } catch {
+        setError("صورة الإيصال كبيرة. ارفع سكرين أصغر، أو صور الإيصال تاني بجودة أقل.");
+        setBusy(false);
+        return;
+      }
+
       const cookies = getTrackingContext();
       const leadEventId = crypto.randomUUID();
       const checkoutEventId = crypto.randomUUID();
@@ -104,19 +115,25 @@ export function CheckoutForm({
       Object.entries(common).forEach(([key, value]) => {
         if (value) data.set(key, String(value));
       });
-      data.set("screenshot", file);
+      data.set("screenshot", screenshot);
 
       const res = await fetch("/api/orders", { method: "POST", body: data });
-      const json = await res.json();
-      if (!res.ok || !json.ok) {
-        setError(json.error || "حصل خطأ، جرّب تاني");
+      const bodyText = await res.text();
+      let json: { ok?: boolean; error?: string; redirect?: string; orderId?: string } | null = null;
+      try {
+        json = bodyText ? JSON.parse(bodyText) : null;
+      } catch {
+        json = null;
+      }
+      if (!res.ok || !json?.ok) {
+        setError(json?.error || messageForOrderSubmitFailure(res.status, bodyText));
         setBusy(false);
         return;
       }
 
       window.location.href = json.redirect || `/thank-you?order=${json.orderId}&pending=1`;
     } catch {
-      setError("حصل خطأ في الاتصال");
+      setError(messageForOrderSubmitFailure(0));
       setBusy(false);
     }
   }
@@ -198,6 +215,7 @@ export function CheckoutForm({
                   onChange={(e) => pickFile(e.target.files?.[0] || null)}
                   required
                 />
+                <small className="screenshot-hint">لو الصورة كبيرة، هتتصغّر تلقائي قبل الإرسال.</small>
               </div>
               {preview ? (
                 <img src={preview} alt="سكرين التحويل" className="screenshot-preview" />

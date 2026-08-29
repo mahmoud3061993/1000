@@ -96,6 +96,18 @@ async function readPayload(req: NextRequest): Promise<OrderPayload> {
 }
 
 export async function POST(req: NextRequest) {
+  try {
+    return await createManualOrder(req);
+  } catch (error) {
+    console.error("order create failed", error);
+    return NextResponse.json(
+      { ok: false, error: "حصل خطأ في حفظ الطلب. جرّب تاني ولو الصورة كبيرة صغّرها." },
+      { status: 500 }
+    );
+  }
+}
+
+async function createManualOrder(req: NextRequest) {
   const payload = await readPayload(req);
   const name = payload.name;
   const email = payload.email;
