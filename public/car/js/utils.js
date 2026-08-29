@@ -209,6 +209,17 @@ export function isNative() {
   }
 }
 
+export function isOfflineHtml() {
+  return Boolean(globalThis.ARABITY_OFFLINE_FILE) || globalThis.location?.protocol === "file:";
+}
+
+export function offlineHtmlUrl() {
+  if (isOfflineHtml() || isNative()) return "";
+  const path = globalThis.location?.pathname || "";
+  if (/\/car(\/|$)/.test(path)) return "/car/arabity-offline.html";
+  return "arabity-offline.html";
+}
+
 export function nativePlugin(name) {
   return globalThis.Capacitor?.Plugins?.[name] || null;
 }
