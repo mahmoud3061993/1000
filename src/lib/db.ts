@@ -475,8 +475,20 @@ export async function insertEvent(event: {
 }
 
 export async function clearAnalyticsData(product = "arabity") {
-  const slug = product === "plant" || product === "1000" || product === "arabity" ? product : "arabity";
   const database = await getDb();
+  if (product === "all") {
+    const visits = await database.execute({ sql: `DELETE FROM visits`, args: [] });
+    const events = await database.execute({ sql: `DELETE FROM events`, args: [] });
+    return {
+      product: "all",
+      visitsDeleted: Number(visits.rowsAffected || 0),
+      eventsDeleted: Number(events.rowsAffected || 0),
+    };
+  }
+  const slug =
+    product === "plant" || product === "1000" || product === "arabity" || product === "masaref"
+      ? product
+      : "arabity";
   const visits = await database.execute({
     sql: `DELETE FROM visits WHERE product_slug = ?`,
     args: [slug],

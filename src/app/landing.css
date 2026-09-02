@@ -2438,4 +2438,457 @@ MOBILE
     }
 }
 
+/* مصارف sales landing — light cream / teal */
+.masaref-root {
+    min-height: 100vh;
+    background: #f6f3ec;
+    color: #1c1917;
+    direction: rtl;
+    font-family: "Almarai", Tahoma, Arial, sans-serif;
+    overflow-x: clip;
+}
+
+.masaref-lp {
+    background:
+        radial-gradient(900px 420px at 90% -10%, rgba(15, 118, 110, 0.12), transparent 60%),
+        radial-gradient(700px 380px at 0% 12%, rgba(234, 88, 12, 0.08), transparent 55%),
+        #f6f3ec;
+    color: #1c1917;
+    overflow-x: clip;
+}
+
+.ms-wrap {
+    width: min(1120px, calc(100% - 32px));
+    margin: 0 auto;
+}
+
+.ms-topbar {
+    background: #fff;
+    color: #115e59;
+    text-align: center;
+    padding: 11px 16px;
+    font-size: 14px;
+    font-weight: 700;
+    border-bottom: 1px solid #e7e0d4;
+}
+
+.ms-hero { padding: 56px 0 28px; }
+
+.ms-hero-grid {
+    display: grid;
+    grid-template-columns: 1.05fr 0.95fr;
+    gap: 48px;
+    align-items: center;
+}
+
+.ms-kicker {
+    display: inline-flex;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: #ccfbf1;
+    color: #115e59;
+    font-size: 13px;
+    font-weight: 800;
+    margin-bottom: 16px;
+}
+
+.ms-hero-copy h1 {
+    margin: 0 0 16px;
+    font-size: clamp(30px, 5vw, 48px);
+    line-height: 1.3;
+    font-weight: 800;
+    color: #1c1917;
+}
+
+.ms-hero-copy > p {
+    margin: 0 0 20px;
+    color: #57534e;
+    font-size: 18px;
+    line-height: 1.85;
+    max-width: 540px;
+}
+
+.ms-hero-points {
+    margin: 0 0 24px;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 8px;
+}
+
+.ms-hero-points li {
+    position: relative;
+    padding-right: 22px;
+    color: #292524;
+    font-weight: 700;
+}
+
+.ms-checks li:before {
+    content: "✓";
+    position: absolute;
+    right: 0;
+    top: 0;
+    color: #0f766e;
+    font-weight: 900;
+}
+
+.ms-btn {
+    border: 0;
+    background: linear-gradient(180deg, #14b8a6, #0f766e);
+    color: #fff;
+    font: inherit;
+    font-weight: 800;
+    font-size: 16px;
+    padding: 14px 22px;
+    border-radius: 12px;
+    cursor: pointer;
+    box-shadow: 0 10px 28px rgba(15, 118, 110, 0.22);
+}
+
+.ms-hero-price {
+    margin: 0 0 16px;
+    color: #115e59;
+    font-size: 22px;
+    font-weight: 800;
+}
+
+.ms-hero-cta { display: flex; flex-wrap: wrap; gap: 12px; }
+.ms-hero-cta .ms-btn { min-height: 48px; }
+.ms-hero-meta { margin-top: 14px; color: #78716c; font-size: 13px; font-weight: 700; }
+
+.ms-phone { max-width: 340px; margin: 0 auto; }
+.ms-phone-bezel {
+    background: #fff;
+    border: 1px solid #e7e0d4;
+    border-radius: 36px;
+    padding: 10px 10px 14px;
+    box-shadow: 0 24px 60px rgba(28, 25, 23, 0.12);
+}
+.ms-phone-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #a8a29e;
+    font-size: 11px;
+    padding: 4px 14px 8px;
+}
+.ms-phone-notch {
+    width: 72px;
+    height: 8px;
+    background: #1c1917;
+    border-radius: 8px;
+}
+.ms-phone-caption {
+    text-align: center;
+    margin-top: 14px;
+    color: #57534e;
+    font-weight: 700;
+    font-size: 14px;
+}
+
+.ms-screen {
+    background: #f6f3ec;
+    color: #1c1917;
+    border-radius: 24px;
+    padding: 14px;
+    min-height: 420px;
+}
+.ms-screen-top {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 14px;
+}
+.ms-screen-top small { display: block; color: #0f766e; font-weight: 800; font-size: 11px; }
+.ms-screen-top strong { display: block; font-size: 16px; }
+.ms-pill {
+    background: #ccfbf1;
+    color: #0f766e;
+    border-radius: 999px;
+    padding: 4px 9px;
+    font-size: 11px;
+    font-weight: 800;
+    height: fit-content;
+}
+.ms-daily, .ms-streak {
+    text-align: center;
+    background: #fff;
+    border-radius: 20px;
+    padding: 18px 12px;
+    margin-bottom: 12px;
+}
+.ms-daily b, .ms-streak b, .ms-buy-amt b {
+    display: block;
+    font-size: 32px;
+    color: #0f766e;
+    line-height: 1.2;
+}
+.ms-daily span, .ms-streak span { color: #78716c; font-size: 13px; font-weight: 700; }
+.ms-warn, .ms-yellow, .ms-red, .ms-runway {
+    border-radius: 16px;
+    padding: 12px;
+    font-weight: 800;
+    font-size: 13px;
+    line-height: 1.7;
+    margin-bottom: 10px;
+}
+.ms-warn, .ms-yellow { background: #fffbeb; color: #92400e; }
+.ms-red { background: #fef2f2; color: #991b1b; }
+.ms-runway { background: #fff7ed; color: #9a3412; }
+.ms-mini, .ms-week {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+.ms-mini div, .ms-week div, .ms-eat div {
+    background: #fff;
+    border-radius: 14px;
+    padding: 10px;
+}
+.ms-mini small, .ms-week small, .ms-eat span, .ms-buy-amt small {
+    color: #78716c;
+    font-size: 11px;
+    font-weight: 800;
+}
+.ms-eat { display: grid; gap: 8px; }
+.ms-eat div { display: flex; justify-content: space-between; }
+.ms-saved { color: #15803d; font-weight: 800; text-align: center; }
+
+.ms-section { padding: 64px 0; }
+.ms-section-head { text-align: center; margin-bottom: 28px; }
+.ms-section-head h2 {
+    margin: 0 0 10px;
+    font-size: clamp(24px, 4vw, 36px);
+    line-height: 1.4;
+}
+.ms-section-head p { margin: 0; color: #57534e; }
+
+.ms-pain-grid, .ms-kpi-grid, .ms-trust-icons {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+}
+.ms-pain-card, .ms-kpi-card {
+    background: #fff;
+    border: 1px solid #e7e0d4;
+    border-radius: 20px;
+    padding: 22px 20px;
+}
+.ms-pain-card h3, .ms-kpi-card h3 { margin: 0 0 8px; font-size: 20px; }
+.ms-pain-card p { margin: 0; color: #57534e; line-height: 1.8; }
+.ms-kpi-card { text-align: center; }
+.ms-kpi-card b { display: block; font-size: clamp(28px, 4vw, 40px); color: #0f766e; }
+.ms-kpi-card small { color: #78716c; font-weight: 700; }
+.ms-center-cta { display: flex; justify-content: center; margin-top: 28px; }
+
+.ms-screen-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px;
+}
+.ms-screen-card {
+    background: #fff;
+    border: 1px solid #e7e0d4;
+    border-radius: 24px;
+    padding: 18px;
+}
+.ms-screen-card-copy h3 { margin: 14px 0 6px; }
+.ms-screen-card-copy p { margin: 0; color: #57534e; }
+
+.ms-package, .ms-offer-list {
+    list-style: none;
+    margin: 0 auto 18px;
+    padding: 0;
+    max-width: 640px;
+    display: grid;
+    gap: 8px;
+}
+.ms-package li, .ms-offer-list li {
+    position: relative;
+    padding: 12px 36px 12px 14px;
+    background: #fff;
+    border: 1px solid #e7e0d4;
+    border-radius: 14px;
+    font-weight: 700;
+}
+.ms-package li:before, .ms-offer-list li:before {
+    content: "✓";
+    position: absolute;
+    right: 14px;
+    color: #0f766e;
+}
+.ms-package-note { text-align: center; color: #0f766e; font-weight: 800; font-size: 18px; }
+
+.ms-trust-box {
+    max-width: 760px;
+    margin: 0 auto;
+    text-align: center;
+    background: #fff;
+    border: 1px solid #e7e0d4;
+    border-radius: 24px;
+    padding: 32px 24px;
+}
+.ms-trust-box h2 { margin: 0 0 10px; }
+.ms-trust-box > p { margin: 0 0 22px; color: #57534e; }
+.ms-trust-icons { grid-template-columns: repeat(3, 1fr); }
+.ms-trust-icons div { background: #f6f3ec; border-radius: 16px; padding: 14px 10px; }
+.ms-trust-icons b { display: block; color: #0f766e; margin-bottom: 4px; }
+
+.ms-faq { max-width: 760px; }
+.ms-faq-item {
+    background: #fff;
+    border: 1px solid #e7e0d4;
+    border-radius: 16px;
+    padding: 4px 16px;
+    margin-bottom: 10px;
+}
+.ms-faq-item summary {
+    cursor: pointer;
+    font-weight: 800;
+    padding: 14px 0;
+    list-style: none;
+}
+.ms-faq-item summary::-webkit-details-marker { display: none; }
+.ms-faq-item p { margin: 0 0 14px; color: #57534e; line-height: 1.8; }
+
+.ms-offer-box {
+    max-width: 640px;
+    margin: 0 auto;
+    background: #fff;
+    border: 1px solid #e7e0d4;
+    border-radius: 24px;
+    padding: 32px 24px;
+    text-align: center;
+}
+.ms-offer-label { color: #0f766e; font-weight: 800; }
+.ms-offer-now small { display: block; color: #78716c; }
+.ms-offer-now strong { display: block; font-size: 40px; color: #0f766e; margin: 4px 0 8px; }
+.ms-offer-note { color: #57534e; font-weight: 700; }
+
+.masaref-checkout { background: #f6f3ec; padding-bottom: 40px; }
+.masaref-root .checkout-wrap { padding-top: 12px; }
+.masaref-root .checkout-title, .masaref-root .checkout-price strong { color: #1c1917; }
+.masaref-root .checkout-box {
+    background: #fff;
+    border: 1px solid #e7e0d4;
+    color: #1c1917;
+}
+.masaref-root .field input {
+    background: #fffcf7;
+    border-color: #e7e0d4;
+    color: #1c1917;
+}
+.masaref-root .pay-option {
+    background: #fffcf7;
+    border-color: #e7e0d4;
+    color: #1c1917;
+}
+.masaref-root .pay-option.active {
+    border-color: #0f766e;
+    background: #ccfbf1;
+    color: #115e59;
+}
+.masaref-root .buy-btn { background: #0f766e; color: #fff; }
+.masaref-root .instapay-box {
+    background: rgba(15, 118, 110, 0.08);
+    border-color: rgba(15, 118, 110, 0.24);
+}
+
+.ms-checkout-lead {
+    width: min(640px, calc(100% - 32px));
+    margin: 0 auto 8px;
+}
+.ms-checkout-lead h2 { margin: 0 0 12px; }
+.ms-checkout-lead ul { list-style: none; margin: 0 0 16px; padding: 0; display: grid; gap: 8px; }
+.ms-checkout-lead li { padding-right: 24px; position: relative; font-weight: 700; }
+.ms-checkout-lead li:before { content: "✓"; position: absolute; right: 0; color: #0f766e; }
+.ms-checkout-lead-price { font-size: 32px; font-weight: 800; color: #0f766e; margin-bottom: 8px; }
+.ms-delivery-note {
+    background: #ccfbf1;
+    border: 1px solid rgba(15, 118, 110, 0.28);
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin: 12px 0 14px;
+}
+.ms-delivery-note p { margin: 4px 0 0; font-weight: 700; line-height: 1.7; }
+.ms-pay-note { color: #78716c; font-size: 14px; font-weight: 700; }
+
+.ms-close { text-align: center; padding: 56px 0 80px; }
+.ms-close h2 { margin: 0 0 12px; font-size: clamp(26px, 4vw, 40px); line-height: 1.35; }
+.ms-close p { color: #57534e; font-size: 18px; }
+
+.ms-sticky { display: none; }
+.ms-wa {
+    position: fixed;
+    left: 18px;
+    bottom: 18px;
+    width: 58px;
+    height: 58px;
+    border-radius: 50%;
+    background: #25d366;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 999999;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.22);
+}
+.ms-wa svg { width: 32px; height: 32px; fill: #fff; }
+
+@media (max-width: 900px) {
+    .ms-hero-grid, .ms-pain-grid, .ms-kpi-grid, .ms-trust-icons, .ms-screen-grid {
+        grid-template-columns: 1fr;
+    }
+    .ms-screen-grid {
+        display: flex;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        gap: 12px;
+        padding-bottom: 8px;
+    }
+    .ms-screen-card {
+        min-width: min(280px, 82vw);
+        scroll-snap-align: start;
+        flex: 0 0 auto;
+    }
+    .ms-hero-copy { text-align: center; }
+    .ms-hero-copy > p, .ms-hero-cta { margin-left: auto; margin-right: auto; }
+    .ms-hero-cta { width: 100%; flex-direction: column; justify-content: center; }
+    .ms-hero-cta .ms-btn, .ms-center-cta .ms-btn, .ms-offer-box .ms-btn, .ms-close .ms-btn { width: 100%; }
+    .ms-hero-points li { text-align: right; }
+    .ms-sticky.is-on {
+        position: fixed;
+        display: flex;
+        left: 10px;
+        right: 10px;
+        bottom: 10px;
+        z-index: 99999;
+        background: #fff;
+        border: 1px solid #e7e0d4;
+        border-radius: 13px;
+        padding: 8px 8px 8px 12px;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        box-shadow: 0 10px 35px rgba(28, 25, 23, 0.16);
+        color: #1c1917;
+        font-size: 14px;
+        font-weight: 800;
+    }
+    .ms-sticky.is-on button {
+        background: #0f766e;
+        color: #fff;
+        border: 0;
+        border-radius: 9px;
+        padding: 12px 16px;
+        font-family: inherit;
+        font-weight: 900;
+        cursor: pointer;
+        min-height: 44px;
+        white-space: nowrap;
+    }
+    .ms-wa { bottom: 88px; width: 54px; height: 54px; }
+    .ms-has-sticky { padding-bottom: 78px; }
+    .ms-close { padding-bottom: 96px; }
+}
+
 

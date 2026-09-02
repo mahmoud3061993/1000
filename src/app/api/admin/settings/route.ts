@@ -26,6 +26,7 @@ export async function GET() {
       product_delivery_url: cfg.deliveryUrl,
       plant_delivery_url: cfg.plantDeliveryUrl,
       arabity_delivery_url: cfg.arabityDeliveryUrl,
+      masaref_delivery_url: cfg.masarefDeliveryUrl,
       whatsapp_number: cfg.whatsapp,
       ntfy_topic: notifications.topic,
     },
@@ -62,6 +63,9 @@ export async function POST(req: NextRequest) {
   }
   if ("arabity_delivery_url" in body) {
     patch.arabity_delivery_url = asString(body.arabity_delivery_url);
+  }
+  if ("masaref_delivery_url" in body) {
+    patch.masaref_delivery_url = asString(body.masaref_delivery_url);
   }
   if ("whatsapp_number" in body) {
     patch.whatsapp_number = asString(body.whatsapp_number).replace(/\D/g, "");

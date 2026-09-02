@@ -5,6 +5,7 @@
 - مكتبة +1000 Canva Ads: `/` و `/products/1000`
 - دليل رعاية النباتات: الشراء `/buydoctorplant` — الدليل `/products/plant`
 - عربيتي: الشراء `/carlanding` — النظام `/car`
+- مصارف: الشراء `/masaref` — النظام `/spend`
 
 الدفع في الاتنين واحد:
 
@@ -16,7 +17,15 @@
 - لوحة أدمن فيها عدد الدخول، مين ملأ البيانات، مين بيستنى مراجعة التحويل، ومين اتقفل
 - إشعارات على الموبايل عن طريق تيليجرام
 
-## عربيتي — `/car`
+## مصارف — `/masaref`
+
+سيستم السيطرة على المصروفات (عربي، بدون حساب وبدون إنترنت بعد التحميل):
+
+- التشغيل المحلي: `npm run masaref` ثم http://127.0.0.1:8766
+- صفحة هبوط البيع: https://www.producthelpyou.online/masaref
+- على الموقع: https://www.producthelpyou.online/spend
+- المصدر: مجلد `masaref/` — بناء الأندرويد في `masaref/BUILD-APK.md`
+- السعر الافتراضي: 399 جنيه، دفع مرة واحدة بإنستاباي أو محفظة كاش
 
 تطبيق إدارة مصاريف وصيانة العربية (عربي، بدون حساب وبدون إنترنت بعد التحميل):
 
@@ -48,6 +57,8 @@ npm run dev
 | `PLANT_DELIVERY_URL` | لينك دخول دليل النباتات بعد الدفع |
 | `ARABITY_PRODUCT_PRICE` | سعر عربيتي (الافتراضي 400) |
 | `ARABITY_DELIVERY_URL` | لينك Google Drive لفولدر عربيتي بعد الدفع (HTML + APK + الدليل) |
+| `MASAREF_PRODUCT_PRICE` | سعر مصارف (الافتراضي 399) |
+| `MASAREF_DELIVERY_URL` | لينك Google Drive لفولدر مصارف بعد الدفع (HTML + APK + الدليل) |
 | `PLANT_APP_ORIGIN` | أصل نشر الدليل عشان `/products/plant` تتوجه له |
 | `ADMIN_PASSWORD` | دخول لوحة الأدمن |
 | `SESSION_SECRET` | مفتاح توقيع جلسة الأدمن |
@@ -171,7 +182,9 @@ CNAME  www    cname.vercel-dns.com
 
 - https://www.producthelpyou.online
 - https://www.producthelpyou.online/products/1000
-- https://www.producthelpyou.online/car — تطبيق **عربيتي** (مصاريف وصيانة العربية، بدون إنترنت بعد التحميل)
+- https://www.producthelpyou.online/car — تطبيق **عربيتي**
+- https://www.producthelpyou.online/masaref — صفحة بيع **مصارف**
+- https://www.producthelpyou.online/spend — تطبيق **مصارف**
 - https://www.producthelpyou.online/admin
 
 ## الاختبار

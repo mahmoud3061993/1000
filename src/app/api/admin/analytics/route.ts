@@ -10,7 +10,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ ok: false, error: "unauthorized" }, { status: 401 });
   }
   const period = parseAnalyticsPeriod(req.nextUrl.searchParams.get("period"));
-  const product = parseProductFilter(req.nextUrl.searchParams.get("product") || "arabity");
+  const product = parseProductFilter(req.nextUrl.searchParams.get("product") || "all");
   const report = await getAnalyticsReport(period, new Date(), product);
   return NextResponse.json({ ok: true, report, usesRemoteDb: usesRemoteDb() });
 }
@@ -23,6 +23,6 @@ export async function POST(req: NextRequest) {
   if (body.action !== "clear") {
     return NextResponse.json({ ok: false, error: "إجراء غير معروف" }, { status: 400 });
   }
-  const cleared = await clearAnalyticsData("arabity");
+  const cleared = await clearAnalyticsData(typeof body.product === "string" ? body.product : "all");
   return NextResponse.json({ ok: true, ...cleared });
 }
