@@ -4,12 +4,14 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "node arabity/scripts/build.mjs && next build",
+    "build": "node arabity/scripts/build.mjs && node masaref/scripts/build.mjs && next build",
     "start": "next start",
-    "test": "tsx --test tests/*.test.ts && node --test arabity/tests/*.test.mjs",
+    "test": "tsx --test tests/*.test.ts && node --test arabity/tests/*.test.mjs && node --test masaref/tests/*.test.mjs",
     "lint": "next lint",
     "arabity": "node arabity/scripts/serve.mjs",
-    "arabity:build": "node arabity/scripts/build.mjs"
+    "arabity:build": "node arabity/scripts/build.mjs",
+    "masaref": "node masaref/scripts/serve.mjs",
+    "masaref:build": "node masaref/scripts/build.mjs"
   },
   "dependencies": {
     "@libsql/client": "^0.14.0",

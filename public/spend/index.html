@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="utf-8" />
+    <base id="app-base" href="/spend/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
+    <meta name="theme-color" content="#0F766E" />
+    <meta name="application-name" content="مصارف" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="مصارف" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta
+      name="description"
+      content="مرتبك بيخلص ومش عارف راح فين؟ مصارف يكشفلك بتصرف فلوسك في إيه، ويحطلك حد للصرف قبل ما فلوسك تخلص."
+    />
+    <title>مصارف — سيستم السيطرة على المصروفات</title>
+    <style>
+      html, body { margin: 0; min-height: 100%; background: #f6f3ec; color: #1c1917; font-family: Tahoma, Arial, sans-serif; }
+      .boot-screen { min-height: 100dvh; display: grid; place-items: center; padding: 32px 20px; text-align: center; }
+      .boot-screen h1 { margin: 0 0 8px; }
+      .boot-screen p { margin: 0; color: #78716c; line-height: 1.7; }
+    </style>
+    <script>
+      (function () {
+        var base = document.getElementById("app-base");
+        var cap = window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform();
+        var path = location.pathname || "";
+        if (!cap && /\/spend(\/|$|index\.html$)/.test(path)) base.href = "/spend/";
+      })();
+    </script>
+    <link rel="icon" href="/spend/assets/icons/favicon.svg" type="image/svg+xml" />
+    <link rel="manifest" href="/spend/manifest.json" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Almarai:wght@400;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/spend/css/app.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#app-main">تخطي إلى المحتوى</a>
+    <div id="app" class="app">
+      <main id="app-main" class="app-main" tabindex="-1">
+        <div class="boot-screen" id="boot-screen">
+          <h1>مصارف</h1>
+          <p>جاري فتح السيستم...</p>
+        </div>
+      </main>
+      <nav id="bottom-nav" class="bottom-nav" aria-label="التنقل"></nav>
+    </div>
+    <div id="overlay-root" class="overlay-root"></div>
+    <div id="toast-root" class="toast-root" aria-live="polite"></div>
+    <script type="module" src="/spend/js/app.js"></script>
+    <script nomodule>
+      document.getElementById("boot-screen").innerHTML =
+        "<h1>مصارف</h1><p>المتصفح ده قديم. افتح Chrome أو Edge المحدّث.</p>";
+    </script>
+  </body>
+</html>

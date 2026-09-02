@@ -1,4 +1,4 @@
-export type ProductSlug = "1000" | "plant" | "arabity";
+export type ProductSlug = "1000" | "plant" | "arabity" | "masaref";
 
 export type CatalogProduct = {
   slug: ProductSlug;
@@ -19,7 +19,7 @@ export type CatalogProduct = {
 };
 
 export function isProductSlug(value: string | null | undefined): value is ProductSlug {
-  return value === "1000" || value === "plant" || value === "arabity";
+  return value === "1000" || value === "plant" || value === "arabity" || value === "masaref";
 }
 
 export function resolveProductSlug(value: string | null | undefined): ProductSlug {
@@ -29,6 +29,7 @@ export function resolveProductSlug(value: string | null | undefined): ProductSlu
 export function productAdminLabel(slug?: string | null) {
   if (slug === "plant") return "دليل النباتات";
   if (slug === "arabity") return "عربيتي";
+  if (slug === "masaref") return "مصارف";
   return "مكتبة +1000";
 }
 
@@ -36,6 +37,28 @@ export function getCatalogProduct(
   slug?: string | null,
   env: NodeJS.Dict<string> = process.env
 ): CatalogProduct {
+  if (slug === "masaref") {
+    return {
+      slug: "masaref",
+      name: "مصارف",
+      arabicName: "مصارف — سيستم السيطرة على المصروفات",
+      shortName: "مصارف",
+      price: Number(env.MASAREF_PRODUCT_PRICE || 399),
+      compareAtPrice: Number(env.MASAREF_COMPARE_AT_PRICE || 990),
+      currency: "EGP",
+      pixelName: "Masaref Spend Control",
+      kashierDescription: "مصارف — سيستم السيطرة على المصروفات",
+      checkoutTitle: "مصارف — سيستم السيطرة على المصروفات",
+      whatsappMessage: "أهلاً، حابب أعرف تفاصيل أكتر عن مصارف",
+      path: "/masaref",
+      thankYouCta: "افتح فولدر الملفات",
+      thankYouBody:
+        "شكراً {name}. فولدر الدرايف تحت فيه 3 ملفات: الدليل، السيستم، وتطبيق الأندرويد. التفاصيل على الإيميل.",
+      pendingBody:
+        "استلمنا سكرين التحويل. أول ما نتأكد إن الدفع وصل هنبعتلك مصارف على الإيميل.",
+    };
+  }
+
   if (slug === "arabity") {
     return {
       slug: "arabity",

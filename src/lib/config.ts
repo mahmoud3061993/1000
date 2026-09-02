@@ -26,6 +26,8 @@ export type KashierCredentials = {
 export const ARABITY_SYSTEM_URL = `${CANONICAL_SITE_URL}/car`;
 export const ARABITY_DRIVE_URL =
   "https://drive.google.com/drive/u/0/folders/1g0QLdBay_9eWs_UWEHf2h5lU2tT57_3e";
+export const MASAREF_SYSTEM_URL = `${CANONICAL_SITE_URL}/spend`;
+export const MASAREF_DRIVE_URL = `${CANONICAL_SITE_URL}/spend`;
 
 export type PaymentConfig = {
   instapay: { number: string; name: string };
@@ -34,6 +36,7 @@ export type PaymentConfig = {
   deliveryUrl: string;
   plantDeliveryUrl: string;
   arabityDeliveryUrl: string;
+  masarefDeliveryUrl: string;
   whatsapp: string;
   usesRemoteDb: boolean;
   envOverrides: {
@@ -43,6 +46,7 @@ export type PaymentConfig = {
     deliveryUrl: boolean;
     plantDeliveryUrl: boolean;
     arabityDeliveryUrl: boolean;
+    masarefDeliveryUrl: boolean;
   };
 };
 
@@ -61,6 +65,16 @@ function firstArabityDelivery(...values: Array<string | undefined>) {
     return url;
   }
   return ARABITY_DRIVE_URL;
+}
+
+function firstMasarefDelivery(...values: Array<string | undefined>) {
+  for (const value of values) {
+    if (!value || !value.trim()) continue;
+    const url = rewriteRetiredSiteUrl(value.trim());
+    if (url === MASAREF_SYSTEM_URL || /\/spend\/?$/.test(url)) continue;
+    return url;
+  }
+  return MASAREF_DRIVE_URL;
 }
 
 export function mergePaymentConfig(
@@ -105,6 +119,7 @@ export function mergePaymentConfig(
       )
     ),
     arabityDeliveryUrl: firstArabityDelivery(env.ARABITY_DELIVERY_URL, stored.arabity_delivery_url),
+    masarefDeliveryUrl: firstMasarefDelivery(env.MASAREF_DELIVERY_URL, stored.masaref_delivery_url),
     whatsapp: firstNonEmpty(env.WHATSAPP_NUMBER, stored.whatsapp_number, "201017420379").replace(
       /\D/g,
       ""
@@ -117,6 +132,7 @@ export function mergePaymentConfig(
       deliveryUrl: Boolean(env.PRODUCT_DELIVERY_URL),
       plantDeliveryUrl: Boolean(env.PLANT_DELIVERY_URL),
       arabityDeliveryUrl: Boolean(env.ARABITY_DELIVERY_URL),
+      masarefDeliveryUrl: Boolean(env.MASAREF_DELIVERY_URL),
     },
   };
 }
@@ -125,6 +141,7 @@ export function deliveryUrlForProduct(slug: string | null | undefined, cfg: Paym
   const product = getCatalogProduct(slug);
   if (product.slug === "plant") return cfg.plantDeliveryUrl;
   if (product.slug === "arabity") return cfg.arabityDeliveryUrl || ARABITY_DRIVE_URL;
+  if (product.slug === "masaref") return cfg.masarefDeliveryUrl || MASAREF_DRIVE_URL;
   return cfg.deliveryUrl || DEFAULT_DELIVERY_URL;
 }
 

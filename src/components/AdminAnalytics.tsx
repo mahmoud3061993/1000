@@ -3,6 +3,14 @@
 import { useEffect, useState } from "react";
 import type { AnalyticsPeriod, AnalyticsReport } from "@/lib/analytics";
 
+const PRODUCTS: Array<{ id: "all" | "masaref" | "arabity" | "plant" | "1000"; label: string }> = [
+  { id: "all", label: "كل المنتجات" },
+  { id: "masaref", label: "مصارف" },
+  { id: "arabity", label: "عربيتي" },
+  { id: "plant", label: "دليل النباتات" },
+  { id: "1000", label: "مكتبة الإعلانات" },
+];
+
 const PERIODS: Array<{ id: AnalyticsPeriod; label: string }> = [
   { id: "day", label: "اليوم" },
   { id: "week", label: "آخر 7 أيام" },
@@ -27,7 +35,7 @@ function changeClass(value: number) {
 
 export default function AdminAnalytics({ onCleared }: { onCleared?: () => void }) {
   const [period, setPeriod] = useState<AnalyticsPeriod>("week");
-  const product = "arabity";
+  const [product, setProduct] = useState<(typeof PRODUCTS)[number]["id"]>("all");
   const [report, setReport] = useState<AnalyticsReport | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -62,7 +70,7 @@ export default function AdminAnalytics({ onCleared }: { onCleared?: () => void }
       const res = await fetch("/api/admin/analytics", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "clear" }),
+        body: JSON.stringify({ action: "clear", product }),
       });
       const json = await res.json().catch(() => ({}));
       if (!res.ok || !json.ok) {
@@ -89,11 +97,22 @@ export default function AdminAnalytics({ onCleared }: { onCleared?: () => void }
   return (
     <div className="analytics-page">
       <div className="settings-card">
-        <h2>تحليل مبيعات عربيتي</h2>
+        <h2>تحليل المبيعات</h2>
         <p>
           فتح الصفحة من كل إعلان، السكرول، السكشن، الفورم (Checkout لميتا)، مين ملأ البيانات، ومين دفع. الأرقام بتوقيت مصر.
         </p>
         <div className="analytics-periods">
+          <select
+            className="admin-filter"
+            value={product}
+            onChange={(e) => setProduct(e.target.value as (typeof PRODUCTS)[number]["id"])}
+          >
+            {PRODUCTS.map((item) => (
+              <option key={item.id} value={item.id}>
+                {item.label}
+              </option>
+            ))}
+          </select>
           {PERIODS.map((item) => (
             <button
               key={item.id}

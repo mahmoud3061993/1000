@@ -6,6 +6,11 @@ arabity/android/.gradle
 arabity/android/build
 arabity/android/local.properties
 arabity/android/captures
+masaref/android/app/build
+masaref/android/.gradle
+masaref/android/build
+masaref/android/local.properties
+masaref/android/captures
 *.apk
 *.aab
 *.keystore
