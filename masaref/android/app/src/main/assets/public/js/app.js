@@ -1,5 +1,5 @@
 import { APP_NAME } from "./constants.js";
-import { getState, loadStore } from "./store.js";
+import { getState, loadStore, onChange } from "./store.js";
 import { go, register, start, currentRoute } from "./router.js";
 import { closeTop, hasOverlay } from "./ui.js";
 import { html } from "./utils.js";
@@ -32,8 +32,10 @@ function paintShell(onboarding) {
 function wrap(renderFn, bindFn) {
   return async (params) => {
     const htmlOut = renderFn(params);
-    queueMicrotask(() => bindFn?.(params));
-    return htmlOut;
+    return {
+      html: htmlOut,
+      bind: () => bindFn?.(params),
+    };
   };
 }
 
@@ -47,6 +49,7 @@ register("settings", wrap(renderSettings, bindSettings));
 
 async function boot() {
   loadStore();
+  onChange((state) => paintShell(!state.setup));
   const bootScreen = document.getElementById("boot-screen");
   const ready = () => {
     document.documentElement.dataset.masarefReady = "1";

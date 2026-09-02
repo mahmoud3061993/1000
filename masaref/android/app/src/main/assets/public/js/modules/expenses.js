@@ -3,7 +3,7 @@ import { snapshot } from "../calc.js";
 import { deleteExpense, getState } from "../store.js";
 import { go } from "../router.js";
 import { toast } from "../ui.js";
-import { formatMoney, html, qs } from "../utils.js";
+import { formatMoney, html, qs, raw } from "../utils.js";
 
 export function renderExpenses() {
   const { setup, expenses } = getState();
@@ -15,8 +15,8 @@ export function renderExpenses() {
       <p>اتصرف ${formatMoney(snap.totalSpent)} من ${formatMoney(snap.income)} · المتاح الحقيقي ${formatMoney(snap.trueAvailable)}</p>
     </header>
     ${list.length === 0
-      ? html`<div class="empty">لسه مفيش حركة. دوس تسجيل وحط أول مصروف في ثواني.</div>`
-      : html`<ul class="exp-list">${{ __html: list
+      ? raw(html`<div class="empty">لسه مفيش حركة. دوس تسجيل وحط أول مصروف في ثواني.</div>`)
+      : raw(html`<ul class="exp-list">${{ __html: list
           .map((item) => {
             const cat = categoryById(item.categoryId);
             return `<li data-id="${item.id}">
@@ -30,7 +30,7 @@ export function renderExpenses() {
               </div>
             </li>`;
           })
-          .join("") }}</ul>`}
+          .join("") }}</ul>`)}
     <button class="btn" type="button" data-go="add">سجّل مصروف</button>
   </section>`;
 }

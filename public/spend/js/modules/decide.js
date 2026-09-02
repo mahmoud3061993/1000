@@ -1,7 +1,7 @@
 import { decidePurchase, formatArabicDate } from "../calc.js";
 import { getState } from "../store.js";
 import { go } from "../router.js";
-import { formatMoney, html, qs } from "../utils.js";
+import { formatMoney, html, qs, raw } from "../utils.js";
 
 function verdict(result) {
   if (result.tone === "red") {
@@ -40,9 +40,9 @@ export function renderDecide(params = {}) {
       </label>
       <button class="btn" type="submit">احسب القرار</button>
     </form>
-    <div id="verdict">${{ __html: verdict(result) }}</div>
+    <div id="verdict">${raw(verdict(result))}</div>
     ${result.tone === "green" || result.tone === "yellow"
-      ? html`<button class="btn secondary" type="button" id="log-it">تمام، سجّلها كمصروف</button>`
+      ? raw(html`<button class="btn secondary" type="button" id="log-it">تمام، سجّلها كمصروف</button>`)
       : ""}
     <p class="muted">لو كملت بنفس معدل الصرف، فلوسك${result.before
       ? ""

@@ -11,7 +11,7 @@ import {
 } from "../calc.js";
 import { getState } from "../store.js";
 import { go } from "../router.js";
-import { formatMoney, html, qs } from "../utils.js";
+import { formatMoney, html, qs, raw } from "../utils.js";
 
 function toneClass(status) {
   if (status === "critical") return "danger";
@@ -56,7 +56,7 @@ export function renderDashboard() {
     </article>
 
     ${alerts.length
-      ? html`<div class="alert-stack">${{ __html: alerts
+      ? raw(html`<div class="alert-stack">${{ __html: alerts
           .map((a) => {
             const msg =
               a.tone === "danger"
@@ -64,7 +64,7 @@ export function renderDashboard() {
                 : `مصروف ${a.name} أعلى من الطبيعي. بالمعدل الحالي هتتخطى الميزانية بحوالي ${formatMoney(a.overBy)}.`;
             return `<article class="alert ${a.tone}">⚠️ ${msg}</article>`;
           })
-          .join("") }}</div>`
+          .join("") }}</div>`)
       : ""}
 
     <section class="panel">
@@ -84,13 +84,13 @@ export function renderDashboard() {
     <section class="panel">
       <h2>أكتر 3 حاجات بتاكل فلوسك</h2>
       ${tops.length
-        ? html`<ul class="eaters">${{ __html: tops
+        ? raw(html`<ul class="eaters">${{ __html: tops
             .map((t) => {
               const cat = categoryById(t.id);
               return `<li><span>${cat.emoji} ${t.name}</span><b>${formatMoney(t.total)}</b></li>`;
             })
-            .join("") }}</ul>`
-        : html`<p class="muted">لسه مفيش مصروف مسجّل. أول ما تسجّل، هبان مين بياكل فلوسك.</p>`}
+            .join("") }}</ul>`)
+        : raw(html`<p class="muted">لسه مفيش مصروف مسجّل. أول ما تسجّل، هبان مين بياكل فلوسك.</p>`)}
     </section>
 
     <section class="panel play-row">
@@ -114,9 +114,9 @@ export function renderDashboard() {
           : `زادت المصاريف ${formatMoney(-week.saved)} عن الأسبوع اللي فات`}
       </p>
       ${vs.previousSpent > 0
-        ? html`<p class="muted">${vs.pct >= 0
+        ? raw(html`<p class="muted">${vs.pct >= 0
             ? `مصروفاتك أقل ${vs.pct}% من نفس الفترة الشهر اللي فات.`
-            : `مصروفاتك أعلى ${Math.abs(vs.pct)}% من نفس الفترة الشهر اللي فات.`}</p>`
+            : `مصروفاتك أعلى ${Math.abs(vs.pct)}% من نفس الفترة الشهر اللي فات.`}</p>`)
         : ""}
     </section>
   </section>`;
