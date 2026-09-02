@@ -2,6 +2,17 @@
 const plantOrigin = (process.env.PLANT_APP_ORIGIN || "").replace(/\/$/, "");
 
 const nextConfig = {
+  async headers() {
+    return [
+      {
+        source: "/spend/masaref.apk",
+        headers: [
+          { key: "Content-Type", value: "application/vnd.android.package-archive" },
+          { key: "Content-Disposition", value: 'attachment; filename="masaref.apk"' },
+        ],
+      },
+    ];
+  },
   async rewrites() {
     const list = [
       { source: "/car", destination: "/car/index.html" },
