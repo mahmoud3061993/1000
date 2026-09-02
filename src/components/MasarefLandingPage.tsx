@@ -211,7 +211,7 @@ const FAQS = [
   },
   {
     q: "هستلم المنتج إزاي؟",
-    a: "بعد تأكيد الدفع هيوصلك إيميل بفولدر Google Drive فيه السيستم HTML، الدليل، وتطبيق الأندرويد APK.",
+    a: "بعد تأكيد الدفع هتلاقي روابط تحميل: ZIP للسيستم على الكمبيوتر، APK للأندرويد، والدليل.",
   },
 ];
 
@@ -295,6 +295,9 @@ export function MasarefLandingPage({
               <button type="button" className="ms-btn" onClick={() => scrollToId("ms-preview")}>
                 شوف السيستم من جوه
               </button>
+              <a className="ms-btn ms-btn-ghost" href="/spend/files.html">
+                حمّل الملفات
+              </a>
             </div>
             <div className="ms-hero-meta">يشتغل أوفلاين — مفيش اشتراك — بياناتك على جهازك</div>
           </div>
@@ -380,6 +383,24 @@ export function MasarefLandingPage({
             ))}
           </ul>
           <p className="ms-package-note">كل ده بدفع مرة واحدة. من غير اشتراك.</p>
+          <div className="ms-dl-box">
+            <h3>حمّل الملفات دلوقتي</h3>
+            <p>السيستم للكمبيوتر ملف ZIP. الأندرويد APK، ولو المتصفح منعه نزّل النسخة المضغوطة.</p>
+            <div className="ms-dl-grid">
+              <a className="ms-btn" href="/spend/masaref-html.zip" download="masaref-html.zip">
+                نزّل السيستم HTML
+              </a>
+              <a className="ms-btn ms-btn-ghost" href="/spend/masaref.apk" download="masaref.apk">
+                نزّل تطبيق أندرويد
+              </a>
+              <a className="ms-btn ms-btn-ghost" href="/spend/masaref-android.zip" download="masaref-android.zip">
+                أندرويد ZIP
+              </a>
+              <a className="ms-btn ms-btn-ghost" href="/spend/files.html">
+                كل الملفات
+              </a>
+            </div>
+          </div>
           <div className="ms-center-cta">
             <button type="button" className="ms-btn" onClick={scrollToOrder}>
               اطلب مصارف
@@ -485,8 +506,8 @@ export function MasarefCheckoutLead({ price }: { price: number }) {
       </ul>
       <div className="ms-checkout-lead-price">{price} جنيه</div>
       <div className="ms-delivery-note">
-        <strong>الاستلام على الإيميل</strong>
-        <p>ملفات السيستم هتوصلك على نفس الإيميل اللي هتسجّل بيه في الطلب. تأكد إنه إيميل تقدر تفتحه.</p>
+        <strong>الاستلام على الإيميل + التحميل من الموقع</strong>
+        <p>هتاخد ZIP للسيستم على الكمبيوتر، APK للأندرويد، والدليل. تأكد إن الإيميل تقدر تفتحه.</p>
       </div>
       <p className="ms-pay-note">الدفع بإنستاباي أو محفظة كاش. حوّل وارفع سكرين التحويل، وبعدين هنتأكد من الدفع يدوي.</p>
     </div>

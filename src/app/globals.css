@@ -350,6 +350,20 @@ a { color: inherit; }
   font-weight: 900;
 }
 
+.file-links {
+  display: grid;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.file-links .drive-link {
+  margin-top: 0;
+}
+
+.masaref-files .drive-link {
+  background: #0f766e;
+}
+
 .admin-body {
   min-height: 100vh;
   background: #0F172A;

@@ -1,12 +1,19 @@
-import { MASAREF_SYSTEM_URL } from "./config";
+import {
+  MASAREF_APK_URL,
+  MASAREF_APK_ZIP_URL,
+  MASAREF_FILES_URL,
+  MASAREF_HTML_ZIP_URL,
+  MASAREF_HOWTO_URL,
+  MASAREF_SYSTEM_URL,
+} from "./config";
 
 export const MASAREF_PURCHASE_EMAIL_SUBJECT = "🎉 تم تأكيد طلبك - مصارف جاهز للاستخدام";
-export { MASAREF_SYSTEM_URL };
+export { MASAREF_SYSTEM_URL, MASAREF_FILES_URL, MASAREF_HTML_ZIP_URL, MASAREF_APK_URL };
 
 function driveFolderForEmail(deliveryUrl: string) {
   const url = deliveryUrl.trim();
   if (/drive\.google\.com/i.test(url)) return url;
-  return url || MASAREF_SYSTEM_URL;
+  return url || MASAREF_FILES_URL;
 }
 
 export function buildMasarefPurchaseEmail(input: {
@@ -21,20 +28,23 @@ export function buildMasarefPurchaseEmail(input: {
 مبروك! 🎉
 تم تأكيد طلبك بنجاح، ودلوقتي تقدر تبدأ تستخدم مصارف — سيستم السيطرة على المصروفات.
 
-📂 رابط فولدر الملفات:
+📂 صفحة تحميل الملفات:
 
 ${driveUrl}
 
-هتلاقي جوه الفولدر 3 ملفات في مكان واحد:
+حمّل الملفات مباشرة:
 
-✅ ملف السيستم للكمبيوتر (HTML)
-نزّله على جهازك وافتحه. أول شاشة هتطلب الدخل والالتزامات، وبعدين السيستم يحسبلك مسموحلك تصرف كام النهارده. البيانات بتتحفظ على الجهاز، ومش محتاج نت بعد التحميل. مفيش تسجيل دخول ولا اشتراك شهري.
+✅ السيستم للكمبيوتر (ZIP)
+${MASAREF_HTML_ZIP_URL}
+فك الضغط وافتح index.html. لو الصفحة بيضاء، شغّل open-on-windows.bat أو open-on-mac.command من داخل المجلد. البيانات بتتحفظ على الجهاز، ومش محتاج نت بعد التحميل.
 
-✅ ملف الدليل (HTML)
-نزّله وافتحه على اللاب. فيه شرح إزاي تثبّت تطبيق الموبايل، وإزاي تستخدم الحد اليومي و«ينفع أشتريها؟» من الأول للآخر.
+✅ تطبيق أندرويد (APK)
+${MASAREF_APK_URL}
+ثبّته يدويًا على الموبايل (مش من Google Play). لو المتصفح منع التحميل استخدم النسخة المضغوطة:
+${MASAREF_APK_ZIP_URL}
 
-✅ نسخة الموبايل (APK)
-نفس السيستم على أندرويد. ثبّته يدويًا على الموبايل (مش من Google Play) وافتحه من أيقونة «مصارف».
+✅ الدليل
+${MASAREF_HOWTO_URL}
 
 🎨 هتلاقي إيه جوه السيستم؟
 
@@ -55,10 +65,8 @@ ${driveUrl}
 
 💡 أفضل طريقة تبدأ بيها:
 
-افتح فولدر الدرايف اللي فوق.
-ابدأ بملف الدليل لو حابب تفهم التثبيت.
-لو عايز تستخدمه على الكمبيوتر: نزّل ملف HTML وافتحه واملأ الدخل والالتزامات.
-لو عايزه على الموبايل: ثبّت ملف الأندرويد.
+افتح صفحة الملفات اللي فوق.
+نزّل ZIP السيستم على الكمبيوتر، أو ثبّت الأندرويد على الموبايل.
 في الشاشة الأولى تقدر تجرّب مثال توضيحي بمرتب 15,000 وبعدين تمسحه من الإعدادات.
 
 ⚠️ نصيحة مهمة:
@@ -79,10 +87,14 @@ ${whatsapp}
     .replaceAll("\n\n", "</p><p>")
     .replaceAll("\n", "<br/>");
 
-  const htmlLinked = htmlBody.replaceAll(
-    escapeHtml(driveUrl),
-    `<a href="${escapeHtml(driveUrl)}" style="color:#0F766E;font-weight:800" target="_blank" rel="noreferrer">${escapeHtml(driveUrl)}</a>`
-  );
+  const links = [driveUrl, MASAREF_HTML_ZIP_URL, MASAREF_APK_URL, MASAREF_APK_ZIP_URL, MASAREF_HOWTO_URL];
+  let htmlLinked = htmlBody;
+  for (const url of links) {
+    htmlLinked = htmlLinked.replaceAll(
+      escapeHtml(url),
+      `<a href="${escapeHtml(url)}" style="color:#0F766E;font-weight:800" target="_blank" rel="noreferrer">${escapeHtml(url)}</a>`
+    );
+  }
 
   const html = `<!doctype html>
 <html lang="ar" dir="rtl">

@@ -97,6 +97,22 @@ function ThankYouClient({
             ) : (
               <p>التفاصيل ولينك الدخول هتوصلك على الإيميل خلال دقايق.</p>
             )}
+            {order?.product_slug === "masaref" ? (
+              <div className="file-links masaref-files">
+                <a className="drive-link" href="/spend/masaref-html.zip" download="masaref-html.zip">
+                  نزّل السيستم للكمبيوتر (ZIP)
+                </a>
+                <a className="drive-link" href="/spend/masaref.apk" download="masaref.apk">
+                  نزّل تطبيق أندرويد (APK)
+                </a>
+                <a className="drive-link" href="/spend/masaref-android.zip" download="masaref-android.zip">
+                  أندرويد ZIP لو الـ APK اتقفل
+                </a>
+                <a className="drive-link" href="/spend/howto.html">
+                  الدليل
+                </a>
+              </div>
+            ) : null}
           </>
         ) : waiting ? (
           <>

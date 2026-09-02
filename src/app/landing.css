@@ -2719,6 +2719,32 @@ MOBILE
 }
 .ms-package-note { text-align: center; color: #0f766e; font-weight: 800; font-size: 18px; }
 
+.ms-dl-box {
+    max-width: 640px;
+    margin: 22px auto 0;
+    background: #fff;
+    border: 1px solid #e7e0d4;
+    border-radius: 20px;
+    padding: 22px 18px;
+    text-align: center;
+}
+.ms-dl-box h3 { margin: 0 0 8px; }
+.ms-dl-box p { margin: 0 0 14px; color: #57534e; font-weight: 700; }
+.ms-dl-grid { display: grid; gap: 10px; }
+.ms-btn-ghost {
+    background: #fff;
+    color: #0f766e;
+    box-shadow: none;
+    border: 2px solid #0f766e;
+}
+a.ms-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    box-sizing: border-box;
+}
+
 .ms-trust-box {
     max-width: 760px;
     margin: 0 auto;
@@ -2853,7 +2879,7 @@ MOBILE
     .ms-hero-copy { text-align: center; }
     .ms-hero-copy > p, .ms-hero-cta { margin-left: auto; margin-right: auto; }
     .ms-hero-cta { width: 100%; flex-direction: column; justify-content: center; }
-    .ms-hero-cta .ms-btn, .ms-center-cta .ms-btn, .ms-offer-box .ms-btn, .ms-close .ms-btn { width: 100%; }
+    .ms-hero-cta .ms-btn, .ms-center-cta .ms-btn, .ms-offer-box .ms-btn, .ms-close .ms-btn, .ms-dl-grid .ms-btn { width: 100%; }
     .ms-hero-points li { text-align: right; }
     .ms-sticky.is-on {
         position: fixed;

@@ -27,7 +27,12 @@ export const ARABITY_SYSTEM_URL = `${CANONICAL_SITE_URL}/car`;
 export const ARABITY_DRIVE_URL =
   "https://drive.google.com/drive/u/0/folders/1g0QLdBay_9eWs_UWEHf2h5lU2tT57_3e";
 export const MASAREF_SYSTEM_URL = `${CANONICAL_SITE_URL}/spend`;
-export const MASAREF_DRIVE_URL = `${CANONICAL_SITE_URL}/spend`;
+export const MASAREF_FILES_URL = `${CANONICAL_SITE_URL}/spend/files.html`;
+export const MASAREF_HTML_ZIP_URL = `${CANONICAL_SITE_URL}/spend/masaref-html.zip`;
+export const MASAREF_APK_URL = `${CANONICAL_SITE_URL}/spend/masaref.apk`;
+export const MASAREF_APK_ZIP_URL = `${CANONICAL_SITE_URL}/spend/masaref-android.zip`;
+export const MASAREF_HOWTO_URL = `${CANONICAL_SITE_URL}/spend/howto.html`;
+export const MASAREF_DRIVE_URL = MASAREF_FILES_URL;
 
 export type PaymentConfig = {
   instapay: { number: string; name: string };
@@ -141,7 +146,7 @@ export function deliveryUrlForProduct(slug: string | null | undefined, cfg: Paym
   const product = getCatalogProduct(slug);
   if (product.slug === "plant") return cfg.plantDeliveryUrl;
   if (product.slug === "arabity") return cfg.arabityDeliveryUrl || ARABITY_DRIVE_URL;
-  if (product.slug === "masaref") return cfg.masarefDeliveryUrl || MASAREF_DRIVE_URL;
+  if (product.slug === "masaref") return cfg.masarefDeliveryUrl || MASAREF_FILES_URL;
   return cfg.deliveryUrl || DEFAULT_DELIVERY_URL;
 }
 
