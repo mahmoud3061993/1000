@@ -59,7 +59,7 @@ npm run dev
 | `ARABITY_DELIVERY_URL` | لينك Google Drive لفولدر عربيتي بعد الدفع (HTML + APK + الدليل) |
 | `MASAREF_PRODUCT_PRICE` | سعر مصارف (الافتراضي 399) |
 | `MASAREF_DELIVERY_URL` | لينك Google Drive لفولدر مصارف بعد الدفع (HTML + APK + الدليل) |
-| `PLANT_APP_ORIGIN` | أصل نشر الدليل عشان `/products/plant` تتوجه له |
+| `PLANT_APP_ORIGIN` | unused; the guide is served from `public/products/plant` |
 | `ADMIN_PASSWORD` | دخول لوحة الأدمن |
 | `SESSION_SECRET` | مفتاح توقيع جلسة الأدمن |
 | `INSTAPAY_NUMBER` / `INSTAPAY_NAME` | رقم واسم إنستاباي |

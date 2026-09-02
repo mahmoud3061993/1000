@@ -1,0 +1,26 @@
+1:"$Sreact.fragment"
+3:I[97367,["/products/plant/_next/static/chunks/12prjbdi6kg29.js"],"OutletBoundary"]
+4:"$Sreact.suspense"
+8:I[97367,["/products/plant/_next/static/chunks/12prjbdi6kg29.js"],"ViewportBoundary"]
+9:I[97367,["/products/plant/_next/static/chunks/12prjbdi6kg29.js"],"MetadataBoundary"]
+a:I[27201,["/products/plant/_next/static/chunks/12prjbdi6kg29.js"],"IconMark"]
+c:I[39756,["/products/plant/_next/static/chunks/12prjbdi6kg29.js"],"default"]
+d:I[37457,["/products/plant/_next/static/chunks/12prjbdi6kg29.js"],"default"]
+11:I[48303,["/products/plant/_next/static/chunks/12prjbdi6kg29.js"],"SiteHeader"]
+12:I[22016,["/products/plant/_next/static/chunks/12prjbdi6kg29.js"],""]
+:HL["/products/plant/_next/static/chunks/1m23zc7oo85br.css","style"]
+7:X
+f:X
+f:C
+0:{"buildId":"REZ8nwXK64Zccl7Iio6wG","data":[{"rsc":["$","$1","c",{"children":["$L2",null,["$","$L3",null,{"children":["$","$4",null,{"name":"Next.MetadataOutlet","children":"$@5"}]}]]}],"isPartial":"$@6","staleTime":"$7","varyParams":null},{"rsc":["$","$1","h",{"children":[null,["$","$L8",null,{"children":[["$","meta","0",{"charSet":"utf-8"}],["$","meta","1",{"name":"viewport","content":"width=device-width, initial-scale=1"}]]}],["$","div",null,{"hidden":true,"children":["$","$L9",null,{"children":["$","$4",null,{"name":"Next.Metadata","children":[["$","title","0",{"children":"مخطط العناية | دليل الإنقاذ"}],["$","meta","1",{"name":"description","content":"صفحات للطباعة تسجّل فيها حالة كل نبات"}],["$","link","2",{"rel":"icon","href":"/products/plant/favicon.ico?favicon.2vob68tjqpejf.ico","sizes":"256x256","type":"image/x-icon"}],["$","link","3",{"rel":"icon","href":"/products/plant/icon.svg?icon.1b3tw4pnvzu9v.svg","sizes":"any","type":"image/svg+xml"}],["$","$La","4",{}]]}]}]}],["$","meta",null,{"name":"next-size-adjust","content":""}]]}],"isPartial":"$@b","staleTime":"$7","varyParams":null},{"rsc":["$","$1","c",{"children":[null,["$","$Lc",null,{"parallelRouterKey":"children","template":["$","$Ld",null,{}]}]]}],"isPartial":"$@e","staleTime":"$7","varyParams":"$f"},{"rsc":["$","$1","c",{"children":[null,["$","$Lc",null,{"parallelRouterKey":"children","template":["$","$Ld",null,{}]}]]}],"isPartial":"$@10","staleTime":"$7","varyParams":"$f"},{"rsc":["$","$1","c",{"children":[[["$","link","0",{"rel":"stylesheet","href":"/products/plant/_next/static/chunks/1m23zc7oo85br.css","precedence":"next"}],["$","script","script-0",{"src":"/products/plant/_next/static/chunks/12prjbdi6kg29.js","async":true}]],["$","html",null,{"lang":"ar","dir":"rtl","className":"cairo_883b24e3-module__pW5XIG__variable h-full antialiased","children":["$","body",null,{"className":"site-grid min-h-full font-sans text-foreground","children":["$","div",null,{"className":"flex min-h-full flex-col","children":[["$","$L11",null,{}],["$","main",null,{"className":"flex-1","children":["$","$Lc",null,{"parallelRouterKey":"children","template":["$","$Ld",null,{}],"notFound":[["$","div",null,{"className":"mx-auto max-w-xl px-4 py-20 text-center","children":[["$","p",null,{"className":"text-4xl","children":"🌿"}],["$","h1",null,{"className":"mt-4 text-3xl font-bold text-leaf-dark","children":"الصفحة دي مش موجودة"}],["$","p",null,{"className":"mt-3 leading-8 text-muted","children":"ممكن الرابط غلط، أو النبات لسه متضافش للدليل."}],["$","$L12",null,{"href":"/","className":"mt-8 inline-flex min-h-12 items-center rounded-full bg-leaf px-6 font-bold text-white","children":"الرجوع للرئيسية"}]]}],[]]}]}],["$","footer",null,{"className":"mt-16 border-t border-line bg-card/70","children":["$","div",null,{"className":"mx-auto flex max-w-6xl flex-col gap-4 px-4 py-8 sm:px-6","children":[["$","p",null,{"className":"text-sm font-semibold text-leaf-dark","children":"دليل إنقاذ ورعاية النباتات المنزلية"}],["$","p",null,{"className":"max-w-2xl text-sm leading-7 text-muted","children":"المعلومات دي للإرشاد العام في البيت. مش تشخيص طبي أو بيطري، ومش بديل عن متخصص لو النبات غالي عندك أو الحالة متقدمة. لو حصل بلع لأي جزء من النبات، راجع جهة طبية أو بيطرية مختصة."}],["$","div",null,{"className":"flex flex-wrap gap-3 text-sm","children":[["$","$L12",null,{"href":"/plants","className":"font-semibold text-leaf hover:underline","children":"دليل النباتات"}],["$","$L12",null,{"href":"/doctor","className":"font-semibold text-leaf hover:underline","children":"التشخيص"}],["$","$L12",null,{"href":"/planner","className":"font-semibold text-leaf hover:underline","children":"المخطط للطباعة"}],["$","$L12",null,{"href":"/situations","className":"font-semibold text-leaf hover:underline","children":"حصل إيه لزرعتي؟"}],["$","$L12",null,{"href":"/tools","className":"font-semibold text-leaf hover:underline","children":"أدوات العناية"}]]}]]}]}]]}]}]}]]}],"isPartial":"$@13","staleTime":"$7","varyParams":null}],"isUpgradeableISRFallback":false,"a":"$@14","rootVaryParams":null,"needsRuntimeRequest":"$@15"}
+2:E{"digest":"NEXT_REDIRECT;replace;/planner;307;"}
+5:null
+7:300
+15:true
+7:C
+14:0
+b:"$undefined"
+e:"$undefined"
+10:"$undefined"
+13:"$undefined"
+6:"$undefined"

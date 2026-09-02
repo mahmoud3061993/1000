@@ -1,11 +1,12 @@
 import assert from "node:assert/strict";
+import { existsSync, readFileSync } from "node:fs";
 import { describe, it } from "node:test";
 import { getCatalogProduct } from "../src/lib/products";
+import { PLANT_GUIDE_COUNT } from "../src/lib/plant-guide";
 import {
   buildPlantPurchaseEmail,
   PLANT_DRIVE_URL,
   PLANT_PURCHASE_EMAIL_SUBJECT,
-  PLANT_SYSTEM_URL,
 } from "../src/lib/plant-email";
 
 describe("plant catalog product", () => {
@@ -26,27 +27,42 @@ describe("plant catalog product", () => {
 });
 
 describe("plant purchase email", () => {
-  it("sends the system link, Drive folder, and how to start", () => {
+  it("sends only the Drive folder link and how to start", () => {
     const email = buildPlantPurchaseEmail({
       name: "سارة",
-      deliveryUrl: PLANT_SYSTEM_URL,
+      deliveryUrl: "https://www.producthelpyou.online/products/plant",
       whatsappDisplay: "01017420379",
     });
     assert.equal(email.subject, PLANT_PURCHASE_EMAIL_SUBJECT);
     assert.match(email.subject, /دليل إنقاذ ورعاية النباتات المنزلية/);
     assert.match(email.text, /دليل إنقاذ ورعاية النباتات المنزلية/);
-    assert.equal(email.text.includes(PLANT_SYSTEM_URL), true);
     assert.equal(email.text.includes(PLANT_DRIVE_URL), true);
-    assert.equal(email.html.includes(PLANT_SYSTEM_URL), true);
     assert.equal(email.html.includes(PLANT_DRIVE_URL), true);
+    assert.equal(email.text.includes("https://www.producthelpyou.online"), false);
+    assert.equal(email.text.includes("mahmoudelkousy.online"), false);
     assert.match(email.html, /dir="rtl"/);
     assert.match(email.text, /نفس السيستم نسخة الموبايل/);
     assert.match(email.text, /ملف طريقة التثبيت على الموبايل/);
     assert.match(email.text, /ملف شرح استخدام السيستم كله/);
-    assert.match(email.text, /77 نبات/);
+    assert.match(email.text, new RegExp(`${PLANT_GUIDE_COUNT} نبات`));
     assert.match(email.text, /دكتور النباتات/);
     assert.match(email.text, /بيتموس/);
     assert.match(email.text, /01017420379/);
     assert.match(email.text, /محمود القوصي/);
+    const httpLinks = email.text.match(/https?:\/\/\S+/g) || [];
+    assert.deepEqual(httpLinks, [PLANT_DRIVE_URL]);
+  });
+});
+
+describe("plant guide catalog", () => {
+  it("ships 150 Egyptian houseplants in the live guide and offline APK", () => {
+    const home = readFileSync("public/products/plant/index.html", "utf8");
+    assert.match(home, new RegExp(`${PLANT_GUIDE_COUNT}`));
+    assert.equal(existsSync("public/plants/pothos.jpg"), true);
+    assert.equal(existsSync("public/plants/gardenia-jasminoides.jpg"), true);
+    assert.equal(existsSync("public/plants/ocimum-basilicum.jpg"), true);
+    assert.equal(existsSync("public/products/plant/plants/nerium-oleander/index.html"), true);
+    assert.equal(existsSync("deliverables/plant-guide.apk"), true);
+    assert.equal(existsSync("deliverables/plant-guide-offline.zip"), true);
   });
 });
