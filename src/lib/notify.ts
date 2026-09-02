@@ -1,6 +1,7 @@
 import { createHmac } from "crypto";
 import { SITE_URL, telegramConfigured } from "./config";
 import { getSettings } from "./db";
+import { productAdminLabel } from "./products";
 import { fileNameForMime, parseStoredScreenshot } from "./screenshot";
 import { formatOrderMessage, notifyTelegram } from "./telegram";
 
@@ -180,10 +181,15 @@ export async function notifyText(
 export async function notifyOrder(kind: NotifyKind, order: NotifyOrder) {
   const screenshot =
     kind === "pending" && order.instapay_screenshot ? order.instapay_screenshot : null;
+  const product = productAdminLabel(order.product_slug);
+  const plantOrder = order.product_slug === "plant";
   return notifyText(formatOrderMessage(kind, order), {
-    title: ORDER_TITLES[kind],
+    title: `${product} — ${ORDER_TITLES[kind]}`,
     screenshot,
-    priority: kind === "paid" || kind === "pending" || kind === "lead" ? 5 : 4,
-    tags: ORDER_TAGS[kind],
+    priority: kind === "paid" || kind === "pending" || kind === "lead" || plantOrder ? 5 : 4,
+    tags: [
+      ...(ORDER_TAGS[kind] || ["bell"]),
+      ...(plantOrder ? ["seedling", "loudspeaker"] : []),
+    ],
   });
 }

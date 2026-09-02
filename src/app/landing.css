@@ -1062,33 +1062,204 @@ MOBILE
 
 /* Plant care landing — same layout, Egyptian leaf palette */
 .plant-lp {
-    --blue:#3d6b4c;
-    --blue-dark:#2f5340;
-    --blue-light:#e4efe4;
+    --blue:#8ec99a;
+    --blue-dark:#cfe8d4;
+    --blue-light:#1a2c22;
     --cyan:#c4a574;
-    background:#f6f1e8;
+    --dark:#e6efe8;
+    --text:#e6efe8;
+    --muted:#9bb0a0;
+    --white:#13201a;
+    --soft:#13201a;
+    background:#0b1410;
+    color:#e6efe8;
+}
+
+.plant-sales {
+    min-height: 100vh;
+    background: #0b1410;
+    color: #e6efe8;
+    color-scheme: dark;
 }
 
 .plant-lp .lp-tag {
-    background:#e4efe4;
-    color:#2f5340;
+    background:#24382c;
+    color:#cfe8d4;
 }
 
 .plant-lp .lp-topbar {
-    background:#2f5340;
+    background:#0e1a14;
+    color:#e8f0ea;
+}
+
+.plant-lp .lp-topbar strong {
+    color:#c4e0c8;
+}
+
+.plant-lp .lp-hero {
+    background:
+        radial-gradient(circle at 15% 20%, rgba(125,186,141,.12), transparent 32%),
+        radial-gradient(circle at 85% 10%, rgba(196,165,116,.08), transparent 34%),
+        linear-gradient(180deg,#070d0a,#0b1410);
+}
+
+.plant-lp .lp-eyebrow {
+    color:#cfe8d4;
+    background:#24382c;
+    border-color:#345541;
+}
+
+.plant-lp .lp-hero h1 {
+    font-size: clamp(28px, 4.4vw, 44px);
+    line-height: 1.38;
+    color:#e8f0ea;
+}
+
+.plant-lp .lp-hero h1 strong {
+    color: #c4e0c8;
+}
+
+.plant-lp .lp-title,
+.plant-lp .lp-hero-desc,
+.plant-lp .lp-subtitle,
+.plant-lp .lp-hero-point,
+.plant-lp .lp-small-note {
+    color:#e8f0ea;
+}
+
+.plant-lp .lp-current-price,
+.plant-lp .lp-offer-title,
+.plant-lp .lp-stack-name,
+.plant-lp .lp-faq-q,
+.plant-lp .lp-problem-card h3,
+.plant-lp .lp-deliver-card h3,
+.plant-lp .lp-step h3 {
+    color:#e8f0ea;
+}
+
+.plant-lp .lp-old-price,
+.plant-lp .lp-subtitle,
+.plant-lp .lp-problem-card p,
+.plant-lp .lp-deliver-card p,
+.plant-lp .lp-step p,
+.plant-lp .lp-faq-a,
+.plant-lp .lp-deliver-note,
+.plant-lp .lp-stack-value {
+    color:#b7c9bc;
+}
+
+.plant-lp .lp-trust {
+    background:#0e1a14;
+    color:#e8f0ea;
+}
+
+.plant-lp .lp-section,
+.plant-lp .lp-problem {
+    background:#0b1410;
+}
+
+.plant-lp .lp-problem-card,
+.plant-lp .lp-deliver-card,
+.plant-lp .lp-step,
+.plant-lp .lp-faq-item,
+.plant-lp .lp-offer-box {
+    background:#13201a;
+    border-color:#2a4536;
+    color:#e6efe8;
+}
+
+.plant-lp .lp-check {
+    background:#24382c;
+    color:#cfe8d4;
+}
+
+.plant-lp .lp-btn {
+    background: linear-gradient(135deg,#3d6b4c,#2f5340);
+    color:#fff !important;
+}
+
+.plant-lp .lp-bottom {
+    background:#0e1a14;
+    color:#e8f0ea;
+}
+
+.plant-lp .lp-bottom h2,
+.plant-lp .lp-bottom p {
+    color:#e8f0ea;
+}
+
+.plant-lp .lp-sticky {
+    background:#0e1a14;
+    border-color:#345541;
 }
 
 .plant-lp .lp-sticky-price strong {
     color:#c4e0c8;
 }
 
-.plant-lp .lp-hero h1 {
-    font-size: clamp(28px, 4.4vw, 44px);
-    line-height: 1.38;
+.plant-slider-hint,
+.plant-slider-caption b {
+    color: #cfe8d4;
 }
 
-.plant-lp .lp-hero h1 strong {
-    color: #2f5340;
+.plant-slider-caption p {
+    color: #b7c9bc;
+}
+
+.plant-sales .checkout-wrap {
+    background: #0b1410;
+    color: #e6efe8;
+}
+
+.plant-sales .checkout-title,
+.plant-sales .checkout-price strong,
+.plant-sales .checkout-box h3,
+.plant-sales .field label,
+.plant-sales .total-row {
+    color: #e8f0ea;
+}
+
+.plant-sales .checkout-price s {
+    color: #8aa392;
+}
+
+.plant-sales .checkout-box {
+    background: #13201a;
+    border-color: #2a4536;
+}
+
+.plant-sales .field input {
+    background: #0b1410;
+    border-color: #2a4536;
+    color: #e6efe8;
+}
+
+.plant-sales .pay-option {
+    background: #0b1410;
+    border-color: #2a4536;
+    color: #e6efe8;
+}
+
+.plant-sales .pay-option.active {
+    background: #24382c;
+    border-color: #7dba8d;
+    color: #cfe8d4;
+}
+
+.plant-sales .buy-btn {
+    background: #3d6b4c;
+    color: #fff;
+}
+
+.plant-sales .copy-btn {
+    background: #24382c;
+    color: #cfe8d4;
+    border-color: #345541;
+}
+
+.plant-sales .instapay-box {
+    background: #0b1410;
+    color: #e6efe8;
 }
 
 .plant-slider {
@@ -2937,6 +3108,122 @@ a.ms-btn {
     .ms-wa { bottom: 88px; width: 54px; height: 54px; }
     .ms-has-sticky { padding-bottom: 78px; }
     .ms-close { padding-bottom: 96px; }
+}
+
+/* Plant sales page — last so leftover cream/white sections stay dark */
+html:has(.plant-sales),
+html:has(.plant-sales) body {
+    background: #0b1410;
+    color: #e6efe8;
+}
+
+.plant-lp .lp-trust-item,
+.plant-lp .lp-get-row,
+.plant-lp .lp-get-row strong,
+.plant-lp .lp-state,
+.plant-lp .lp-state h3,
+.plant-lp .lp-bonus-card,
+.plant-lp .lp-bonus-card h3,
+.plant-lp .lp-faq-q,
+.plant-lp .lp-final-price .now,
+.plant-lp .lp-offer-title,
+.plant-lp .lp-total-value {
+    color: #e6efe8;
+}
+
+.plant-lp .lp-get-row div div,
+.plant-lp .lp-state p,
+.plant-lp .lp-bonus-card p {
+    color: #9bb0a0;
+}
+
+.plant-lp .lp-speed,
+.plant-lp .lp-bonus,
+.plant-lp .lp-offer {
+    background: #080f0c;
+}
+
+.plant-lp .lp-get-row,
+.plant-lp .lp-state,
+.plant-lp .lp-bonus-card,
+.plant-lp .lp-faq-item,
+.plant-lp .lp-faq-q,
+.plant-lp .lp-offer-box,
+.plant-lp .lp-deliver-card,
+.plant-lp .lp-problem-card,
+.plant-lp .lp-step {
+    background: #13201a;
+    border-color: #2a4536;
+}
+
+.plant-lp .lp-price-badge {
+    background: #24382c;
+    color: #cfe8d4;
+}
+
+.plant-lp .lp-offer-label {
+    background: #24382c;
+    color: #c4e0c8;
+}
+
+.plant-lp .lp-stack-row {
+    border-bottom-color: #2a4536;
+}
+
+.plant-lp .lp-highlight {
+    color: #8ec99a;
+}
+
+.plant-lp .lp-trust {
+    border-color: #2a4536;
+}
+
+.plant-lp .plant-slider-hint,
+.plant-lp .plant-slider-caption b {
+    color: #cfe8d4;
+}
+
+.plant-lp .plant-slider-caption p,
+.plant-lp .lp-deliver-note {
+    color: #9bb0a0;
+}
+
+.plant-lp .plant-slider-frame {
+    background: #1a2c22;
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
+}
+
+.plant-lp .plant-slider-dots button {
+    background: #2a4536;
+}
+
+.plant-lp .plant-slider-dots button.active {
+    background: #8ec99a;
+}
+
+.plant-lp .lp-bonus-number {
+    background: #1a2c22;
+    color: #8ec99a;
+}
+
+.plant-lp .lp-bonus-badge {
+    background: #1a2c22;
+    color: #8ec99a;
+}
+
+.plant-sales .instapay-box code,
+.plant-sales .instapay-steps,
+.plant-sales .copy-btn {
+    color: #e6efe8;
+}
+
+.plant-sales .screenshot-preview {
+    background: #0b1410;
+}
+
+.plant-sales .form-error {
+    background: #3a1c1c;
+    color: #fecaca;
 }
 
 

@@ -53,8 +53,8 @@ npm run dev
 | --- | --- |
 | `SITE_URL` | رابط الموقع النهائي (مهم لـ CAPI) |
 | `PRODUCT_DELIVERY_URL` | لينك Google Drive لمكتبة الـ 1000 بعد الدفع |
-| `PLANT_PRODUCT_PRICE` | سعر دليل النباتات (الافتراضي 350) |
-| `PLANT_DELIVERY_URL` | لينك دخول دليل النباتات بعد الدفع |
+| `PLANT_PRODUCT_PRICE` | سعر دليل النباتات (الافتراضي 450) |
+| `PLANT_DELIVERY_URL` | لينك Google Drive لفولدر دليل النباتات بعد الدفع |
 | `ARABITY_PRODUCT_PRICE` | سعر عربيتي (الافتراضي 400) |
 | `ARABITY_DELIVERY_URL` | لينك Google Drive لفولدر عربيتي بعد الدفع (HTML + APK + الدليل) |
 | `MASAREF_PRODUCT_PRICE` | سعر مصارف (الافتراضي 399) |
