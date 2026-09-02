@@ -13,7 +13,7 @@ const product = getCatalogProduct("plant");
 export const metadata: Metadata = {
   title: product.arabicName,
   description:
-    `دليل تفاعلي لرعاية وإنقاذ النباتات المنزلية المتوفرة في مصر — ${PLANT_GUIDE_COUNT} نوع بصور حقيقية، وأدوات تشخيص وري وتربة، بـ 350 جنيه.`,
+    `دليل تفاعلي لرعاية وإنقاذ النباتات المنزلية المتوفرة في مصر — ${PLANT_GUIDE_COUNT} نوع بصور حقيقية، وأدوات تشخيص وري وتربة، بـ ${product.price} جنيه.`,
   openGraph: {
     title: product.arabicName,
     description: `${PLANT_GUIDE_COUNT} نبات من المشاتل المصرية، وأدوات عناية تفاعلية. شراء لمرة واحدة.`,
@@ -25,7 +25,7 @@ export default async function PlantProductPage() {
   const cfg = await getPaymentConfig();
   const plant = getCatalogProduct("plant");
   return (
-    <>
+    <div className="plant-sales">
       <TrackingBoot
         productSlug={plant.slug}
         price={plant.price}
@@ -44,6 +44,6 @@ export default async function PlantProductPage() {
         productTitle={plant.checkoutTitle}
         pixelName={plant.pixelName}
       />
-    </>
+    </div>
   );
 }

@@ -1,4 +1,5 @@
 import { getSettings } from "./db";
+import { PLANT_DRIVE_URL } from "./plant-guide";
 import { getCatalogProduct } from "./products";
 
 export { PRODUCT, getCatalogProduct } from "./products";
@@ -82,6 +83,21 @@ function firstMasarefDelivery(...values: Array<string | undefined>) {
   return MASAREF_DRIVE_URL;
 }
 
+function firstPlantDelivery(...values: Array<string | undefined>) {
+  for (const value of values) {
+    if (!value || !value.trim()) continue;
+    const url = rewriteRetiredSiteUrl(value.trim());
+    try {
+      const parsed = new URL(url);
+      if (parsed.pathname.startsWith("/products/plant")) return PLANT_DRIVE_URL;
+    } catch {
+      if (url.includes("/products/plant")) return PLANT_DRIVE_URL;
+    }
+    return url;
+  }
+  return PLANT_DRIVE_URL;
+}
+
 export function mergePaymentConfig(
   env: NodeJS.Dict<string>,
   stored: Record<string, string> = {}
@@ -116,13 +132,7 @@ export function mergePaymentConfig(
         DEFAULT_DELIVERY_URL
       )
     ),
-    plantDeliveryUrl: rewriteRetiredSiteUrl(
-      firstNonEmpty(
-        env.PLANT_DELIVERY_URL,
-        stored.plant_delivery_url,
-        `${CANONICAL_SITE_URL}/products/plant`
-      )
-    ),
+    plantDeliveryUrl: firstPlantDelivery(env.PLANT_DELIVERY_URL, stored.plant_delivery_url),
     arabityDeliveryUrl: firstArabityDelivery(env.ARABITY_DELIVERY_URL, stored.arabity_delivery_url),
     masarefDeliveryUrl: firstMasarefDelivery(env.MASAREF_DELIVERY_URL, stored.masaref_delivery_url),
     whatsapp: firstNonEmpty(env.WHATSAPP_NUMBER, stored.whatsapp_number, "201017420379").replace(

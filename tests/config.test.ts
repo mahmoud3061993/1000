@@ -1,10 +1,12 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
+  deliveryUrlForProduct,
   kashierConfigured,
   mergePaymentConfig,
   rewriteRetiredSiteUrl,
 } from "../src/lib/config";
+import { PLANT_DRIVE_URL } from "../src/lib/plant-guide";
 
 describe("payment config merge", () => {
   it("uses admin-stored Instapay and falls wallet back to the same number", () => {
@@ -71,9 +73,19 @@ describe("payment config merge", () => {
         arabity_delivery_url: "https://www.mahmoudelkousy.online/car",
       }
     );
-    assert.equal(cfg.plantDeliveryUrl, "https://www.producthelpyou.online/products/plant");
+    assert.equal(cfg.plantDeliveryUrl, PLANT_DRIVE_URL);
     assert.equal(cfg.deliveryUrl, "https://www.producthelpyou.online/products/1000");
     assert.equal(cfg.arabityDeliveryUrl, "https://drive.google.com/drive/u/0/folders/1g0QLdBay_9eWs_UWEHf2h5lU2tT57_3e");
+  });
+
+  it("delivers the plant guide from the Drive folder, not the live preview page", () => {
+    const fallback = mergePaymentConfig({}, {});
+    assert.equal(fallback.plantDeliveryUrl, PLANT_DRIVE_URL);
+    const fromLivePage = mergePaymentConfig({
+      PLANT_DELIVERY_URL: "https://www.producthelpyou.online/products/plant",
+    });
+    assert.equal(fromLivePage.plantDeliveryUrl, PLANT_DRIVE_URL);
+    assert.equal(deliveryUrlForProduct("plant", fallback), PLANT_DRIVE_URL);
   });
 
   it("falls back to the store Instapay number when nothing is configured", () => {

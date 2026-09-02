@@ -1,3 +1,5 @@
+import { PLANT_GUIDE_PRICE } from "./plant-guide";
+
 export type ProductSlug = "1000" | "plant" | "arabity" | "masaref";
 
 export type CatalogProduct = {
@@ -31,6 +33,12 @@ export function productAdminLabel(slug?: string | null) {
   if (slug === "arabity") return "عربيتي";
   if (slug === "masaref") return "مصارف";
   return "مكتبة +1000";
+}
+
+function plantSalePrice(env: NodeJS.Dict<string>) {
+  const raw = Number(env.PLANT_PRODUCT_PRICE);
+  if (Number.isFinite(raw) && raw > 0 && raw !== 350) return raw;
+  return PLANT_GUIDE_PRICE;
 }
 
 export function getCatalogProduct(
@@ -87,7 +95,7 @@ export function getCatalogProduct(
       name: "دليل إنقاذ ورعاية النباتات المنزلية",
       arabicName: "دليل إنقاذ ورعاية النباتات المنزلية",
       shortName: "دليل النباتات",
-      price: Number(env.PLANT_PRODUCT_PRICE || 350),
+      price: plantSalePrice(env),
       compareAtPrice: Number(env.PLANT_COMPARE_AT_PRICE || 1490),
       currency: "EGP",
       pixelName: "Plant Care Guide",
@@ -95,7 +103,7 @@ export function getCatalogProduct(
       checkoutTitle: "دليل إنقاذ ورعاية النباتات المنزلية",
       whatsappMessage: "أهلاً، حابب أعرف تفاصيل أكتر عن دليل رعاية النباتات المنزلية",
       path: "/buydoctorplant",
-      thankYouCta: "افتح الدليل دلوقتي",
+      thankYouCta: "افتح فولدر الدرايف",
       thankYouBody: "شكراً {name}. هيوصلك إيميل فيه لينك فولدر الدرايف — منه التطبيق ونسخة HTML وملفات الشرح. تقدر كمان تفتح الدليل أونلاين من الزر تحت.",
       pendingBody: "استلمنا سكرين التحويل. أول ما نتأكد إن الدفع وصل هنبعتلك لينك فولدر الدرايف على الإيميل.",
     };

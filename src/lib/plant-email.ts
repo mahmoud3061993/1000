@@ -1,10 +1,9 @@
-import { PLANT_GUIDE_COUNT } from "./plant-guide";
+import { PLANT_DRIVE_URL, PLANT_GUIDE_COUNT } from "./plant-guide";
 
 export const PLANT_PURCHASE_EMAIL_SUBJECT =
   "🎉 تم تأكيد طلبك - دليل إنقاذ ورعاية النباتات المنزلية جاهز للاستخدام";
 
-export const PLANT_DRIVE_URL =
-  "https://drive.google.com/drive/u/0/folders/189YT8A2YjnXC3-GbmL5dpyj1J9lfnnZ_";
+export { PLANT_DRIVE_URL };
 
 export function buildPlantPurchaseEmail(input: {
   name?: string;
