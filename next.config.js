@@ -12,6 +12,13 @@ const nextConfig = {
         ],
       },
       {
+        source: "/masaref-html.zip",
+        headers: [
+          { key: "Content-Type", value: "application/zip" },
+          { key: "Content-Disposition", value: 'attachment; filename="masaref-html.zip"' },
+        ],
+      },
+      {
         source: "/spend/masaref-html.zip",
         headers: [
           { key: "Content-Type", value: "application/zip" },
@@ -43,6 +50,9 @@ const nextConfig = {
       );
     }
     return list;
+  },
+  outputFileTracingIncludes: {
+    "/download/masaref-html": ["./public/masaref-html.zip", "./public/spend/masaref-html.zip"],
   },
 };
 

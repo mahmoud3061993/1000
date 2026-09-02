@@ -108,6 +108,7 @@ if (apkStash) {
 const htmlZip = join(web, htmlZipName);
 const apkZip = join(web, apkZipName);
 zipFolder(dist, htmlZip);
+await copyFile(htmlZip, join(root, "..", "public", htmlZipName));
 if (await exists(join(web, apkName))) {
   zipSingleFile(join(web, apkName), apkZip, apkName);
 }

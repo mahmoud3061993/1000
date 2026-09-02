@@ -27,8 +27,8 @@ export const ARABITY_SYSTEM_URL = `${CANONICAL_SITE_URL}/car`;
 export const ARABITY_DRIVE_URL =
   "https://drive.google.com/drive/u/0/folders/1g0QLdBay_9eWs_UWEHf2h5lU2tT57_3e";
 export const MASAREF_SYSTEM_URL = `${CANONICAL_SITE_URL}/spend`;
-export const MASAREF_FILES_URL = `${CANONICAL_SITE_URL}/spend/files.html`;
-export const MASAREF_HTML_ZIP_URL = `${CANONICAL_SITE_URL}/spend/masaref-html.zip`;
+export const MASAREF_FILES_URL = `${CANONICAL_SITE_URL}/masaref/files`;
+export const MASAREF_HTML_ZIP_URL = `${CANONICAL_SITE_URL}/download/masaref-html`;
 export const MASAREF_APK_URL = `${CANONICAL_SITE_URL}/spend/masaref.apk`;
 export const MASAREF_APK_ZIP_URL = `${CANONICAL_SITE_URL}/spend/masaref-android.zip`;
 export const MASAREF_HOWTO_URL = `${CANONICAL_SITE_URL}/spend/howto.html`;
@@ -76,7 +76,7 @@ function firstMasarefDelivery(...values: Array<string | undefined>) {
   for (const value of values) {
     if (!value || !value.trim()) continue;
     const url = rewriteRetiredSiteUrl(value.trim());
-    if (url === MASAREF_SYSTEM_URL || /\/spend\/?$/.test(url)) continue;
+    if (url === MASAREF_SYSTEM_URL || /\/spend\/?$/.test(url) || /\/spend\/files\.html$/i.test(url)) continue;
     return url;
   }
   return MASAREF_DRIVE_URL;

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { firePixel, ensureOriginalFbc } from "@/components/TrackingBoot";
+import { DownloadLink, StaticPageLink } from "@/components/DownloadLink";
 
 type OrderInfo = {
   id: string;
@@ -99,18 +100,18 @@ function ThankYouClient({
             )}
             {order?.product_slug === "masaref" ? (
               <div className="file-links masaref-files">
-                <a className="drive-link" href="/spend/masaref-html.zip" download="masaref-html.zip">
+                <DownloadLink className="drive-link" href="/download/masaref-html" filename="masaref-html.zip">
                   نزّل السيستم للكمبيوتر (ZIP)
-                </a>
-                <a className="drive-link" href="/spend/masaref.apk" download="masaref.apk">
+                </DownloadLink>
+                <DownloadLink className="drive-link" href="/spend/masaref.apk" filename="masaref.apk">
                   نزّل تطبيق أندرويد (APK)
-                </a>
-                <a className="drive-link" href="/spend/masaref-android.zip" download="masaref-android.zip">
+                </DownloadLink>
+                <DownloadLink className="drive-link" href="/spend/masaref-android.zip" filename="masaref-android.zip">
                   أندرويد ZIP لو الـ APK اتقفل
-                </a>
-                <a className="drive-link" href="/spend/howto.html">
+                </DownloadLink>
+                <StaticPageLink className="drive-link" href="/spend/howto.html">
                   الدليل
-                </a>
+                </StaticPageLink>
               </div>
             ) : null}
           </>
