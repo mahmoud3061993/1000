@@ -1934,6 +1934,10 @@ MOBILE
     border-color: rgba(18, 179, 160, 0.24);
 }
 
+.arabity-root .screenshot-hint {
+    color: #8aa0b8;
+}
+
 .ar-checks li:before {
     content: "✓";
     top: 0;
