@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>تحميل ملفات مصارف</title>
+    <style>
+      body { font-family: Tahoma, Arial, sans-serif; direction: rtl; max-width: 720px; margin: 0 auto; padding: 28px 18px 64px; line-height: 1.9; color: #1c1917; background: #f6f3ec; }
+      h1, h2 { line-height: 1.4; }
+      p { color: #44403c; }
+      .card { background: #fff; border: 1px solid #e7e0d4; border-radius: 18px; padding: 18px; margin: 16px 0; }
+      .btn { display: block; text-align: center; text-decoration: none; font-weight: 800; padding: 14px 18px; border-radius: 12px; margin: 10px 0; }
+      .btn-main { background: #0f766e; color: #fff; }
+      .btn-apk { background: #115e59; color: #fff; }
+      .btn-alt { background: #fff; color: #0f766e; border: 2px solid #0f766e; }
+      .note { background: #ecfdf5; border: 1px solid #99f6e4; border-radius: 14px; padding: 12px 14px; }
+    </style>
+  </head>
+  <body>
+    <h1>تحميل ملفات مصارف</h1>
+    <p>هنا الملفات اللي تقدر تنزّلها وتشغّلها أوفلاين. مفيش تسجيل دخول ولا اشتراك.</p>
+
+    <div class="card">
+      <h2>1) السيستم للكمبيوتر</h2>
+      <p>ملف ZIP فيه HTML و CSS و JS. فك الضغط، بعدين افتح <b>index.html</b>.</p>
+      <a class="btn btn-main" href="./masaref-html.zip" download="masaref-html.zip">نزّل السيستم HTML</a>
+      <p>لو الصفحة فضلت بيضاء بعد فتح index.html، شغّل ملف <b>open-on-windows.bat</b> أو <b>open-on-mac.command</b> من داخل المجلد.</p>
+    </div>
+
+    <div class="card">
+      <h2>2) تطبيق أندرويد</h2>
+      <p>ثبّته يدويًا على الموبايل (مش من Google Play). لو المتصفح منع ملف APK، نزّل النسخة المضغوطة.</p>
+      <a class="btn btn-apk" href="./masaref.apk" download="masaref.apk">نزّل masaref.apk</a>
+      <a class="btn btn-alt" href="./masaref-android.zip" download="masaref-android.zip">نزّل الأندرويد ZIP (لو الـ APK اتقفل)</a>
+    </div>
+
+    <div class="card">
+      <h2>3) الدليل</h2>
+      <a class="btn btn-alt" href="./howto.html">افتح دليل الاستخدام</a>
+    </div>
+
+    <p class="note">تقدر تجرب السيستم أونلاين من غير تحميل: <a href="./">افتح مصارف</a></p>
+  </body>
+</html>

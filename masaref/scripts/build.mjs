@@ -1,4 +1,5 @@
 import { access, copyFile, cp, mkdir, readFile, rm, writeFile } from "node:fs/promises";
+import { execFileSync } from "node:child_process";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -9,6 +10,8 @@ const src = join(root, "src");
 const dist = join(root, "dist");
 const web = join(root, "..", "public", "spend");
 const apkName = "masaref.apk";
+const htmlZipName = "masaref-html.zip";
+const apkZipName = "masaref-android.zip";
 
 async function exists(path) {
   try {
@@ -28,6 +31,51 @@ async function stashApk() {
     }
   }
   return null;
+}
+
+function zipFolder(fromDir, outFile, skipExt = [".apk", ".zip"]) {
+  const skip = JSON.stringify(skipExt);
+  execFileSync(
+    "python3",
+    [
+      "-c",
+      [
+        "import os, sys, zipfile",
+        "src, out, skip = sys.argv[1], sys.argv[2], set(sys.argv[3].split(','))",
+        "os.makedirs(os.path.dirname(out) or '.', exist_ok=True)",
+        "with zipfile.ZipFile(out, 'w', zipfile.ZIP_DEFLATED) as z:",
+        "    for root, dirs, files in os.walk(src):",
+        "        for name in files:",
+        "            ext = os.path.splitext(name)[1].lower()",
+        "            if ext in skip: continue",
+        "            path = os.path.join(root, name)",
+        "            z.write(path, os.path.relpath(path, src))",
+      ].join("\n"),
+      fromDir,
+      outFile,
+      skipExt.join(","),
+    ],
+    { stdio: "inherit" }
+  );
+}
+
+function zipSingleFile(filePath, outFile, innerName) {
+  execFileSync(
+    "python3",
+    [
+      "-c",
+      [
+        "import sys, zipfile",
+        "src, out, name = sys.argv[1], sys.argv[2], sys.argv[3]",
+        "with zipfile.ZipFile(out, 'w', zipfile.ZIP_DEFLATED) as z:",
+        "    z.write(src, name)",
+      ].join("\n"),
+      filePath,
+      outFile,
+      innerName,
+    ],
+    { stdio: "inherit" }
+  );
 }
 
 const apkStash = await stashApk();
@@ -55,7 +103,13 @@ if (apkStash) {
   await copyFile(apkStash, join(dist, apkName));
   await copyFile(apkStash, join(web, apkName));
   await rm(apkStash, { force: true });
-  console.log("Built masaref/dist and public/spend (kept masaref.apk)");
-} else {
-  console.log("Built masaref/dist and public/spend (no masaref.apk to keep)");
 }
+
+const htmlZip = join(web, htmlZipName);
+const apkZip = join(web, apkZipName);
+zipFolder(dist, htmlZip);
+if (await exists(join(web, apkName))) {
+  zipSingleFile(join(web, apkName), apkZip, apkName);
+}
+
+console.log("Built masaref/dist, public/spend, HTML zip, and Android zip");

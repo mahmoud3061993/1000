@@ -7,8 +7,22 @@ const nextConfig = {
       {
         source: "/spend/masaref.apk",
         headers: [
-          { key: "Content-Type", value: "application/vnd.android.package-archive" },
+          { key: "Content-Type", value: "application/octet-stream" },
           { key: "Content-Disposition", value: 'attachment; filename="masaref.apk"' },
+        ],
+      },
+      {
+        source: "/spend/masaref-html.zip",
+        headers: [
+          { key: "Content-Type", value: "application/zip" },
+          { key: "Content-Disposition", value: 'attachment; filename="masaref-html.zip"' },
+        ],
+      },
+      {
+        source: "/spend/masaref-android.zip",
+        headers: [
+          { key: "Content-Type", value: "application/zip" },
+          { key: "Content-Disposition", value: 'attachment; filename="masaref-android.zip"' },
         ],
       },
     ];

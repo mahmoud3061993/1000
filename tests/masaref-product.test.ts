@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { MASAREF_PURCHASE_EMAIL_SUBJECT, MASAREF_SYSTEM_URL, buildMasarefPurchaseEmail } from "../src/lib/masaref-email";
+import { MASAREF_PURCHASE_EMAIL_SUBJECT, MASAREF_FILES_URL, MASAREF_HTML_ZIP_URL, MASAREF_APK_URL, buildMasarefPurchaseEmail } from "../src/lib/masaref-email";
 import { deliveryUrlForProduct, mergePaymentConfig } from "../src/lib/config";
 import { getCatalogProduct, isProductSlug, productAdminLabel, resolveProductSlug } from "../src/lib/products";
 import { formatOrderMessage } from "../src/lib/telegram";
@@ -38,9 +38,9 @@ describe("masaref catalog product", () => {
 });
 
 describe("masaref delivery and purchase email", () => {
-  it("defaults delivery to the live system until a Drive folder is set", () => {
+  it("defaults delivery to the download page until a Drive folder is set", () => {
     const cfg = mergePaymentConfig({}, {});
-    assert.equal(deliveryUrlForProduct("masaref", cfg), MASAREF_SYSTEM_URL);
+    assert.equal(deliveryUrlForProduct("masaref", cfg), MASAREF_FILES_URL);
   });
 
   it("prefers MASAREF_DELIVERY_URL for the Drive folder", () => {
@@ -65,6 +65,19 @@ describe("masaref delivery and purchase email", () => {
     assert.match(email.html, /dir="rtl"/);
     assert.match(email.text, /01017420379/);
     assert.match(email.text, /محمود القوصي/);
+    assert.equal(email.text.includes(MASAREF_HTML_ZIP_URL), true);
+    assert.equal(email.text.includes(MASAREF_APK_URL), true);
+  });
+
+  it("lists direct download links when no Drive folder is set", () => {
+    const email = buildMasarefPurchaseEmail({
+      name: "سارة",
+      deliveryUrl: "",
+      whatsappDisplay: "01017420379",
+    });
+    assert.equal(email.text.includes(MASAREF_FILES_URL), true);
+    assert.equal(email.text.includes(MASAREF_HTML_ZIP_URL), true);
+    assert.equal(email.text.includes(MASAREF_APK_URL), true);
   });
 });
 
