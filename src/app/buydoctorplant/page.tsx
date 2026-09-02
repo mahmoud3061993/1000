@@ -3,6 +3,7 @@ import { CheckoutForm } from "@/components/CheckoutForm";
 import { PlantLandingPage } from "@/components/PlantLandingPage";
 import { TrackingBoot } from "@/components/TrackingBoot";
 import { getCatalogProduct, getPaymentConfig } from "@/lib/config";
+import { PLANT_GUIDE_COUNT } from "@/lib/plant-guide";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -12,10 +13,10 @@ const product = getCatalogProduct("plant");
 export const metadata: Metadata = {
   title: product.arabicName,
   description:
-    "دليل تفاعلي لرعاية وإنقاذ النباتات المنزلية المتوفرة في مصر — 77 نوع بصور حقيقية، وأدوات تشخيص وري وتربة، بـ 350 جنيه.",
+    `دليل تفاعلي لرعاية وإنقاذ النباتات المنزلية المتوفرة في مصر — ${PLANT_GUIDE_COUNT} نوع بصور حقيقية، وأدوات تشخيص وري وتربة، بـ 350 جنيه.`,
   openGraph: {
     title: product.arabicName,
-    description: "77 نبات من المشاتل المصرية، وأدوات عناية تفاعلية. شراء لمرة واحدة.",
+    description: `${PLANT_GUIDE_COUNT} نبات من المشاتل المصرية، وأدوات عناية تفاعلية. شراء لمرة واحدة.`,
     images: ["/images/plant/og.jpg"],
   },
 };

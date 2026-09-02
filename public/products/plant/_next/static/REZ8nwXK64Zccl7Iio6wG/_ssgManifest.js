@@ -1,0 +1,1 @@
+self.__SSG_MANIFEST=new Set(["\u002Fplants\u002F[slug]","\u002Fsituations\u002F[id]","\u002Ftools\u002F[slug]"]);self.__SSG_MANIFEST_CB&&self.__SSG_MANIFEST_CB()

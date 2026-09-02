@@ -14,6 +14,8 @@ masaref/android/captures
 *.apk
 *.aab
 *.keystore
+!deliverables/*.apk
+!public/spend/*.apk
 public/spend/*.zip
 masaref/dist/*.zip
 !arabity/android/app/debug.keystore

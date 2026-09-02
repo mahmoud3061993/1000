@@ -4,7 +4,9 @@
     { "source": "/car", "destination": "/car/index.html" },
     { "source": "/car/", "destination": "/car/index.html" },
     { "source": "/spend", "destination": "/spend/index.html" },
-    { "source": "/spend/", "destination": "/spend/index.html" }
+    { "source": "/spend/", "destination": "/spend/index.html" },
+    { "source": "/products/plant", "destination": "/products/plant/index.html" },
+    { "source": "/products/plant/", "destination": "/products/plant/index.html" }
   ],
   "headers": [
     {

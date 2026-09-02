@@ -1,6 +1,4 @@
 /** @type {import('next').NextConfig} */
-const plantOrigin = (process.env.PLANT_APP_ORIGIN || "").replace(/\/$/, "");
-
 const nextConfig = {
   async headers() {
     return [
@@ -28,21 +26,16 @@ const nextConfig = {
     ];
   },
   async rewrites() {
-    const list = [
+    return [
       { source: "/car", destination: "/car/index.html" },
       { source: "/car/", destination: "/car/index.html" },
       { source: "/car/index.html", destination: "/car/index.html" },
       { source: "/spend", destination: "/spend/index.html" },
       { source: "/spend/", destination: "/spend/index.html" },
       { source: "/spend/index.html", destination: "/spend/index.html" },
+      { source: "/products/plant", destination: "/products/plant/index.html" },
+      { source: "/products/plant/", destination: "/products/plant/index.html" },
     ];
-    if (plantOrigin) {
-      list.push(
-        { source: "/products/plant", destination: `${plantOrigin}/products/plant` },
-        { source: "/products/plant/:path*", destination: `${plantOrigin}/products/plant/:path*` }
-      );
-    }
-    return list;
   },
 };
 

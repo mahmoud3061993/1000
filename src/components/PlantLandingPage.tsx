@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useRef, useState } from "react";
+import { PLANT_GUIDE_COUNT } from "@/lib/plant-guide";
 
 function scrollToOrder() {
   const el = document.getElementById("order-form");
@@ -17,7 +18,7 @@ const SLIDES = [
   },
   {
     src: "/images/plant/slides/library.png",
-    title: "دليل 77 نبات",
+    title: `دليل ${PLANT_GUIDE_COUNT} نبات`,
     caption: "بتدور بالعربي أو الإنجليزي، وتفلتر حسب الضوء والري والحيوانات.",
   },
   {
@@ -39,25 +40,44 @@ const SLIDES = [
 
 function PlantSlider() {
   const [index, setIndex] = useState(0);
-  useEffect(() => {
-    const timer = window.setInterval(() => {
-      setIndex((current) => (current + 1) % SLIDES.length);
-    }, 4500);
-    return () => window.clearInterval(timer);
-  }, []);
-
+  const startX = useRef<number | null>(null);
   const slide = SLIDES[index];
+
+  function go(delta: number) {
+    setIndex((current) => (current + delta + SLIDES.length) % SLIDES.length);
+  }
+
+  function onPointerDown(event: { clientX: number }) {
+    startX.current = event.clientX;
+  }
+
+  function onPointerUp(event: { clientX: number }) {
+    if (startX.current == null) return;
+    const dx = event.clientX - startX.current;
+    if (dx > 40) go(-1);
+    if (dx < -40) go(1);
+    startX.current = null;
+  }
+
   return (
-    <div className="plant-slider">
+    <div
+      className="plant-slider"
+      onPointerDown={onPointerDown}
+      onPointerUp={onPointerUp}
+      onPointerCancel={() => {
+        startX.current = null;
+      }}
+    >
+      <p className="plant-slider-hint">اسحب يمين أو شمال</p>
       <div className="plant-slider-frame">
-        <img src={slide.src} alt={slide.title} />
+        <img src={slide.src} alt={slide.title} draggable={false} />
       </div>
       <div className="plant-slider-caption">
         <b>{slide.title}</b>
         <p>{slide.caption}</p>
       </div>
       <div className="plant-slider-nav">
-        <button type="button" onClick={() => setIndex((index - 1 + SLIDES.length) % SLIDES.length)} aria-label="السابق">
+        <button type="button" onClick={() => go(-1)} aria-label="السابق">
           →
         </button>
         <div className="plant-slider-dots">
@@ -71,7 +91,7 @@ function PlantSlider() {
             />
           ))}
         </div>
-        <button type="button" onClick={() => setIndex((index + 1) % SLIDES.length)} aria-label="التالي">
+        <button type="button" onClick={() => go(1)} aria-label="التالي">
           ←
         </button>
       </div>
@@ -88,19 +108,19 @@ export function PlantLandingPage({ whatsapp, price }: { whatsapp: string; price:
   const faqs = [
     {
       q: "هستلم المنتج إزاي؟",
-      a: "بعد الدفع هيوصلك إيميل فيه لينك السيستم تفتحه وتستخدمه مباشرة، وكمان ملف تنزّله على موبايلك وتثبّته وتشتغل عليه. كل الخطوات مشروحة بالتفصيل في نفس الإيميل.",
+      a: "بعد الدفع هيوصلك إيميل فيه لينك فولدر Google Drive بس. جوه الفولدر تطبيق أندرويد، نسخة HTML أوفلاين، وملفات الشرح. باقي الخطوات مكتوبة في نفس الإيميل.",
     },
     {
       q: "ملف الموبايل من Google Play؟",
-      a: "لأ. مش من المتجر. بتنزّل الملف من الإيميل وتثبّته على الموبايل مباشرة، وبعدين تفتح أيقونة دليل النباتات.",
+      a: "لأ. مش من المتجر. بتنزّل ملف APK من فولدر الدرايف وتثبّته على الموبايل مباشرة، وبعدين تفتح أيقونة دليل النباتات.",
     },
     {
       q: "ينفع على آيفون؟",
-      a: "لينك السيستم يفتح على آيفون وعلى أي جهاز. ملف التثبيت ده لأندرويد.",
+      a: "ملف التثبيت لأندرويد فقط. على آيفون استخدم نسخة HTML من نفس فولدر الدرايف.",
     },
     {
       q: "النباتات دي موجودة في مصر فعلًا؟",
-      a: "أيوه. الكتالوج 77 نوع من اللي بيتباع في المشاتل والورود والبلكونات المصرية، بأسماء الناس بتستخدمها، وصورة حقيقية على كل كارت.",
+      a: `أيوه. الكتالوج ${PLANT_GUIDE_COUNT} نوع من اللي بيتباع في المشاتل والورود والبلكونات المصرية، بأسماء الناس بتستخدمها، وصورة حقيقية على كل كارت.`,
     },
     {
       q: "في حساب أو اشتراك شهري؟",
@@ -122,10 +142,14 @@ export function PlantLandingPage({ whatsapp, price }: { whatsapp: string; price:
         <div className="lp-container lp-hero-grid">
           <div className="lp-hero-copy">
             <div className="lp-eyebrow">دليل تفاعلي للنباتات المنزلية في مصر</div>
-            <h1>اعرف نباتك، اسقيه صح، وأنقذه قبل ما يموت — من غير تخمين</h1>
+            <h1>
+              جبنالك دليل رعاية جميع النباتات المنزلية الموجودة في مصر —{" "}
+              <strong>{PLANT_GUIDE_COUNT} نبات</strong>
+            </h1>
+            <PlantSlider />
             <p className="lp-hero-desc">
-              سيستم كامل فيه <strong>77 نبات من المشاتل المصرية</strong> بصور حقيقية، وأدوات تشخيص وري وتربة ومكان النبات.
-              هتستلم لينك السيستم تستخدمه مباشرة، وملف تنزّله على موبايلك وتثبّته وتشتغل عليه. تدفع مرة واحدة.
+              سيستم كامل فيه <strong>{PLANT_GUIDE_COUNT} نبات من المشاتل المصرية</strong> بصور حقيقية، وأدوات تشخيص وري وتربة ومكان النبات.
+              هتستلم فولدر درايف فيه تطبيق الموبايل، ونسخة HTML أوفلاين، وملفات الشرح. تدفع مرة واحدة.
             </p>
             <div className="lp-hero-points">
               <div className="lp-hero-point">
@@ -138,7 +162,7 @@ export function PlantLandingPage({ whatsapp, price }: { whatsapp: string; price:
               </div>
               <div className="lp-hero-point">
                 <div className="lp-check">✓</div>
-                <div>لينك السيستم للاستخدام المباشر، وملف تثبّته على موبايلك وتشتغل عليه.</div>
+                <div>فولدر درايف فيه تطبيق أندرويد أوفلاين، ونسخة HTML، وشرح التثبيت والاستخدام.</div>
               </div>
               <div className="lp-hero-point">
                 <div className="lp-check">✓</div>
@@ -153,16 +177,7 @@ export function PlantLandingPage({ whatsapp, price }: { whatsapp: string; price:
             <button className="lp-btn" onClick={scrollToOrder}>
               اطلب الدليل دلوقتي <span>←</span>
             </button>
-            <div className="lp-small-note">📩 الإيميل بعد الشراء فيه اللينك وملف الموبايل، وكل الخطوات مشروحة بالتفصيل</div>
-          </div>
-          <div className="lp-hero-media">
-            <div className="lp-main-image">
-              <img src="/images/plant/hero.jpg" alt="دليل رعاية النباتات المنزلية" />
-            </div>
-            <div className="lp-floating-card">
-              <b>77 نبات</b>
-              من المشاتل المصرية
-            </div>
+            <div className="lp-small-note">📩 الإيميل بعد الشراء فيه لينك فولدر الدرايف، وكل الخطوات مشروحة بالتفصيل</div>
           </div>
         </div>
       </section>
@@ -170,22 +185,11 @@ export function PlantLandingPage({ whatsapp, price }: { whatsapp: string; price:
       <div className="lp-trust">
         <div className="lp-container lp-trust-grid">
           <div className="lp-trust-item">✓ نباتات مصر فقط</div>
-          <div className="lp-trust-item">✓ لينك السيستم مباشر</div>
+          <div className="lp-trust-item">✓ فولدر درايف بعد الدفع</div>
           <div className="lp-trust-item">✓ ملف تثبّته على الموبايل</div>
           <div className="lp-trust-item">✓ من غير اشتراك شهري</div>
         </div>
       </div>
-
-      <section className="lp-section lp-preview" data-track-section="SectionPreview">
-        <div className="lp-container">
-          <div className="lp-center">
-            <div className="lp-tag">سكرينات من جوه السيستم</div>
-            <h2 className="lp-title">ده شكل الدليل من جوه… مش صور ديكور</h2>
-            <p className="lp-subtitle">اسحب السلايدر وشوف الصفحة الرئيسية، دليل النباتات، دكتور النباتات، الري، وخلطة التربة.</p>
-          </div>
-          <PlantSlider />
-        </div>
-      </section>
 
       <section className="lp-section lp-problem" data-track-section="SectionProblem">
         <div className="lp-container">
@@ -226,28 +230,26 @@ export function PlantLandingPage({ whatsapp, price }: { whatsapp: string; price:
             <div className="lp-tag">الاستلام</div>
             <h2 className="lp-title">هتستلم الملفات عبارة عن إيه؟</h2>
             <p className="lp-subtitle">
-              لينك السيستم تستخدمه مباشرة، وملف تنزّله على موبايلك وتثبّته وتشتغل عليه. كل ده مشروح بالتفصيل في الإيميل بعد
-              الشراء.
+              الإيميل بعد الشراء فيه لينك فولدر Google Drive فقط. جوه الفولدر كل الملفات، وشرح التثبيت والاستخدام.
             </p>
           </div>
           <div className="lp-deliver-grid lp-deliver-grid-two">
             <div className="lp-deliver-card">
               <div className="lp-deliver-no">1</div>
-              <h3>لينك السيستم</h3>
+              <h3>تطبيق أندرويد أوفلاين</h3>
               <p>
-                تفتح الدليل من اللينك على الموبايل أو الكمبيوتر وتستخدمه على طول. كل الأدوات شغالة: دليل النباتات، التشخيص،
-                الري، التربة، المكان، والآفات.
+                ملف APK تثبّته على الموبايل وتفتح أيقونة «دليل النباتات». نفس الدليل كامل، ويشتغل من غير نت بعد التثبيت.
               </p>
             </div>
             <div className="lp-deliver-card">
               <div className="lp-deliver-no">2</div>
-              <h3>ملف تثبّته على الموبايل</h3>
+              <h3>نسخة HTML + ملفات الشرح</h3>
               <p>
-                تنزّل الملف على موبايلك، تثبّته، وتفتح السيستم من أيقونة على الشاشة. مش من Play Store — تثبيت مباشر من الملف.
+                نفس الدليل للكمبيوتر أو الآيفون، مع ملف طريقة التثبيت وملف شرح استخدام الأدوات كلها.
               </p>
             </div>
           </div>
-          <p className="lp-deliver-note">كل الخطوات هتكون مشروحة بالتفصيل في الإيميل اللي هيوصلك بعد الشراء.</p>
+          <p className="lp-deliver-note">الإيميل فيه لينك الدرايف بس. باقي الخطوات مشروحة جوه الإيميل وجوه الفولدر.</p>
         </div>
       </section>
 
@@ -256,13 +258,13 @@ export function PlantLandingPage({ whatsapp, price }: { whatsapp: string; price:
           <div className="lp-center">
             <div className="lp-tag">جوه السيستم</div>
             <h2 className="lp-title">إيه اللي هتستخدمه حتة حتة؟</h2>
-            <p className="lp-subtitle">كل الأدوات بتقرأ من نفس دليل الـ 77 نبات. مفيش إجابات متناقضة.</p>
+            <p className="lp-subtitle">كل الأدوات بتقرأ من نفس دليل الـ {PLANT_GUIDE_COUNT} نبات. مفيش إجابات متناقضة.</p>
           </div>
           <div className="lp-get-list">
             {[
               {
                 t: "دليل النباتات",
-                d: "77 نوع من المشاتل المصرية بصورة حقيقية، اسم عربي زي ما بيتقال في السوق، ضوء، ري، تربة، وتحذيرات الحيوانات والأطفال.",
+                d: `${PLANT_GUIDE_COUNT} نوع من المشاتل المصرية بصورة حقيقية، اسم عربي زي ما بيتقال في السوق، ضوء، ري، تربة، وتحذيرات الحيوانات والأطفال.`,
               },
               {
                 t: "دكتور النباتات",
@@ -378,12 +380,12 @@ export function PlantLandingPage({ whatsapp, price }: { whatsapp: string; price:
             <div className="lp-step">
               <div className="lp-step-no">2</div>
               <h3>استلم الإيميل</h3>
-              <p>هيوصلك لينك السيستم وملف الموبايل، وشرح خطوة بخطوة إزاي تستخدمهم.</p>
+              <p>هيوصلك لينك فولدر الدرايف، وشرح خطوة بخطوة إزاي تثبّت التطبيق وتستخدم الدليل.</p>
             </div>
             <div className="lp-step">
               <div className="lp-step-no">3</div>
               <h3>افتح اللي يناسبك</h3>
-              <p>استخدم اللينك مباشرة، أو نزّل الملف وثبّته على الموبايل واشتغل من الأيقونة.</p>
+              <p>نزّل تطبيق أندرويد من الفولدر وثبّته، أو افتح نسخة HTML على الكمبيوتر أو الآيفون.</p>
             </div>
           </div>
         </div>
@@ -396,11 +398,11 @@ export function PlantLandingPage({ whatsapp, price }: { whatsapp: string; price:
             <h2 className="lp-offer-title">كل اللي هتاخده النهاردة</h2>
             <div className="lp-stack">
               <div className="lp-stack-row">
-                <div className="lp-stack-name">دليل 77 نبات + كل الأدوات</div>
+                <div className="lp-stack-name">دليل {PLANT_GUIDE_COUNT} نبات + كل الأدوات</div>
                 <div className="lp-stack-value">790 جنيه</div>
               </div>
               <div className="lp-stack-row">
-                <div className="lp-stack-name">لينك السيستم + ملف تثبّته على الموبايل</div>
+                <div className="lp-stack-name">تطبيق أندرويد أوفلاين + نسخة HTML</div>
                 <div className="lp-stack-value">400 جنيه</div>
               </div>
               <div className="lp-stack-row">
@@ -451,7 +453,7 @@ export function PlantLandingPage({ whatsapp, price }: { whatsapp: string; price:
       <section className="lp-bottom">
         <div className="lp-container">
           <h2>جاهز تبطل تخمّن على نباتاتك؟</h2>
-          <p>سيستم 77 نبات من مصر، وأدوات تشخيص وري وتربة، بـ {price} جنيه لمرة واحدة.</p>
+          <p>سيستم {PLANT_GUIDE_COUNT} نبات من مصر، وأدوات تشخيص وري وتربة، بـ {price} جنيه لمرة واحدة.</p>
           <button className="lp-btn" onClick={scrollToOrder}>
             اطلب الدليل بـ {price} جنيه <span>←</span>
           </button>

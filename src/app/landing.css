@@ -155,9 +155,11 @@ HERO
 
 .lp-hero-grid {
     display:grid;
-    grid-template-columns:1.05fr .95fr;
-    gap:50px;
-    align-items:center;
+    grid-template-columns:1fr;
+    gap:28px;
+    align-items:start;
+    max-width: 720px;
+    margin: 0 auto;
 }
 
 .lp-eyebrow {
@@ -1080,9 +1082,29 @@ MOBILE
     color:#c4e0c8;
 }
 
+.plant-lp .lp-hero h1 {
+    font-size: clamp(28px, 4.4vw, 44px);
+    line-height: 1.38;
+}
+
+.plant-lp .lp-hero h1 strong {
+    color: #2f5340;
+}
+
 .plant-slider {
     max-width: 420px;
-    margin: 36px auto 0;
+    margin: 22px auto 10px;
+    touch-action: pan-y;
+    user-select: none;
+    cursor: grab;
+}
+
+.plant-slider-hint {
+    text-align: center;
+    margin: 0 0 12px;
+    color: #3d6b4c;
+    font-size: 15px;
+    font-weight: 800;
 }
 
 .plant-slider-frame {
