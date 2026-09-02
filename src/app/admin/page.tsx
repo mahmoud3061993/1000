@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import AdminAnalytics from "@/components/AdminAnalytics";
 import { formatAdPath, parseAdPath } from "@/lib/attribution";
 import { orderEmailStatus, paymentMethodLabel } from "@/lib/orders";
+import { productAdminLabel } from "@/lib/products";
 
 type Order = {
   id: string;
@@ -47,6 +48,7 @@ type PaymentSettings = {
   product_delivery_url: string;
   plant_delivery_url: string;
   arabity_delivery_url: string;
+  masaref_delivery_url: string;
   whatsapp_number: string;
   ntfy_topic: string;
 };
@@ -78,6 +80,7 @@ const emptySettings: PaymentSettings = {
   product_delivery_url: "",
   plant_delivery_url: "",
   arabity_delivery_url: "",
+  masaref_delivery_url: "",
   whatsapp_number: "",
   ntfy_topic: "",
 };
@@ -90,7 +93,7 @@ export default function AdminPage() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);
   const [status, setStatus] = useState("all");
-  const [product] = useState("arabity");
+  const [product, setProduct] = useState("all");
   const [q, setQ] = useState("");
   const [integrations, setIntegrations] = useState({
     meta: false,
@@ -143,6 +146,7 @@ export default function AdminPage() {
       product_delivery_url: json.settings.product_delivery_url || "",
       plant_delivery_url: json.settings.plant_delivery_url || "",
       arabity_delivery_url: json.settings.arabity_delivery_url || "",
+      masaref_delivery_url: json.settings.masaref_delivery_url || "",
       whatsapp_number: json.settings.whatsapp_number || "",
       ntfy_topic: json.settings.ntfy_topic || json.notifications?.topic || "",
     });
@@ -256,6 +260,7 @@ export default function AdminPage() {
         product_delivery_url: settings.product_delivery_url,
         plant_delivery_url: settings.plant_delivery_url,
         arabity_delivery_url: settings.arabity_delivery_url,
+        masaref_delivery_url: settings.masaref_delivery_url,
         whatsapp_number: settings.whatsapp_number,
         ntfy_topic: settings.ntfy_topic,
       }),
@@ -401,9 +406,9 @@ export default function AdminPage() {
               العميل بيحوّل إنستاباي أو محفظة كاش، يرفع سكرين التحويل، والطلب بيفضل قيد المراجعة لحد ما تتأكد بنفسك وتضغط «تأكيد الدفع».
             </p>
             <p>
-              عشان الأدمن يعرف كل طلب جاي من أنهي إعلان، في Ads Manager حط لينك صفحة عربيتي زي ما هو بالظبط (سيب الأقواس زي ما هي):
+              عشان الأدمن يعرف كل طلب جاي من أنهي إعلان، في Ads Manager حط لينك صفحة المنتج زي ما هو بالظبط (سيب الأقواس زي ما هي). مصارف:
               <code className="settings-code" dir="ltr">
-                {"https://www.producthelpyou.online/carlanding?utm_source=facebook&utm_medium=paid&utm_campaign={{campaign.name}}&utm_content={{ad.name}}&utm_term={{adset.name}}"}
+                {"https://www.producthelpyou.online/masaref?utm_source=facebook&utm_medium=paid&utm_campaign={{campaign.name}}&utm_content={{ad.name}}&utm_term={{adset.name}}"}
               </code>
             </p>
             {!usesRemoteDb ? (
@@ -471,6 +476,15 @@ export default function AdminPage() {
                 />
               </div>
               <div className="field settings-wide">
+                <label>لينك فولدر مصارف بعد الدفع (Google Drive: HTML + APK + الدليل)</label>
+                <input
+                  value={settings.masaref_delivery_url}
+                  onChange={(e) => setSettings({ ...settings, masaref_delivery_url: e.target.value })}
+                  placeholder="https://drive.google.com/..."
+                  dir="ltr"
+                />
+              </div>
+              <div className="field settings-wide">
                 <label>قناة إشعار الموبايل (اختياري)</label>
                 <input
                   value={settings.ntfy_topic}
@@ -528,6 +542,20 @@ export default function AdminPage() {
               />
               <select
                 className="admin-filter"
+                value={product}
+                onChange={(e) => {
+                  setProduct(e.target.value);
+                  load(status, q, e.target.value);
+                }}
+              >
+                <option value="all">كل المنتجات</option>
+                <option value="masaref">مصارف</option>
+                <option value="arabity">عربيتي</option>
+                <option value="plant">دليل النباتات</option>
+                <option value="1000">مكتبة الإعلانات</option>
+              </select>
+              <select
+                className="admin-filter"
                 value={status}
                 onChange={(e) => {
                   setStatus(e.target.value);
@@ -578,7 +606,7 @@ export default function AdminPage() {
                     <td>
                       {order.id}
                       <div>{order.amount} {order.currency}</div>
-                      <div style={{ color: "#64748B" }}>عربيتي</div>
+                      <div style={{ color: "#64748B" }}>{productAdminLabel(order.product_slug)}</div>
                     </td>
                     <td>
                       <div>{order.name}</div>
