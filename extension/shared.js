@@ -88,7 +88,13 @@ var MLD = (function () {
     /^(facebook|instagram|messenger|audience network|threads|whatsapp)$/i,
     /^(see more|see less)$/i,
     /^sponsored$/i,
-    /^open dropdown$/i,
+    /^open\s*drop[\s-]*down$/i,
+    /^copy brief$/i,
+    /^offer$/i,
+    /^spy$/i,
+    /^download$/i,
+    /^watch$/i,
+    /^\d+d$/i,
     /^about this ad$/i,
     /^\d+\s+versions?$/i,
     /^this ad (is|has|was)\b/i,
@@ -232,8 +238,22 @@ var MLD = (function () {
     };
   }
 
+  function sliceAdCopyText(text) {
+    var s = String(text || "").replace(/\r/g, "");
+    var match = s.match(/open\s*drop[\s-]*down/i);
+    if (match) {
+      s = s.slice(s.indexOf(match[0]) + match[0].length);
+    }
+    s = s.replace(/\n+\s*See ad details[\s\S]*$/i, "");
+    s = s.replace(/\n+\s*See summary details[\s\S]*$/i, "");
+    s = s.replace(/\n+\s*Library ID:[\s\S]*$/i, "");
+    return s.trim();
+  }
+
   function parseCardCopy(text, pageName) {
-    var rawLines = String(text || "").split(/\r?\n/);
+    var usedCutoff = /open\s*drop[\s-]*down/i.test(text || "");
+    var source = usedCutoff ? sliceAdCopyText(text) : String(text || "");
+    var rawLines = source.split(/\r?\n/);
     var lines = [];
     var i;
     for (i = 0; i < rawLines.length; i++) {
@@ -255,13 +275,13 @@ var MLD = (function () {
     var title = "";
     var bodyLines = [];
     for (i = 0; i < lines.length; i++) {
-      if (isCta(lines[i]) && !cta) {
+      if (!usedCutoff && isCta(lines[i]) && !cta) {
         cta = humanizeCta(lines[i]);
         continue;
       }
       bodyLines.push(lines[i]);
     }
-    if (bodyLines.length >= 2) {
+    if (!usedCutoff && bodyLines.length >= 2) {
       var last = bodyLines[bodyLines.length - 1];
       var firstLine = bodyLines[0];
       if (last.length <= 80 && last.length < firstLine.length && last.split(" ").length <= 12) {
@@ -276,6 +296,81 @@ var MLD = (function () {
       cta: cta,
       status: status,
     };
+  }
+
+  function parseWatchInput(raw) {
+    var value = String(raw || "").trim();
+    if (!value) return null;
+    if (/^https?:\/\//i.test(value) || /facebook\.com/i.test(value)) {
+      try {
+        var href = /^https?:\/\//i.test(value) ? value : "https://" + value.replace(/^\/\//, "");
+        var url = new URL(href);
+        var pageId = url.searchParams.get("view_all_page_id") || url.searchParams.get("page_id") || "";
+        var seedAdId = url.searchParams.get("id") || "";
+        if (pageId || seedAdId) {
+          return { pageId: pageId, pageName: "", seedAdId: seedAdId, input: value };
+        }
+        var slug = url.pathname.replace(/^\//, "").split("/")[0];
+        if (slug && slug !== "ads" && slug !== "profile.php" && slug !== "pages") {
+          return { pageId: "", pageName: decodeURIComponent(slug), seedAdId: "", input: value };
+        }
+      } catch (e) {
+        /* fall through */
+      }
+    }
+    if (/^\d{5,}$/.test(value)) {
+      return { pageId: value, pageName: "", seedAdId: "", input: value };
+    }
+    return { pageId: "", pageName: value, seedAdId: "", input: value };
+  }
+
+  function uniqueIds(matches) {
+    var ids = [];
+    var seen = {};
+    for (var i = 0; i < matches.length; i++) {
+      var id = matches[i];
+      if (!id || seen[id]) continue;
+      seen[id] = true;
+      ids.push(id);
+    }
+    return ids;
+  }
+
+  function extractAdIdsFromHtml(html) {
+    var text = String(html || "");
+    var found = [];
+    var patterns = [
+      /"ad_archive_id"\s*:\s*"(\d+)"/g,
+      /"adArchiveID"\s*:\s*"(\d+)"/g,
+      /ad_archive_id\\":\\"(\d+)/g,
+      /Library ID:\s*(\d+)/gi,
+    ];
+    for (var p = 0; p < patterns.length; p++) {
+      var re = patterns[p];
+      var match;
+      while ((match = re.exec(text))) found.push(match[1]);
+    }
+    return uniqueIds(found);
+  }
+
+  function extractPageIdFromHtml(html) {
+    var text = String(html || "");
+    var match =
+      text.match(/"page_id"\s*:\s*"(\d+)"/) ||
+      text.match(/"pageID"\s*:\s*"(\d+)"/) ||
+      text.match(/view_all_page_id=(\d+)/);
+    return match ? match[1] : "";
+  }
+
+  function extractPageNameFromHtml(html) {
+    var text = String(html || "");
+    var match = text.match(/"page_name"\s*:\s*"((?:\\.|[^"\\])*)"/) || text.match(/"pageName"\s*:\s*"((?:\\.|[^"\\])*)"/);
+    if (!match) return "";
+    try {
+      return JSON.parse('"' + match[1] + '"');
+    } catch (e) {
+      return match[1];
+    }
   }
 
   function unwrapFacebookLink(href) {
@@ -318,26 +413,6 @@ var MLD = (function () {
       );
     }
     return "https://www.facebook.com/ads/library/";
-  }
-
-  function formatSwipeBrief(ad) {
-    ad = ad || {};
-    var lines = [];
-    lines.push((ad.isWinner ? "WINNER · " : "") + (ad.days || 0) + " days · " + (ad.pageName || "Unknown page"));
-    if (ad.body) lines.push("Primary: " + ad.body);
-    if (ad.title) lines.push("Headline: " + ad.title);
-    if (ad.description) lines.push("Description: " + ad.description);
-    if (ad.cta) lines.push("CTA: " + ad.cta);
-    if (ad.link) lines.push("Offer: " + ad.link);
-    if (ad.id) lines.push("Ad Library: " + libraryUrl(ad.id));
-    return lines.join("\n");
-  }
-
-  function formatSwipeFile(ads) {
-    var list = ads || [];
-    var chunks = [];
-    for (var i = 0; i < list.length; i++) chunks.push(formatSwipeBrief(list[i]));
-    return chunks.join("\n\n-----\n\n");
   }
 
   function pickVideoUrl(obj) {
@@ -753,11 +828,14 @@ var MLD = (function () {
     humanizeCta: humanizeCta,
     extractCopyFromSnapshot: extractCopyFromSnapshot,
     parseCardCopy: parseCardCopy,
+    sliceAdCopyText: sliceAdCopyText,
+    parseWatchInput: parseWatchInput,
+    extractAdIdsFromHtml: extractAdIdsFromHtml,
+    extractPageIdFromHtml: extractPageIdFromHtml,
+    extractPageNameFromHtml: extractPageNameFromHtml,
     unwrapFacebookLink: unwrapFacebookLink,
     libraryUrl: libraryUrl,
     pageAdsUrl: pageAdsUrl,
-    formatSwipeBrief: formatSwipeBrief,
-    formatSwipeFile: formatSwipeFile,
     pickVideoUrl: pickVideoUrl,
     collectMedia: collectMedia,
     daysRunning: daysRunning,

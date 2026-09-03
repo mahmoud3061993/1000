@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "Meta Library Downloader",
-  "version": "2.1.0",
-  "description": "Download Meta Ad Library images and clean MP4s, bulk-save ads, spot 30-day winners, spy on advertisers, open offers, and export CSV.",
+  "version": "2.2.0",
+  "description": "Download Meta Ad Library ads, spot 30-day winners, export clean copy, and get notified when a watched advertiser launches a new ad.",
   "icons": {
     "16": "icons/icon16.png",
     "32": "icons/icon32.png",
@@ -21,7 +21,7 @@
   "background": {
     "service_worker": "background.js"
   },
-  "permissions": ["downloads", "storage"],
+  "permissions": ["downloads", "storage", "notifications", "alarms"],
   "host_permissions": [
     "https://www.facebook.com/*",
     "https://web.facebook.com/*",

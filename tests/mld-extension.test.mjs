@@ -220,28 +220,44 @@ describe("Meta Library Downloader parsers", () => {
     assert.equal(merged.cta, "Shop now");
   });
 
-  it("builds a swipe brief and unwraps Facebook redirect links", () => {
-    const ad = MLD.normalizeAd({
-      ad_archive_id: "111",
-      page_name: "Glow Co",
-      start_date: fortySevenDaysAgo,
-      snapshot: {
-        body: { text: "Get glowing skin in 7 days." },
-        title: "50% off today",
-        cta_type: "SHOP_NOW",
-        link_url: "https://glow.example/offer",
-      },
-    });
-    const brief = MLD.formatSwipeBrief(ad);
-    assert.match(brief, /WINNER/);
-    assert.match(brief, /Primary: Get glowing skin in 7 days/);
-    assert.match(brief, /Headline: 50% off today/);
-    assert.match(brief, /CTA: Shop now/);
-    assert.match(brief, /Offer: https:\/\/glow.example\/offer/);
-    assert.match(brief, /ads\/library\/\?id=111/);
+  it("keeps only the ad copy after Open Drop-down and drops extension chrome", () => {
+    const copy = MLD.parseCardCopy(
+      [
+        "11d",
+        "Copy brief",
+        "Offer",
+        "Spy",
+        "Open Drop-down",
+        "خصم علي اي بدلة او اي بليزر 50%",
+        "بمناسبه افتتاح أحدث فروع أراك",
+        "اي 2 بدلة ب 3699 ج",
+        "https://wa.me/+201015335600",
+        "العرض لا يشمل البدل الصوف",
+        "See ad details",
+        "Library ID: 999",
+      ].join("\n"),
+      "أراك"
+    );
+    assert.match(copy.body, /خصم علي اي بدلة/);
+    assert.match(copy.body, /العرض لا يشمل البدل الصوف/);
+    assert.equal(copy.body.includes("Copy brief"), false);
+    assert.equal(copy.body.includes("Open Drop-down"), false);
+    assert.equal(copy.body.includes("11d"), false);
+    assert.equal(copy.body.includes("Library ID"), false);
     assert.equal(
       MLD.unwrapFacebookLink("https://l.facebook.com/l.php?u=https%3A%2F%2Fglow.example%2Foffer"),
       "https://glow.example/offer"
     );
+  });
+
+  it("parses advertiser watch input from a Page ID or Ad Library URL", () => {
+    assert.equal(MLD.parseWatchInput("123456789012345").pageId, "123456789012345");
+    const fromUrl = MLD.parseWatchInput(
+      "https://www.facebook.com/ads/library/?active_status=all&ad_type=all&country=ALL&view_all_page_id=98765&search_type=page"
+    );
+    assert.equal(fromUrl.pageId, "98765");
+    const ids = MLD.extractAdIdsFromHtml('{"ad_archive_id":"111","page_name":"Arak","adArchiveID":"222"}');
+    assert.deepEqual(ids, ["111", "222"]);
+    assert.equal(MLD.extractPageNameFromHtml('"page_name":"Arak"'), "Arak");
   });
 });

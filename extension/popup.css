@@ -1,6 +1,6 @@
 body {
   margin: 0;
-  width: 320px;
+  width: 340px;
   font: 13px/1.4 "Segoe UI", Tahoma, system-ui, sans-serif;
   color: #e2e8f0;
   background: #0f172a;
@@ -83,7 +83,8 @@ h2 {
   display: block;
 }
 
-#recent span {
+#recent span,
+#watches span {
   color: #94a3b8;
   font-size: 11px;
 }
@@ -105,6 +106,71 @@ h2 {
 
 .tips li {
   margin: 0 0 4px;
+}
+
+.hint,
+#watch-status {
+  margin: 6px 0 8px;
+  color: #94a3b8;
+  font-size: 12px;
+}
+
+#watch-form {
+  display: flex;
+  gap: 6px;
+}
+
+#watch-input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  border-radius: 8px;
+  background: #1e293b;
+  color: #fff;
+  padding: 8px;
+}
+
+#watch-form button,
+.linkish {
+  border: 0;
+  background: #1877f2;
+  color: #fff;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.linkish {
+  background: transparent;
+  color: #93c5fd;
+  padding: 0;
+  font-size: 12px;
+}
+
+#watches {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+}
+
+#watches li {
+  background: #1e293b;
+  border-radius: 10px;
+  padding: 8px 10px;
+  margin: 0 0 6px;
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+#watches button {
+  border: 0;
+  background: transparent;
+  color: #fca5a5;
+  cursor: pointer;
+  font-size: 12px;
 }
 
 footer {

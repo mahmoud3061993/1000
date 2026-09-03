@@ -146,8 +146,17 @@
     return found;
   }
 
+  function cardInnerText(root) {
+    if (!root) return "";
+    var clone = root.cloneNode(true);
+    clone.querySelectorAll(".mld-toolbar, .mld-panel, .mld-modal, .mld-toast").forEach(function (node) {
+      node.remove();
+    });
+    return clone.innerText || "";
+  }
+
   function scrapeAdFromCard(root, libraryId) {
-    var text = root.innerText || "";
+    var text = cardInnerText(root);
     var start = MLD.parseStartDate(text);
     var nameNode = root.querySelector('a[href*="facebook.com/"]');
     var pageName = nameNode ? (nameNode.textContent || "").trim() : "";
@@ -385,14 +394,6 @@
     });
     bar.appendChild(dl);
 
-    var brief = el("button", "mld-chip", "Copy brief");
-    brief.addEventListener("click", function (e) {
-      e.preventDefault();
-      e.stopPropagation();
-      copyText(MLD.formatSwipeBrief(ad), "Swipe brief copied");
-    });
-    bar.appendChild(brief);
-
     var offer = el("button", "mld-chip", "Offer");
     offer.title = ad.link || "Open the landing page";
     offer.addEventListener("click", function (e) {
@@ -412,6 +413,23 @@
       openSpy(MLD.advertiserPlaybook(ads.length ? ads : [ad]));
     });
     bar.appendChild(spy);
+
+    var watch = el("button", "mld-chip", "Watch");
+    watch.title = "Notify me when this advertiser launches a new ad";
+    watch.addEventListener("click", function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      send({
+        type: "mld-watch-add",
+        input: ad.pageId || ad.pageName,
+        pageName: ad.pageName,
+        pageId: ad.pageId,
+      }).then(function (result) {
+        if (result.ok) toast("Watching " + (ad.pageName || "this advertiser"));
+        else toast(result.error || "Could not watch advertiser", "err");
+      });
+    });
+    bar.appendChild(watch);
 
     root.insertBefore(bar, root.firstChild);
     applyCardState(root, ad);
@@ -501,16 +519,6 @@
     csv.addEventListener("click", function () {
       exportCsv(visibleAds());
     });
-    var swipe = el("button", "mld-btn", "Copy swipe file");
-    swipe.title = "Copy every ad's hook, headline, CTA, and offer URL";
-    swipe.addEventListener("click", function () {
-      var ads = visibleAds();
-      if (!ads.length) {
-        toast("No ads to copy yet", "err");
-        return;
-      }
-      copyText(MLD.formatSwipeFile(ads), "Swipe file copied · " + ads.length + " ads");
-    });
     var filter = el("label", "mld-filter");
     var box = document.createElement("input");
     box.type = "checkbox";
@@ -527,7 +535,6 @@
     panel.appendChild(bulk);
     panel.appendChild(spy);
     panel.appendChild(csv);
-    panel.appendChild(swipe);
     panel.appendChild(filter);
     panel.appendChild(progress);
     document.documentElement.appendChild(panel);
@@ -542,6 +549,18 @@
       if (ad) injectToolbar(card.root, ad);
     });
     updatePanelStats();
+    send({
+      type: "mld-seen-ads",
+      ads: allAds().map(function (ad) {
+        return {
+          id: ad.id,
+          pageId: ad.pageId,
+          pageName: ad.pageName,
+          body: ad.body,
+          title: ad.title,
+        };
+      }),
+    });
   }
 
   window.addEventListener("message", function (event) {
