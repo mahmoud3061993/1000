@@ -368,9 +368,9 @@
       closeModal();
       bulkDownload(playbook.ads || []);
     });
-    var csv = el("button", "mld-btn", "Export CSV");
+    var csv = el("button", "mld-btn", "Export to Google Sheets");
     csv.addEventListener("click", function () {
-      exportCsv(playbook.ads || [], MLD.sanitizeFilename(title) + "_ads.csv");
+      openGoogleSheetsImport(playbook.ads || []);
     });
     var close = el("button", "mld-btn", "Close");
     close.addEventListener("click", closeModal);
@@ -473,23 +473,6 @@
     });
     bar.appendChild(spy);
 
-    var watch = el("button", "mld-chip", "Watch");
-    watch.title = "Notify me when this advertiser launches a new ad";
-    watch.addEventListener("click", function (e) {
-      e.preventDefault();
-      e.stopPropagation();
-      send({
-        type: "mld-watch-add",
-        input: ad.pageId || ad.pageName,
-        pageName: ad.pageName,
-        pageId: ad.pageId,
-      }).then(function (result) {
-        if (result.ok) toast("Watching " + (ad.pageName || "this advertiser"));
-        else toast(result.error || "Could not watch advertiser", "err");
-      });
-    });
-    bar.appendChild(watch);
-
     root.insertBefore(bar, root.firstChild);
     applyCardState(root, ad);
   }
@@ -543,19 +526,57 @@
     }, 1800);
   }
 
-  async function exportCsv(list, filename) {
+  function exportToGoogleSheets(list) {
     var ads = list && list.length ? list : visibleAds();
     if (!ads.length) {
       toast("Nothing to export yet", "err");
       return;
     }
-    var result = await send({
-      type: "mld-csv",
-      csv: MLD.adsToCsv(ads),
-      filename: filename || "ad-library-export.csv",
-    });
-    if (result.ok) toast("CSV saved to Downloads/MetaAdLibrary");
-    else toast(result.error || "CSV export failed", "err");
+    var csv = MLD.adsToCsv(ads);
+    var blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    var reader = new FileReader();
+    reader.onload = function () {
+      var base64 = reader.result.split(",")[1];
+      var gUrl =
+        "https://docs.google.com/spreadsheets/d/create?title=" +
+        encodeURIComponent("Ad Library Export " + new Date().toISOString().slice(0, 10));
+      window.open(gUrl, "_blank", "noopener");
+      setTimeout(function () {
+        send({
+          type: "mld-csv",
+          csv: csv,
+          filename: "ad-library-export.csv",
+        });
+      }, 200);
+      toast("Google Sheet opened + CSV saved");
+    };
+    reader.readAsDataURL(blob);
+  }
+
+  function openGoogleSheetsImport(list) {
+    var ads = list && list.length ? list : visibleAds();
+    if (!ads.length) {
+      toast("Nothing to export yet", "err");
+      return;
+    }
+    var csv = MLD.adsToCsv(ads);
+    var csvBlob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    var csvUrl = URL.createObjectURL(csvBlob);
+    var a = document.createElement("a");
+    a.href = csvUrl;
+    a.download = "ad-library-export.csv";
+    a.click();
+    setTimeout(function () {
+      URL.revokeObjectURL(csvUrl);
+    }, 1000);
+    setTimeout(function () {
+      window.open(
+        "https://sheets.google.com/create",
+        "_blank",
+        "noopener"
+      );
+      toast("CSV downloaded — import it in the Google Sheet that just opened (File → Import)");
+    }, 400);
   }
 
   function injectPanel() {
@@ -574,9 +595,9 @@
     spy.addEventListener("click", function () {
       openSpyPicker(MLD.groupByAdvertiser(allAds()));
     });
-    var csv = el("button", "mld-btn", "Export CSV");
+    var csv = el("button", "mld-btn", "Export to Google Sheets");
     csv.addEventListener("click", function () {
-      exportCsv(visibleAds());
+      openGoogleSheetsImport(visibleAds());
     });
     var filter = el("label", "mld-filter");
     var box = document.createElement("input");
@@ -608,18 +629,6 @@
       if (ad) injectToolbar(card.root, ad);
     });
     updatePanelStats();
-    send({
-      type: "mld-seen-ads",
-      ads: allAds().map(function (ad) {
-        return {
-          id: ad.id,
-          pageId: ad.pageId,
-          pageName: ad.pageName,
-          body: ad.body,
-          title: ad.title,
-        };
-      }),
-    });
   }
 
   window.addEventListener("message", function (event) {

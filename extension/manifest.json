@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "Meta Library Downloader",
-  "version": "2.3.0",
-  "description": "Download Meta Ad Library ads, spot 30-day winners, export clean copy, and get notified when a watched advertiser launches a new ad.",
+  "version": "2.4.0",
+  "description": "Download Meta Ad Library ads, spot 30-day winners, export ad copy to Google Sheets, and spy on advertisers.",
   "icons": {
     "16": "icons/icon16.png",
     "32": "icons/icon32.png",
@@ -21,7 +21,7 @@
   "background": {
     "service_worker": "background.js"
   },
-  "permissions": ["downloads", "storage", "notifications", "alarms"],
+  "permissions": ["downloads", "storage"],
   "host_permissions": [
     "https://www.facebook.com/*",
     "https://web.facebook.com/*",
