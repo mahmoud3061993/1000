@@ -155,12 +155,71 @@
     return clone.innerText || "";
   }
 
+  function scrapeBodyFromDom(root) {
+    if (!root) return "";
+    var sponsored = null;
+    var walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    while (walker.nextNode()) {
+      if (/^\s*sponsored\s*$/i.test(walker.currentNode.nodeValue || "")) {
+        sponsored = walker.currentNode;
+        break;
+      }
+    }
+    if (!sponsored) return "";
+    var container = sponsored.parentElement;
+    while (container && container !== root) {
+      var next = container.nextElementSibling;
+      if (next) {
+        var text = MLD.cleanCopy(next.innerText || "");
+        if (text && text.length > 10 && MLD.isUsableCopy(text.split("\n")[0])) {
+          return text;
+        }
+      }
+      container = container.parentElement;
+    }
+    return "";
+  }
+
+  function scrapeCta(root) {
+    if (!root) return "";
+    var buttons = root.querySelectorAll('a[role="button"], div[role="button"], a[data-lynx-mode]');
+    for (var i = 0; i < buttons.length; i++) {
+      var txt = MLD.cleanCopy(buttons[i].textContent || "");
+      if (txt && MLD.humanizeCta(txt)) return MLD.humanizeCta(txt);
+    }
+    return "";
+  }
+
+  function scrapeHeadline(root) {
+    if (!root) return "";
+    var links = root.querySelectorAll("a[href]");
+    for (var i = 0; i < links.length; i++) {
+      var href = links[i].href || "";
+      if (!/facebook\.com|fbcdn\.net|instagram\.com/i.test(href) || /l\.php|flx\/warn/i.test(href)) {
+        var span = links[i].querySelector("span");
+        if (span) {
+          var text = MLD.cleanCopy(span.textContent || "");
+          if (text && text.length >= 3 && text.length <= 120) return text;
+        }
+      }
+    }
+    return "";
+  }
+
   function scrapeAdFromCard(root, libraryId) {
-    var text = cardInnerText(root);
-    var start = MLD.parseStartDate(text);
+    var fullText = cardInnerText(root);
+    var start = MLD.parseStartDate(fullText);
     var nameNode = root.querySelector('a[href*="facebook.com/"]');
     var pageName = nameNode ? (nameNode.textContent || "").trim() : "";
-    var copy = MLD.parseCardCopy(text, pageName);
+
+    var domBody = scrapeBodyFromDom(root);
+    var domCta = scrapeCta(root);
+    var domHeadline = scrapeHeadline(root);
+
+    var copy = MLD.parseCardCopy(fullText, pageName);
+    var body = MLD.isUsableCopy(domBody) ? domBody : copy.body;
+    var cta = domCta || copy.cta;
+    var title = domHeadline || copy.title;
     var media = scrapeMediaFromCard(root);
     var link = scrapeOfferLink(root);
     return MLD.normalizeAd({
@@ -170,11 +229,11 @@
       is_active: copy.status !== "Inactive",
       snapshot: {
         page_name: pageName,
-        body: { text: copy.body },
-        title: copy.title,
-        cta_text: copy.cta,
+        body: { text: body },
+        title: title,
+        cta_text: cta,
         link_url: link,
-        link_description: copy.description,
+        link_description: copy.description || "",
         images: media
           .filter(function (m) {
             return m.kind === "image";

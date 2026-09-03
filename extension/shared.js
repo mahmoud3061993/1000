@@ -238,21 +238,42 @@ var MLD = (function () {
     };
   }
 
+  var CARD_CUTOFFS = [
+    /sponsored/i,
+    /open\s*drop[\s-]*down/i,
+  ];
+
+  var CARD_TAIL = [
+    /^\s*see ad details\s*$/im,
+    /^\s*see summary details\s*$/im,
+    /^\s*Library ID:\s*\d/im,
+    /^\s*System status\s*/im,
+  ];
+
   function sliceAdCopyText(text) {
     var s = String(text || "").replace(/\r/g, "");
-    var match = s.match(/open\s*drop[\s-]*down/i);
-    if (match) {
-      s = s.slice(s.indexOf(match[0]) + match[0].length);
+    var bestIdx = -1;
+    for (var c = 0; c < CARD_CUTOFFS.length; c++) {
+      var match = s.match(CARD_CUTOFFS[c]);
+      if (match) {
+        var idx = s.indexOf(match[0]) + match[0].length;
+        if (idx > bestIdx) bestIdx = idx;
+      }
     }
-    s = s.replace(/\n+\s*See ad details[\s\S]*$/i, "");
-    s = s.replace(/\n+\s*See summary details[\s\S]*$/i, "");
-    s = s.replace(/\n+\s*Library ID:[\s\S]*$/i, "");
+    if (bestIdx > 0) s = s.slice(bestIdx);
+    for (var t = 0; t < CARD_TAIL.length; t++) {
+      var tail = s.match(CARD_TAIL[t]);
+      if (tail) s = s.slice(0, tail.index);
+    }
     return s.trim();
   }
 
   function parseCardCopy(text, pageName) {
-    var usedCutoff = /open\s*drop[\s-]*down/i.test(text || "");
-    var source = usedCutoff ? sliceAdCopyText(text) : String(text || "");
+    var hasCutoff = false;
+    for (var c = 0; c < CARD_CUTOFFS.length; c++) {
+      if (CARD_CUTOFFS[c].test(text || "")) { hasCutoff = true; break; }
+    }
+    var source = hasCutoff ? sliceAdCopyText(text) : String(text || "");
     var rawLines = source.split(/\r?\n/);
     var lines = [];
     var i;
@@ -275,13 +296,13 @@ var MLD = (function () {
     var title = "";
     var bodyLines = [];
     for (i = 0; i < lines.length; i++) {
-      if (!usedCutoff && isCta(lines[i]) && !cta) {
+      if (!hasCutoff && isCta(lines[i]) && !cta) {
         cta = humanizeCta(lines[i]);
         continue;
       }
       bodyLines.push(lines[i]);
     }
-    if (!usedCutoff && bodyLines.length >= 2) {
+    if (!hasCutoff && bodyLines.length >= 2) {
       var last = bodyLines[bodyLines.length - 1];
       var firstLine = bodyLines[0];
       if (last.length <= 80 && last.length < firstLine.length && last.split(" ").length <= 12) {

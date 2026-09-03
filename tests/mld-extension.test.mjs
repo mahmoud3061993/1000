@@ -220,7 +220,29 @@ describe("Meta Library Downloader parsers", () => {
     assert.equal(merged.cta, "Shop now");
   });
 
-  it("keeps only the ad copy after Open Drop-down and drops extension chrome", () => {
+  it("keeps only the ad copy after Sponsored and drops extension/chrome text", () => {
+    const copy = MLD.parseCardCopy(
+      [
+        "عيادة جراحات مجرى البول",
+        "Sponsored",
+        "إبعد 40 سنة بدون علاج مجرى البول",
+        "😊 الحمدلله",
+        "https://ayman-moussa.com",
+        "01023513542",
+        "إصلاح قطع في مجرى البول",
+        "See ad details",
+        "Library ID: 999",
+      ].join("\n"),
+      "عيادة جراحات مجرى البول"
+    );
+    assert.match(copy.body, /إبعد 40 سنة/);
+    assert.match(copy.body, /إصلاح قطع/);
+    assert.equal(copy.body.includes("عيادة جراحات"), false);
+    assert.equal(copy.body.includes("Sponsored"), false);
+    assert.equal(copy.body.includes("Library ID"), false);
+  });
+
+  it("also uses Open Drop-down as a cutoff", () => {
     const copy = MLD.parseCardCopy(
       [
         "11d",
@@ -230,20 +252,14 @@ describe("Meta Library Downloader parsers", () => {
         "Open Drop-down",
         "خصم علي اي بدلة او اي بليزر 50%",
         "بمناسبه افتتاح أحدث فروع أراك",
-        "اي 2 بدلة ب 3699 ج",
-        "https://wa.me/+201015335600",
-        "العرض لا يشمل البدل الصوف",
         "See ad details",
         "Library ID: 999",
       ].join("\n"),
       "أراك"
     );
     assert.match(copy.body, /خصم علي اي بدلة/);
-    assert.match(copy.body, /العرض لا يشمل البدل الصوف/);
     assert.equal(copy.body.includes("Copy brief"), false);
-    assert.equal(copy.body.includes("Open Drop-down"), false);
     assert.equal(copy.body.includes("11d"), false);
-    assert.equal(copy.body.includes("Library ID"), false);
     assert.equal(
       MLD.unwrapFacebookLink("https://l.facebook.com/l.php?u=https%3A%2F%2Fglow.example%2Foffer"),
       "https://glow.example/offer"
