@@ -35,7 +35,8 @@ export const MASAREF_APK_ZIP_URL = `${CANONICAL_SITE_URL}/spend/masaref-android.
 export const MASAREF_HOWTO_URL = `${CANONICAL_SITE_URL}/spend/howto.html`;
 export const MASAREF_DRIVE_URL = MASAREF_FILES_URL;
 export const MLD_ZIP_URL = `${CANONICAL_SITE_URL}/downloads/meta-library-downloader.zip`;
-export const MLD_DRIVE_URL = MLD_ZIP_URL;
+export const MLD_DRIVE_URL =
+  "https://drive.google.com/drive/u/0/folders/10_EfCwJTazW-d7n1IuJhk_BqcNyBJUJI";
 
 export type PaymentConfig = {
   instapay: { number: string; name: string };
@@ -90,9 +91,13 @@ function firstMasarefDelivery(...values: Array<string | undefined>) {
 function firstMldDelivery(...values: Array<string | undefined>) {
   for (const value of values) {
     if (!value || !value.trim()) continue;
-    return rewriteRetiredSiteUrl(value.trim());
+    const url = rewriteRetiredSiteUrl(value.trim());
+    if (/meta-library-downloader\.zip/i.test(url) || /\/downloads\/meta-library-downloader/i.test(url)) {
+      continue;
+    }
+    return url;
   }
-  return MLD_ZIP_URL;
+  return MLD_DRIVE_URL;
 }
 
 function firstPlantDelivery(...values: Array<string | undefined>) {
@@ -171,7 +176,7 @@ export function deliveryUrlForProduct(slug: string | null | undefined, cfg: Paym
   if (product.slug === "plant") return cfg.plantDeliveryUrl;
   if (product.slug === "arabity") return cfg.arabityDeliveryUrl || ARABITY_DRIVE_URL;
   if (product.slug === "masaref") return cfg.masarefDeliveryUrl || MASAREF_FILES_URL;
-  if (product.slug === "mld") return cfg.mldDeliveryUrl || MLD_ZIP_URL;
+  if (product.slug === "mld") return cfg.mldDeliveryUrl || MLD_DRIVE_URL;
   return cfg.deliveryUrl || DEFAULT_DELIVERY_URL;
 }
 

@@ -60,9 +60,9 @@ export function getCatalogProduct(
       checkoutTitle: "Meta Library Downloader — النسخة الاحترافية مدى الحياة",
       whatsappMessage: "أهلاً، حابب أعرف تفاصيل أكتر عن Meta Library Downloader",
       path: "/mld",
-      thankYouCta: "نزّل الإضافة دلوقتي",
+      thankYouCta: "افتح فولدر الدرايف",
       thankYouBody:
-        "شكراً {name}. لينك تحميل الإضافة تحت، وخطوات التثبيت هتوصلك على الإيميل.",
+        "شكراً {name}. لينك فولدر الدرايف تحت فيه الإضافة وفيديو شرح التثبيت.",
       pendingBody:
         "استلمنا سكرين التحويل. أول ما نتأكد إن الدفع وصل هنبعتلك الإضافة على الإيميل.",
     };
