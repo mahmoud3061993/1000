@@ -49,6 +49,7 @@ type PaymentSettings = {
   plant_delivery_url: string;
   arabity_delivery_url: string;
   masaref_delivery_url: string;
+  mld_delivery_url: string;
   whatsapp_number: string;
   ntfy_topic: string;
 };
@@ -81,6 +82,7 @@ const emptySettings: PaymentSettings = {
   plant_delivery_url: "",
   arabity_delivery_url: "",
   masaref_delivery_url: "",
+  mld_delivery_url: "",
   whatsapp_number: "",
   ntfy_topic: "",
 };
@@ -147,6 +149,7 @@ export default function AdminPage() {
       plant_delivery_url: json.settings.plant_delivery_url || "",
       arabity_delivery_url: json.settings.arabity_delivery_url || "",
       masaref_delivery_url: json.settings.masaref_delivery_url || "",
+      mld_delivery_url: json.settings.mld_delivery_url || "",
       whatsapp_number: json.settings.whatsapp_number || "",
       ntfy_topic: json.settings.ntfy_topic || json.notifications?.topic || "",
     });
@@ -261,6 +264,7 @@ export default function AdminPage() {
         plant_delivery_url: settings.plant_delivery_url,
         arabity_delivery_url: settings.arabity_delivery_url,
         masaref_delivery_url: settings.masaref_delivery_url,
+        mld_delivery_url: settings.mld_delivery_url,
         whatsapp_number: settings.whatsapp_number,
         ntfy_topic: settings.ntfy_topic,
       }),
@@ -406,9 +410,9 @@ export default function AdminPage() {
               العميل بيحوّل إنستاباي أو محفظة كاش، يرفع سكرين التحويل، والطلب بيفضل قيد المراجعة لحد ما تتأكد بنفسك وتضغط «تأكيد الدفع».
             </p>
             <p>
-              عشان الأدمن يعرف كل طلب جاي من أنهي إعلان، في Ads Manager حط لينك صفحة المنتج زي ما هو بالظبط (سيب الأقواس زي ما هي). مصارف:
+              عشان الأدمن يعرف كل طلب جاي من أنهي إعلان، في Ads Manager حط لينك صفحة المنتج زي ما هو بالظبط (سيب الأقواس زي ما هي). MLD:
               <code className="settings-code" dir="ltr">
-                {"https://www.producthelpyou.online/masaref?utm_source=facebook&utm_medium=paid&utm_campaign={{campaign.name}}&utm_content={{ad.name}}&utm_term={{adset.name}}"}
+                {"https://www.producthelpyou.online/mld?utm_source=facebook&utm_medium=paid&utm_campaign={{campaign.name}}&utm_content={{ad.name}}&utm_term={{adset.name}}"}
               </code>
             </p>
             {!usesRemoteDb ? (
@@ -494,6 +498,20 @@ export default function AdminPage() {
                 </p>
               </div>
               <div className="field settings-wide">
+                <label>لينك تحميل Meta Library Downloader بعد الدفع (ZIP أو Drive)</label>
+                <input
+                  value={settings.mld_delivery_url}
+                  onChange={(e) => setSettings({ ...settings, mld_delivery_url: e.target.value })}
+                  placeholder="https://www.producthelpyou.online/downloads/meta-library-downloader.zip"
+                  dir="ltr"
+                />
+                <p style={{ marginTop: 8, color: "#94a3b8", fontSize: 13, lineHeight: 1.7 }}>
+                  لو فاضي، العميل هيتحوّل لنسخة الـ ZIP على الموقع.
+                  {" · "}
+                  <a href="/downloads/meta-library-downloader.zip">ZIP الحالي</a>
+                </p>
+              </div>
+              <div className="field settings-wide">
                 <label>قناة إشعار الموبايل (اختياري)</label>
                 <input
                   value={settings.ntfy_topic}
@@ -558,6 +576,7 @@ export default function AdminPage() {
                 }}
               >
                 <option value="all">كل المنتجات</option>
+                <option value="mld">MLD</option>
                 <option value="masaref">مصارف</option>
                 <option value="arabity">عربيتي</option>
                 <option value="plant">دليل النباتات</option>

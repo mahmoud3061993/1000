@@ -39,7 +39,7 @@ export type AnalyticsEvent = {
   product_slug?: string | null;
 };
 
-export type AnalyticsProductFilter = "all" | "1000" | "plant" | "arabity" | "masaref";
+export type AnalyticsProductFilter = "all" | "1000" | "plant" | "arabity" | "masaref" | "mld";
 
 export type AnalyticsSectionStat = {
   event: string;
@@ -235,7 +235,7 @@ export function parseAnalyticsPeriod(value: string | null | undefined): Analytic
 }
 
 export function parseProductFilter(value: string | null | undefined): AnalyticsProductFilter {
-  if (value === "all" || value === "1000" || value === "plant" || value === "arabity" || value === "masaref") {
+  if (value === "all" || value === "1000" || value === "plant" || value === "arabity" || value === "masaref" || value === "mld") {
     return value;
   }
   return "arabity";

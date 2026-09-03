@@ -97,6 +97,13 @@ function ThankYouClient({
             ) : (
               <p>التفاصيل ولينك الدخول هتوصلك على الإيميل خلال دقايق.</p>
             )}
+            {order?.product_slug === "mld" ? (
+              <div className="file-links">
+                <p style={{ textAlign: "right", lineHeight: 1.8 }}>
+                  بعد التحميل: افتح Chrome → <b dir="ltr">chrome://extensions</b> → فعّل Developer mode → Load unpacked واختار مجلد الإضافة.
+                </p>
+              </div>
+            ) : null}
             {order?.product_slug === "masaref" ? (
               <div className="file-links masaref-files">
                 <a className="drive-link" href="/spend/masaref-html.zip" download="masaref-html.zip">

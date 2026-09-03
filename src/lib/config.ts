@@ -34,6 +34,8 @@ export const MASAREF_APK_URL = `${CANONICAL_SITE_URL}/spend/masaref.apk`;
 export const MASAREF_APK_ZIP_URL = `${CANONICAL_SITE_URL}/spend/masaref-android.zip`;
 export const MASAREF_HOWTO_URL = `${CANONICAL_SITE_URL}/spend/howto.html`;
 export const MASAREF_DRIVE_URL = MASAREF_FILES_URL;
+export const MLD_ZIP_URL = `${CANONICAL_SITE_URL}/downloads/meta-library-downloader.zip`;
+export const MLD_DRIVE_URL = MLD_ZIP_URL;
 
 export type PaymentConfig = {
   instapay: { number: string; name: string };
@@ -43,6 +45,7 @@ export type PaymentConfig = {
   plantDeliveryUrl: string;
   arabityDeliveryUrl: string;
   masarefDeliveryUrl: string;
+  mldDeliveryUrl: string;
   whatsapp: string;
   usesRemoteDb: boolean;
   envOverrides: {
@@ -53,6 +56,7 @@ export type PaymentConfig = {
     plantDeliveryUrl: boolean;
     arabityDeliveryUrl: boolean;
     masarefDeliveryUrl: boolean;
+    mldDeliveryUrl: boolean;
   };
 };
 
@@ -81,6 +85,14 @@ function firstMasarefDelivery(...values: Array<string | undefined>) {
     return url;
   }
   return MASAREF_DRIVE_URL;
+}
+
+function firstMldDelivery(...values: Array<string | undefined>) {
+  for (const value of values) {
+    if (!value || !value.trim()) continue;
+    return rewriteRetiredSiteUrl(value.trim());
+  }
+  return MLD_ZIP_URL;
 }
 
 function firstPlantDelivery(...values: Array<string | undefined>) {
@@ -135,6 +147,7 @@ export function mergePaymentConfig(
     plantDeliveryUrl: firstPlantDelivery(env.PLANT_DELIVERY_URL, stored.plant_delivery_url),
     arabityDeliveryUrl: firstArabityDelivery(env.ARABITY_DELIVERY_URL, stored.arabity_delivery_url),
     masarefDeliveryUrl: firstMasarefDelivery(env.MASAREF_DELIVERY_URL, stored.masaref_delivery_url),
+    mldDeliveryUrl: firstMldDelivery(env.MLD_DELIVERY_URL, stored.mld_delivery_url),
     whatsapp: firstNonEmpty(env.WHATSAPP_NUMBER, stored.whatsapp_number, "201017420379").replace(
       /\D/g,
       ""
@@ -148,6 +161,7 @@ export function mergePaymentConfig(
       plantDeliveryUrl: Boolean(env.PLANT_DELIVERY_URL),
       arabityDeliveryUrl: Boolean(env.ARABITY_DELIVERY_URL),
       masarefDeliveryUrl: Boolean(env.MASAREF_DELIVERY_URL),
+      mldDeliveryUrl: Boolean(env.MLD_DELIVERY_URL),
     },
   };
 }
@@ -157,6 +171,7 @@ export function deliveryUrlForProduct(slug: string | null | undefined, cfg: Paym
   if (product.slug === "plant") return cfg.plantDeliveryUrl;
   if (product.slug === "arabity") return cfg.arabityDeliveryUrl || ARABITY_DRIVE_URL;
   if (product.slug === "masaref") return cfg.masarefDeliveryUrl || MASAREF_FILES_URL;
+  if (product.slug === "mld") return cfg.mldDeliveryUrl || MLD_ZIP_URL;
   return cfg.deliveryUrl || DEFAULT_DELIVERY_URL;
 }
 

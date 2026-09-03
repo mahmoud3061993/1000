@@ -486,7 +486,7 @@ export async function clearAnalyticsData(product = "arabity") {
     };
   }
   const slug =
-    product === "plant" || product === "1000" || product === "arabity" || product === "masaref"
+    product === "plant" || product === "1000" || product === "arabity" || product === "masaref" || product === "mld"
       ? product
       : "arabity";
   const visits = await database.execute({

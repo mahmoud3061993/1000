@@ -3,8 +3,9 @@
 import { useEffect, useState } from "react";
 import type { AnalyticsPeriod, AnalyticsReport } from "@/lib/analytics";
 
-const PRODUCTS: Array<{ id: "all" | "masaref" | "arabity" | "plant" | "1000"; label: string }> = [
+const PRODUCTS: Array<{ id: "all" | "mld" | "masaref" | "arabity" | "plant" | "1000"; label: string }> = [
   { id: "all", label: "كل المنتجات" },
+  { id: "mld", label: "MLD" },
   { id: "masaref", label: "مصارف" },
   { id: "arabity", label: "عربيتي" },
   { id: "plant", label: "دليل النباتات" },

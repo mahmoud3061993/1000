@@ -1,6 +1,6 @@
 import { PLANT_GUIDE_PRICE } from "./plant-guide";
 
-export type ProductSlug = "1000" | "plant" | "arabity" | "masaref";
+export type ProductSlug = "1000" | "plant" | "arabity" | "masaref" | "mld";
 
 export type CatalogProduct = {
   slug: ProductSlug;
@@ -21,7 +21,7 @@ export type CatalogProduct = {
 };
 
 export function isProductSlug(value: string | null | undefined): value is ProductSlug {
-  return value === "1000" || value === "plant" || value === "arabity" || value === "masaref";
+  return value === "1000" || value === "plant" || value === "arabity" || value === "masaref" || value === "mld";
 }
 
 export function resolveProductSlug(value: string | null | undefined): ProductSlug {
@@ -32,6 +32,7 @@ export function productAdminLabel(slug?: string | null) {
   if (slug === "plant") return "دليل النباتات";
   if (slug === "arabity") return "عربيتي";
   if (slug === "masaref") return "مصارف";
+  if (slug === "mld") return "Meta Library Downloader";
   return "مكتبة +1000";
 }
 
@@ -45,6 +46,28 @@ export function getCatalogProduct(
   slug?: string | null,
   env: NodeJS.Dict<string> = process.env
 ): CatalogProduct {
+  if (slug === "mld") {
+    return {
+      slug: "mld",
+      name: "Meta Library Downloader Pro",
+      arabicName: "Meta Library Downloader — النسخة الاحترافية",
+      shortName: "MLD Pro",
+      price: Number(env.MLD_PRODUCT_PRICE || 499),
+      compareAtPrice: Number(env.MLD_COMPARE_AT_PRICE || 1490),
+      currency: "EGP",
+      pixelName: "Meta Library Downloader Pro",
+      kashierDescription: "Meta Library Downloader Pro — lifetime license",
+      checkoutTitle: "Meta Library Downloader — النسخة الاحترافية مدى الحياة",
+      whatsappMessage: "أهلاً، حابب أعرف تفاصيل أكتر عن Meta Library Downloader",
+      path: "/mld",
+      thankYouCta: "نزّل الإضافة دلوقتي",
+      thankYouBody:
+        "شكراً {name}. لينك تحميل الإضافة تحت، وخطوات التثبيت هتوصلك على الإيميل.",
+      pendingBody:
+        "استلمنا سكرين التحويل. أول ما نتأكد إن الدفع وصل هنبعتلك الإضافة على الإيميل.",
+    };
+  }
+
   if (slug === "masaref") {
     return {
       slug: "masaref",
