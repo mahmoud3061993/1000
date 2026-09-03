@@ -3,19 +3,9 @@
   if (window.__MLD_CONTENT__) return;
   window.__MLD_CONTENT__ = true;
 
-  var WINNER_DAYS = MLD.WINNER_DAYS;
   var adsById = {};
-  var notes = {};
-  var labels = {};
   var winnersOnly = false;
   var busy = false;
-  var COLORS = [
-    { id: "red", title: "Winner" },
-    { id: "green", title: "Tested" },
-    { id: "blue", title: "Later" },
-    { id: "gold", title: "Angle" },
-    { id: "purple", title: "Offer" },
-  ];
 
   function runtime() {
     if (typeof chrome !== "undefined" && chrome.runtime && chrome.runtime.sendMessage) return chrome;
@@ -88,9 +78,36 @@
     }, 2800);
   }
 
+  function copyText(text, okMessage) {
+    if (!text) {
+      toast("Nothing to copy yet", "err");
+      return;
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(
+        function () {
+          toast(okMessage || "Copied");
+        },
+        function () {
+          toast("Could not copy", "err");
+        }
+      );
+      return;
+    }
+    toast("Clipboard unavailable", "err");
+  }
+
   function allAds() {
     return Object.keys(adsById).map(function (id) {
       return adsById[id];
+    });
+  }
+
+  function visibleAds() {
+    var ads = allAds();
+    if (!winnersOnly) return ads;
+    return ads.filter(function (ad) {
+      return ad.isWinner;
     });
   }
 
@@ -103,7 +120,7 @@
     var media = [];
     if (!root) return media;
     root.querySelectorAll("img").forEach(function (img) {
-      if (img.closest(".mld-toolbar, .mld-note, .mld-panel, .mld-modal")) return;
+      if (img.closest(".mld-toolbar, .mld-panel, .mld-modal")) return;
       var w = img.naturalWidth || img.width || 0;
       var h = img.naturalHeight || img.height || 0;
       if (w && h && (w < 80 || h < 80)) return;
@@ -118,19 +135,37 @@
     return media;
   }
 
+  function scrapeOfferLink(root) {
+    if (!root) return "";
+    var found = "";
+    root.querySelectorAll("a[href]").forEach(function (anchor) {
+      if (found || anchor.closest(".mld-toolbar, .mld-panel, .mld-modal")) return;
+      var href = MLD.unwrapFacebookLink(anchor.href);
+      if (href) found = href;
+    });
+    return found;
+  }
+
   function scrapeAdFromCard(root, libraryId) {
     var text = root.innerText || "";
     var start = MLD.parseStartDate(text);
     var nameNode = root.querySelector('a[href*="facebook.com/"]');
     var pageName = nameNode ? (nameNode.textContent || "").trim() : "";
+    var copy = MLD.parseCardCopy(text, pageName);
     var media = scrapeMediaFromCard(root);
+    var link = scrapeOfferLink(root);
     return MLD.normalizeAd({
       ad_archive_id: libraryId,
       page_name: pageName,
       start_date: start ? Math.floor(start / 1000) : 0,
+      is_active: copy.status !== "Inactive",
       snapshot: {
         page_name: pageName,
-        body: { text: text.split("Library ID")[0].trim().slice(0, 2000) },
+        body: { text: copy.body },
+        title: copy.title,
+        cta_text: copy.cta,
+        link_url: link,
+        link_description: copy.description,
         images: media
           .filter(function (m) {
             return m.kind === "image";
@@ -166,6 +201,7 @@
 
   function findCards() {
     var found = [];
+    if (!document.body) return found;
     var walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
     var seen = {};
     while (walker.nextNode()) {
@@ -178,17 +214,6 @@
       found.push({ id: id, root: root });
     }
     return found;
-  }
-
-  function adText(ad) {
-    var parts = [];
-    if (ad.pageName) parts.push(ad.pageName);
-    if (ad.body) parts.push(ad.body);
-    if (ad.title) parts.push(ad.title);
-    if (ad.cta) parts.push(ad.cta);
-    if (ad.link) parts.push(ad.link);
-    parts.push("Library ID: " + ad.id);
-    return parts.join("\n\n");
   }
 
   function downloadableMedia(ad) {
@@ -218,42 +243,14 @@
   function applyCardState(root, ad) {
     root.classList.toggle("mld-winner", Boolean(ad.isWinner));
     root.classList.toggle("mld-dim", winnersOnly && !ad.isWinner);
-    var color = labels[ad.id];
-    COLORS.forEach(function (c) {
-      root.classList.toggle("mld-label-" + c.id, color === c.id);
-    });
   }
 
-  function openNoteEditor(ad, anchor) {
-    closeModal();
-    var modal = el("div", "mld-modal");
-    var box = el("div", "mld-modal-box");
-    box.appendChild(el("h3", "", "Note · " + (ad.pageName || ad.id)));
-    var area = document.createElement("textarea");
-    area.className = "mld-textarea";
-    area.placeholder = "Hook, offer, why this ad is running…";
-    area.value = notes[ad.id] || "";
-    box.appendChild(area);
-    var actions = el("div", "mld-modal-actions");
-    var save = el("button", "mld-btn mld-btn-primary", "Save note");
-    save.addEventListener("click", function () {
-      notes[ad.id] = area.value.trim();
-      storageSet({ mldNotes: notes });
-      if (anchor) anchor.classList.toggle("mld-has-note", Boolean(notes[ad.id]));
-      closeModal();
-      toast("Note saved");
-    });
-    var cancel = el("button", "mld-btn", "Close");
-    cancel.addEventListener("click", closeModal);
-    actions.appendChild(cancel);
-    actions.appendChild(save);
-    box.appendChild(actions);
-    modal.appendChild(box);
-    modal.addEventListener("click", function (e) {
-      if (e.target === modal) closeModal();
-    });
-    document.documentElement.appendChild(modal);
-    area.focus();
+  function openOffer(ad) {
+    if (ad.link) {
+      window.open(ad.link, "_blank", "noopener");
+      return;
+    }
+    toast("No landing page found on this ad", "err");
   }
 
   function openSpy(playbook) {
@@ -294,6 +291,10 @@
       box.appendChild(top);
     }
     var actions = el("div", "mld-modal-actions");
+    var pageAds = el("button", "mld-btn", "All ads from this page");
+    pageAds.addEventListener("click", function () {
+      window.open(MLD.pageAdsUrl(playbook.pageId, playbook.pageName), "_blank", "noopener");
+    });
     var dl = el("button", "mld-btn mld-btn-primary", "Download this advertiser");
     dl.addEventListener("click", function () {
       closeModal();
@@ -306,6 +307,7 @@
     var close = el("button", "mld-btn", "Close");
     close.addEventListener("click", closeModal);
     actions.appendChild(close);
+    actions.appendChild(pageAds);
     actions.appendChild(csv);
     actions.appendChild(dl);
     box.appendChild(actions);
@@ -383,25 +385,22 @@
     });
     bar.appendChild(dl);
 
-    var copy = el("button", "mld-chip", "Copy text");
-    copy.addEventListener("click", function (e) {
+    var brief = el("button", "mld-chip", "Copy brief");
+    brief.addEventListener("click", function (e) {
       e.preventDefault();
       e.stopPropagation();
-      var text = adText(ad);
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(text).then(
-          function () {
-            toast("Ad copy copied");
-          },
-          function () {
-            toast("Could not copy", "err");
-          }
-        );
-      } else {
-        toast("Clipboard unavailable", "err");
-      }
+      copyText(MLD.formatSwipeBrief(ad), "Swipe brief copied");
     });
-    bar.appendChild(copy);
+    bar.appendChild(brief);
+
+    var offer = el("button", "mld-chip", "Offer");
+    offer.title = ad.link || "Open the landing page";
+    offer.addEventListener("click", function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      openOffer(ad);
+    });
+    bar.appendChild(offer);
 
     var spy = el("button", "mld-chip", "Spy");
     spy.addEventListener("click", function (e) {
@@ -413,32 +412,6 @@
       openSpy(MLD.advertiserPlaybook(ads.length ? ads : [ad]));
     });
     bar.appendChild(spy);
-
-    var colors = el("div", "mld-colors");
-    COLORS.forEach(function (color) {
-      var dot = el("button", "mld-dot mld-dot-" + color.id);
-      dot.type = "button";
-      dot.title = color.title;
-      if (labels[ad.id] === color.id) dot.classList.add("mld-dot-on");
-      dot.addEventListener("click", function (e) {
-        e.preventDefault();
-        e.stopPropagation();
-        labels[ad.id] = labels[ad.id] === color.id ? "" : color.id;
-        storageSet({ mldLabels: labels });
-        injectToolbar(root, ad);
-        applyCardState(root, ad);
-      });
-      colors.appendChild(dot);
-    });
-    bar.appendChild(colors);
-
-    var note = el("button", "mld-chip" + (notes[ad.id] ? " mld-has-note" : ""), notes[ad.id] ? "Note ✓" : "Note");
-    note.addEventListener("click", function (e) {
-      e.preventDefault();
-      e.stopPropagation();
-      openNoteEditor(ad, note);
-    });
-    bar.appendChild(note);
 
     root.insertBefore(bar, root.firstChild);
     applyCardState(root, ad);
@@ -494,7 +467,7 @@
   }
 
   async function exportCsv(list, filename) {
-    var ads = list && list.length ? list : allAds();
+    var ads = list && list.length ? list : visibleAds();
     if (!ads.length) {
       toast("Nothing to export yet", "err");
       return;
@@ -513,12 +486,12 @@
     var panel = el("div", "mld-panel");
     panel.innerHTML =
       '<div class="mld-panel-head">' +
-      '<strong>Meta Library Downloader</strong>' +
+      "<strong>Meta Library Downloader</strong>" +
       '<span class="mld-panel-stats">Scanning…</span>' +
       "</div>";
     var bulk = el("button", "mld-btn mld-btn-primary", "Bulk download all");
     bulk.addEventListener("click", function () {
-      bulkDownload(allAds());
+      bulkDownload(visibleAds());
     });
     var spy = el("button", "mld-btn", "Spy on page");
     spy.addEventListener("click", function () {
@@ -526,7 +499,17 @@
     });
     var csv = el("button", "mld-btn", "Export CSV");
     csv.addEventListener("click", function () {
-      exportCsv(allAds());
+      exportCsv(visibleAds());
+    });
+    var swipe = el("button", "mld-btn", "Copy swipe file");
+    swipe.title = "Copy every ad's hook, headline, CTA, and offer URL";
+    swipe.addEventListener("click", function () {
+      var ads = visibleAds();
+      if (!ads.length) {
+        toast("No ads to copy yet", "err");
+        return;
+      }
+      copyText(MLD.formatSwipeFile(ads), "Swipe file copied · " + ads.length + " ads");
     });
     var filter = el("label", "mld-filter");
     var box = document.createElement("input");
@@ -544,6 +527,7 @@
     panel.appendChild(bulk);
     panel.appendChild(spy);
     panel.appendChild(csv);
+    panel.appendChild(swipe);
     panel.appendChild(filter);
     panel.appendChild(progress);
     document.documentElement.appendChild(panel);
@@ -568,9 +552,7 @@
     scan();
   });
 
-  storageGet({ mldNotes: {}, mldLabels: {}, mldWinnersOnly: false }).then(function (stored) {
-    notes = stored.mldNotes || {};
-    labels = stored.mldLabels || {};
+  storageGet({ mldWinnersOnly: false }).then(function (stored) {
     winnersOnly = Boolean(stored.mldWinnersOnly);
     injectPanel();
     var box = document.querySelector(".mld-filter input");

@@ -31,7 +31,6 @@
 
 .mld-chip,
 .mld-btn,
-.mld-dot,
 .mld-spy-row {
   cursor: pointer;
   border: 0;
@@ -59,10 +58,6 @@
   background: #166fe0;
 }
 
-.mld-has-note {
-  background: #0f766e;
-}
-
 .mld-crown,
 .mld-days {
   font-size: 12px;
@@ -80,41 +75,6 @@
   background: rgba(255, 255, 255, 0.08);
   color: #cbd5e1;
 }
-
-.mld-colors {
-  display: flex;
-  gap: 4px;
-  margin-left: auto;
-}
-
-.mld-dot {
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  border: 2px solid rgba(255, 255, 255, 0.35);
-  padding: 0;
-}
-
-.mld-dot-on {
-  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.25);
-  transform: scale(1.1);
-}
-
-.mld-dot-red { background: #ef4444; }
-.mld-dot-green { background: #22c55e; }
-.mld-dot-blue { background: #3b82f6; }
-.mld-dot-gold { background: #eab308; }
-.mld-dot-purple { background: #a855f7; }
-
-[class*="mld-label-"] {
-  box-shadow: inset 4px 0 0 #94a3b8;
-}
-
-.mld-label-red { box-shadow: inset 4px 0 0 #ef4444 !important; }
-.mld-label-green { box-shadow: inset 4px 0 0 #22c55e !important; }
-.mld-label-blue { box-shadow: inset 4px 0 0 #3b82f6 !important; }
-.mld-label-gold { box-shadow: inset 4px 0 0 #eab308 !important; }
-.mld-label-purple { box-shadow: inset 4px 0 0 #a855f7 !important; }
 
 .mld-winner {
   outline: 2px solid #f59e0b !important;

@@ -1,4 +1,4 @@
-# Meta Library Downloader 2.0 — Chrome Web Store package
+# Meta Library Downloader 2.1 — Chrome Web Store package
 
 This folder is the extension source. The uploadable zip is:
 
@@ -6,7 +6,7 @@ This folder is the extension source. The uploadable zip is:
 
 No payment is wired in. Every feature below works after install.
 
-## What 2.0 adds
+## What 2.1 includes
 
 On [facebook.com/ads/library](https://www.facebook.com/ads/library):
 
@@ -14,8 +14,9 @@ On [facebook.com/ads/library](https://www.facebook.com/ads/library):
 - 👑 gold outline on ads running **30+ days**
 - **Bulk download all** ads currently on screen, with `⬇ 6/24` progress
 - **Spy on page** — top creative, average runtime, image vs video split, winner count
-- **CSV export** — advertiser, copy, Library ID, media URL, days running
-- Per-ad **notes** and **5 color labels** (saved locally)
+- **Open offer** — jump to the landing page behind the ad
+- **Copy swipe file** — hook, headline, CTA, and offer URL for every ad on screen
+- **CSV export** — primary text, headline, CTA, destination URL, Library ID, days running (UTF-8 so Excel reads Arabic/English correctly)
 - Popup shows the **last 5 downloads**
 
 Files save to `Downloads/MetaAdLibrary/`.
@@ -25,11 +26,9 @@ Files save to `Downloads/MetaAdLibrary/`.
 1. Open [Chrome Web Store Developer Dashboard](https://chrome.google.com/webstore/devconsole)
 2. Select **Meta Library Downloader** (`fekhgpbfajekimfgndgohpnhojnpdeon`)
 3. **Package → Upload new package** → choose `meta-library-downloader.zip`
-4. Version in the zip is **2.0.0** (store is currently 1.0)
+4. Version in the zip is **2.1.0**
 5. Paste the listing copy from `STORE-LISTING.md` if you want the new features described
 6. Submit for review
-
-Users who already installed 1.0 will get a permission prompt because this version adds `downloads`, `storage`, and Facebook/CDN host access so it can save files and remember notes.
 
 ## Load unpacked for a local test
 
@@ -39,4 +38,4 @@ Users who already installed 1.0 will get a permission prompt because this versio
 
 ## Privacy
 
-Notes, labels, and the recent-download list stay in `chrome.storage.local` on the user's computer. Nothing is sent to a server.
+The recent-download list stays in `chrome.storage.local` on the user's computer. Nothing is sent to a server.

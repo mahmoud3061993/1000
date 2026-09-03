@@ -112,11 +112,16 @@ describe("Meta Library Downloader parsers", () => {
   it("exports CSV with advertiser, copy, library id, media, and days", () => {
     const ads = MLD.adsFromPayload(samplePayload());
     const csv = MLD.adsToCsv(ads);
-    assert.match(csv, /Advertiser,Page ID,Library ID,Days Running,Winner/);
-    assert.match(csv, /Glow Co,99,111,/);
-    assert.match(csv, /Get glowing skin in 7 days/);
-    assert.match(csv, /https:\/\/video\.fbcdn\.net\/ad\.mp4/);
-    assert.match(csv, /yes/);
+    assert.equal(csv.charCodeAt(0), 0xfeff);
+    const body = csv.replace(/^\uFEFF/, "");
+    assert.match(body, /Advertiser,Page ID,Library ID,Days Running,Winner/);
+    assert.match(body, /Glow Co,99,111,/);
+    assert.match(body, /Get glowing skin in 7 days/);
+    assert.match(body, /50% off today/);
+    assert.match(body, /Shop now/);
+    assert.match(body, /https:\/\/example.com/);
+    assert.match(body, /https:\/\/video\.fbcdn\.net\/ad\.mp4/);
+    assert.match(body, /yes/);
   });
 
   it("names files from the advertiser and library id", () => {
@@ -155,5 +160,88 @@ describe("Meta Library Downloader parsers", () => {
   it("strips Facebook's for (;;); JSON prefix", () => {
     const ads = MLD.adsFromPayload(`for (;;);${JSON.stringify(samplePayload())}`);
     assert.equal(ads.length, 3);
+  });
+
+  it("reads primary text, headline, and CTA from carousel cards when the top snapshot is empty", () => {
+    const ad = MLD.normalizeAd({
+      ad_archive_id: "444",
+      page_name: "Glow Co",
+      snapshot: {
+        cards: [
+          {
+            body: "Get glowing skin in 7 days.",
+            title: "50% off today",
+            cta_text: "Shop now",
+            link_url: "https://glow.example/offer",
+          },
+        ],
+      },
+    });
+    assert.equal(ad.body, "Get glowing skin in 7 days.");
+    assert.equal(ad.title, "50% off today");
+    assert.equal(ad.cta, "Shop now");
+    assert.equal(ad.link, "https://glow.example/offer");
+  });
+
+  it("humanizes GraphQL CTA types and ignores zero-width Ad Library chrome", () => {
+    assert.equal(MLD.humanizeCta("SHOP_NOW"), "Shop now");
+    const copy = MLD.parseCardCopy(
+      "Glow Co\nActive\n\u200b\u200b\nStarted running on Jan 2, 2026\nFacebook · Instagram\nGet glowing skin in 7 days.\n50% off today\nShop now\nSee ad details\nLibrary ID: 111",
+      "Glow Co"
+    );
+    assert.equal(copy.body, "Get glowing skin in 7 days.");
+    assert.equal(copy.title, "50% off today");
+    assert.equal(copy.cta, "Shop now");
+    assert.equal(copy.status, "Active");
+    assert.equal(MLD.isUsableCopy("\u200b\u200b"), false);
+    assert.equal(MLD.isUsableCopy("Active"), false);
+  });
+
+  it("drops a chrome-only scrape when merging real ad copy", () => {
+    const graphql = MLD.normalizeAd({
+      ad_archive_id: "111",
+      page_name: "Glow Co",
+      start_date: fortySevenDaysAgo,
+      snapshot: {
+        body: { text: "Get glowing skin in 7 days." },
+        title: "50% off today",
+        cta_text: "Shop now",
+        videos: [{ video_hd_url: "https://cdn.example/ad.mp4" }],
+      },
+    });
+    const scrape = MLD.normalizeAd({
+      ad_archive_id: "111",
+      page_name: "Glow Co",
+      snapshot: { body: { text: "\u200bActive\u200b" } },
+    });
+    const merged = MLD.mergeAd(scrape, graphql);
+    assert.equal(merged.body, "Get glowing skin in 7 days.");
+    assert.equal(merged.title, "50% off today");
+    assert.equal(merged.cta, "Shop now");
+  });
+
+  it("builds a swipe brief and unwraps Facebook redirect links", () => {
+    const ad = MLD.normalizeAd({
+      ad_archive_id: "111",
+      page_name: "Glow Co",
+      start_date: fortySevenDaysAgo,
+      snapshot: {
+        body: { text: "Get glowing skin in 7 days." },
+        title: "50% off today",
+        cta_type: "SHOP_NOW",
+        link_url: "https://glow.example/offer",
+      },
+    });
+    const brief = MLD.formatSwipeBrief(ad);
+    assert.match(brief, /WINNER/);
+    assert.match(brief, /Primary: Get glowing skin in 7 days/);
+    assert.match(brief, /Headline: 50% off today/);
+    assert.match(brief, /CTA: Shop now/);
+    assert.match(brief, /Offer: https:\/\/glow.example\/offer/);
+    assert.match(brief, /ads\/library\/\?id=111/);
+    assert.equal(
+      MLD.unwrapFacebookLink("https://l.facebook.com/l.php?u=https%3A%2F%2Fglow.example%2Foffer"),
+      "https://glow.example/offer"
+    );
   });
 });

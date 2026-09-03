@@ -5,6 +5,98 @@
 var MLD = (function () {
   var WINNER_DAYS = 30;
 
+  var CTA_ALIASES = {
+    SHOP_NOW: "Shop now",
+    LEARN_MORE: "Learn more",
+    SIGN_UP: "Sign up",
+    SUBSCRIBE: "Subscribe",
+    DOWNLOAD: "Download",
+    BOOK_NOW: "Book now",
+    CONTACT_US: "Contact us",
+    GET_QUOTE: "Get quote",
+    APPLY_NOW: "Apply now",
+    WATCH_MORE: "Watch more",
+    LISTEN_NOW: "Listen now",
+    GET_OFFER: "Get offer",
+    ORDER_NOW: "Order now",
+    SEND_MESSAGE: "Send message",
+    WHATSAPP_MESSAGE: "WhatsApp",
+    CALL_NOW: "Call now",
+    INSTALL_MOBILE_APP: "Install",
+    USE_APP: "Use app",
+    PLAY_GAME: "Play game",
+    GET_DIRECTIONS: "Get directions",
+    OPEN_LINK: "Open link",
+    DONATE_NOW: "Donate now",
+    BUY_NOW: "Buy now",
+    GET_SHOWTIMES: "Get showtimes",
+    REQUEST_TIME: "Request time",
+    SEE_MENU: "See menu",
+    GET_PROMOTIONS: "Get promotions",
+    NO_BUTTON: "",
+  };
+
+  var CTA_PHRASES = [
+    "shop now",
+    "learn more",
+    "sign up",
+    "subscribe",
+    "download",
+    "book now",
+    "contact us",
+    "get quote",
+    "apply now",
+    "watch more",
+    "listen now",
+    "get offer",
+    "order now",
+    "send message",
+    "whatsapp",
+    "call now",
+    "install",
+    "use app",
+    "play game",
+    "get directions",
+    "open link",
+    "donate now",
+    "buy now",
+    "buy tickets",
+    "get showtimes",
+    "see menu",
+    "get deal",
+    "try now",
+    "send whatsapp message",
+    "watch video",
+    "get started",
+    "start now",
+    "register",
+    "join now",
+    "book a call",
+    "اطلب الآن",
+    "تسوق الآن",
+    "اعرف المزيد",
+    "سجل الآن",
+    "تواصل معنا",
+  ];
+
+  var CHROME_LINE = [
+    /^library id:/i,
+    /^see ad details$/i,
+    /^see summary details$/i,
+    /^started running on\b/i,
+    /^(active|inactive)$/i,
+    /^(facebook|instagram|messenger|audience network|threads|whatsapp)$/i,
+    /^(see more|see less)$/i,
+    /^sponsored$/i,
+    /^open dropdown$/i,
+    /^about this ad$/i,
+    /^\d+\s+versions?$/i,
+    /^this ad (is|has|was)\b/i,
+    /^opens? in (a )?new tab$/i,
+    /^use this ad$/i,
+    /^platforms?$/i,
+  ];
+
   function parseMaybeJson(text) {
     if (!text || typeof text !== "string") return null;
     var s = text.trim();
@@ -29,6 +121,223 @@ var MLD = (function () {
       if (value !== undefined && value !== null && value !== "") return value;
     }
     return "";
+  }
+
+  function cleanCopy(text) {
+    return String(text || "")
+      .replace(/[\u200B-\u200D\uFEFF\u2060\u00AD]/g, "")
+      .replace(/\u00A0/g, " ")
+      .replace(/[ \t]+/g, " ")
+      .replace(/\n{3,}/g, "\n\n")
+      .trim();
+  }
+
+  function isChromeLine(line) {
+    var t = cleanCopy(line);
+    if (!t) return true;
+    for (var i = 0; i < CHROME_LINE.length; i++) {
+      if (CHROME_LINE[i].test(t)) return true;
+    }
+    return false;
+  }
+
+  function looksLikeDomDump(text) {
+    return /Library ID:|Started running on|See ad details|See summary details/i.test(text || "");
+  }
+
+  function humanizeCta(value) {
+    var raw = cleanCopy(value);
+    if (!raw) return "";
+    var key = raw.replace(/\s+/g, "_").toUpperCase();
+    if (Object.prototype.hasOwnProperty.call(CTA_ALIASES, key)) return CTA_ALIASES[key];
+    return raw;
+  }
+
+  function isCta(value) {
+    var t = cleanCopy(value).toLowerCase();
+    if (!t) return false;
+    if (Object.prototype.hasOwnProperty.call(CTA_ALIASES, t.replace(/\s+/g, "_").toUpperCase())) return true;
+    for (var i = 0; i < CTA_PHRASES.length; i++) {
+      if (t === CTA_PHRASES[i]) return true;
+    }
+    return false;
+  }
+
+  function isUsableCopy(text) {
+    var c = cleanCopy(text);
+    if (c.length < 2) return false;
+    if (isChromeLine(c)) return false;
+    if (looksLikeDomDump(c)) return false;
+    if (!/[A-Za-z0-9\u0600-\u06FF\u00C0-\u024F]/.test(c)) return false;
+    return true;
+  }
+
+  function pickCopy(current, incoming) {
+    var aOk = isUsableCopy(current);
+    var bOk = isUsableCopy(incoming);
+    if (aOk && bOk) {
+      var a = cleanCopy(current);
+      var b = cleanCopy(incoming);
+      return b.length > a.length ? b : a;
+    }
+    if (bOk) return cleanCopy(incoming);
+    if (aOk) return cleanCopy(current);
+    return "";
+  }
+
+  function textFrom(value) {
+    if (!value) return "";
+    if (typeof value === "string") return cleanCopy(value);
+    if (typeof value === "object") return cleanCopy(value.text || value.body || "");
+    return "";
+  }
+
+  function extractCopyFromSnapshot(snapshot) {
+    snapshot = snapshot || {};
+    var cards = snapshot.cards || [];
+    var extras = snapshot.extra_texts || snapshot.extraTexts || [];
+    var body = textFrom(snapshot.body) || textFrom(snapshot.body_text);
+    var i;
+    if (!body) {
+      for (i = 0; i < extras.length; i++) {
+        var extra = textFrom(extras[i]);
+        if (extra) body = body ? body + "\n" + extra : extra;
+      }
+    }
+    var title = cleanCopy(snapshot.title || snapshot.headline || "");
+    var description = cleanCopy(first(snapshot.link_description, snapshot.description, ""));
+    var caption = textFrom(snapshot.caption);
+    if (!body && caption) body = caption;
+    if (description && (description === body || description === title)) description = "";
+    var cta = humanizeCta(snapshot.cta_text || snapshot.ctaText || "");
+    if (!cta && snapshot.cta_type && snapshot.cta_type !== "UNKNOWN" && snapshot.cta_type !== "NO_BUTTON") {
+      cta = humanizeCta(snapshot.cta_type);
+    }
+    var link = first(snapshot.link_url, snapshot.linkUrl, snapshot.link_destination_display_url, "");
+    for (i = 0; i < cards.length; i++) {
+      var card = cards[i] || {};
+      if (!body) body = textFrom(card.body) || textFrom(card.text);
+      if (!title) title = cleanCopy(card.title || card.headline || "");
+      if (!description) description = cleanCopy(card.link_description || card.description || "");
+      if (!cta) cta = humanizeCta(card.cta_text || card.cta_type || "");
+      if (!link) link = first(card.link_url, card.linkUrl, "");
+    }
+    if (description && (description === body || description === title)) description = "";
+    return {
+      body: body,
+      title: title,
+      description: description,
+      cta: cta,
+      link: String(link || ""),
+    };
+  }
+
+  function parseCardCopy(text, pageName) {
+    var rawLines = String(text || "").split(/\r?\n/);
+    var lines = [];
+    var i;
+    for (i = 0; i < rawLines.length; i++) {
+      var line = cleanCopy(rawLines[i]);
+      if (!line) continue;
+      if (isChromeLine(line)) continue;
+      if (pageName && line.toLowerCase() === cleanCopy(pageName).toLowerCase()) continue;
+      if (
+        /^(facebook|instagram|messenger|audience network|threads)(\s*[·|,]\s*(facebook|instagram|messenger|audience network|threads))+$/i.test(
+          line
+        )
+      ) {
+        continue;
+      }
+      lines.push(line);
+    }
+    var status = /\binactive\b/i.test(text || "") ? "Inactive" : /\bactive\b/i.test(text || "") ? "Active" : "";
+    var cta = "";
+    var title = "";
+    var bodyLines = [];
+    for (i = 0; i < lines.length; i++) {
+      if (isCta(lines[i]) && !cta) {
+        cta = humanizeCta(lines[i]);
+        continue;
+      }
+      bodyLines.push(lines[i]);
+    }
+    if (bodyLines.length >= 2) {
+      var last = bodyLines[bodyLines.length - 1];
+      var firstLine = bodyLines[0];
+      if (last.length <= 80 && last.length < firstLine.length && last.split(" ").length <= 12) {
+        title = last;
+        bodyLines = bodyLines.slice(0, -1);
+      }
+    }
+    return {
+      body: cleanCopy(bodyLines.join("\n")),
+      title: title,
+      description: "",
+      cta: cta,
+      status: status,
+    };
+  }
+
+  function unwrapFacebookLink(href) {
+    if (!href) return "";
+    try {
+      var u = new URL(href, "https://www.facebook.com");
+      var dest = u.searchParams.get("u");
+      if ((u.pathname === "/l.php" || u.pathname.indexOf("/flx/warn") === 0) && dest) {
+        return dest;
+      }
+      var host = u.hostname.replace(/^www\./, "");
+      if (
+        /(^|\.)facebook\.com$|(^|\.)fb\.com$|(^|\.)fbcdn\.net$|(^|\.)instagram\.com$|(^|\.)fbsbx\.com$/.test(host)
+      ) {
+        return "";
+      }
+      return u.href;
+    } catch (e) {
+      return href;
+    }
+  }
+
+  function libraryUrl(id) {
+    return id ? "https://www.facebook.com/ads/library/?id=" + encodeURIComponent(id) : "";
+  }
+
+  function pageAdsUrl(pageId, pageName) {
+    if (pageId) {
+      return (
+        "https://www.facebook.com/ads/library/?active_status=all&ad_type=all&country=ALL&view_all_page_id=" +
+        encodeURIComponent(pageId) +
+        "&search_type=page"
+      );
+    }
+    if (pageName) {
+      return (
+        "https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=ALL&q=" +
+        encodeURIComponent(pageName) +
+        "&search_type=keyword_unordered"
+      );
+    }
+    return "https://www.facebook.com/ads/library/";
+  }
+
+  function formatSwipeBrief(ad) {
+    ad = ad || {};
+    var lines = [];
+    lines.push((ad.isWinner ? "WINNER · " : "") + (ad.days || 0) + " days · " + (ad.pageName || "Unknown page"));
+    if (ad.body) lines.push("Primary: " + ad.body);
+    if (ad.title) lines.push("Headline: " + ad.title);
+    if (ad.description) lines.push("Description: " + ad.description);
+    if (ad.cta) lines.push("CTA: " + ad.cta);
+    if (ad.link) lines.push("Offer: " + ad.link);
+    if (ad.id) lines.push("Ad Library: " + libraryUrl(ad.id));
+    return lines.join("\n");
+  }
+
+  function formatSwipeFile(ads) {
+    var list = ads || [];
+    var chunks = [];
+    for (var i = 0; i < list.length; i++) chunks.push(formatSwipeBrief(list[i]));
+    return chunks.join("\n\n-----\n\n");
   }
 
   function pickVideoUrl(obj) {
@@ -138,14 +447,6 @@ var MLD = (function () {
     return [String(value)];
   }
 
-  function bodyText(snapshot) {
-    if (!snapshot) return "";
-    var body = snapshot.body;
-    if (body && typeof body === "object") return String(body.text || "");
-    if (typeof body === "string") return body;
-    return String(snapshot.body_text || snapshot.caption || "");
-  }
-
   function normalizeAd(raw) {
     raw = raw || {};
     var snapshot = raw.snapshot || raw.ad_snapshot || raw.adSnapshot || {};
@@ -161,6 +462,8 @@ var MLD = (function () {
     var platforms = asList(raw.publisher_platform || raw.publisherPlatform);
     var media = collectMedia(snapshot);
     var days = daysRunning(start, end);
+    var copy = extractCopyFromSnapshot(snapshot);
+    var status = raw.is_active === false || raw.isActive === false ? "Inactive" : raw.is_active || raw.isActive ? "Active" : "";
     return {
       id: id,
       pageName: pageName,
@@ -168,10 +471,12 @@ var MLD = (function () {
       startDate: start,
       endDate: end,
       platforms: platforms,
-      body: bodyText(snapshot),
-      title: String(first(snapshot.title, snapshot.headline, "")),
-      cta: String(first(snapshot.cta_text, snapshot.cta_type, "")),
-      link: String(first(snapshot.link_url, snapshot.link_destination_display_url, "")),
+      body: copy.body,
+      title: copy.title,
+      description: copy.description,
+      cta: copy.cta,
+      link: copy.link,
+      status: status,
       media: media,
       days: days,
       isWinner: days >= WINNER_DAYS,
@@ -205,9 +510,13 @@ var MLD = (function () {
       seen.push(obj);
       if (looksLikeAd(obj)) {
         var ad = normalizeAd(obj);
-        if (ad.id && !ids[ad.id]) {
-          ids[ad.id] = true;
-          out.push(ad);
+        if (ad.id) {
+          if (ids[ad.id] == null) {
+            ids[ad.id] = out.length;
+            out.push(ad);
+          } else {
+            out[ids[ad.id]] = mergeAd(out[ids[ad.id]], ad);
+          }
         }
       }
       if (Array.isArray(obj)) {
@@ -240,12 +549,15 @@ var MLD = (function () {
       "Library ID",
       "Days Running",
       "Winner",
+      "Status",
       "Start Date",
       "Platforms",
       "Primary Text",
       "Headline",
+      "Description",
       "CTA",
-      "Link",
+      "Destination URL",
+      "Ad Library URL",
       "Media Type",
       "Media URL",
     ];
@@ -267,12 +579,15 @@ var MLD = (function () {
           ad.id,
           ad.days,
           ad.days >= WINNER_DAYS ? "yes" : "no",
+          ad.status || "",
           startDateIso(ad.startDate),
           (ad.platforms || []).join("|"),
           ad.body,
           ad.title,
+          ad.description || "",
           ad.cta,
           ad.link,
+          libraryUrl(ad.id),
           types.join("|") || "unknown",
           urls.join(" | "),
         ]
@@ -280,7 +595,7 @@ var MLD = (function () {
           .join(",")
       );
     }
-    return lines.join("\r\n");
+    return "\uFEFF" + lines.join("\r\n");
   }
 
   function advertiserPlaybook(ads) {
@@ -393,15 +708,6 @@ var MLD = (function () {
     return Number.isFinite(parsed) ? parsed : 0;
   }
 
-  function betterText(current, incoming) {
-    var a = String(current || "");
-    var b = String(incoming || "");
-    if (a && a.indexOf("Library ID:") !== -1 && b) return b;
-    if (b && b.indexOf("Library ID:") !== -1 && a) return a;
-    if (b && (!a || b.length < a.length * 0.6 || a.length < 8)) return b;
-    return a || b;
-  }
-
   function mergeAd(current, incoming) {
     if (!current) return incoming;
     if (!incoming) return current;
@@ -419,17 +725,20 @@ var MLD = (function () {
     }
     var end = current.endDate || incoming.endDate;
     var days = daysRunning(start, end);
+    var platforms = (current.platforms && current.platforms.length ? current.platforms : incoming.platforms) || [];
     return {
       id: current.id || incoming.id,
       pageName: current.pageName && current.pageName !== "Unknown page" ? current.pageName : incoming.pageName,
       pageId: current.pageId || incoming.pageId,
       startDate: start,
       endDate: end,
-      platforms: (current.platforms && current.platforms.length ? current.platforms : incoming.platforms) || [],
-      body: betterText(current.body, incoming.body),
-      title: current.title || incoming.title,
-      cta: current.cta || incoming.cta,
+      platforms: platforms,
+      body: pickCopy(current.body, incoming.body),
+      title: pickCopy(current.title, incoming.title),
+      description: pickCopy(current.description, incoming.description),
+      cta: pickCopy(current.cta, incoming.cta) || humanizeCta(incoming.cta || current.cta),
       link: current.link || incoming.link,
+      status: current.status || incoming.status || "",
       media: media,
       days: days,
       isWinner: days >= WINNER_DAYS,
@@ -439,6 +748,16 @@ var MLD = (function () {
   return {
     WINNER_DAYS: WINNER_DAYS,
     parseMaybeJson: parseMaybeJson,
+    cleanCopy: cleanCopy,
+    isUsableCopy: isUsableCopy,
+    humanizeCta: humanizeCta,
+    extractCopyFromSnapshot: extractCopyFromSnapshot,
+    parseCardCopy: parseCardCopy,
+    unwrapFacebookLink: unwrapFacebookLink,
+    libraryUrl: libraryUrl,
+    pageAdsUrl: pageAdsUrl,
+    formatSwipeBrief: formatSwipeBrief,
+    formatSwipeFile: formatSwipeFile,
     pickVideoUrl: pickVideoUrl,
     collectMedia: collectMedia,
     daysRunning: daysRunning,
