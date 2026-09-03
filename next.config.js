@@ -3,6 +3,13 @@ const nextConfig = {
   async headers() {
     return [
       {
+        source: "/plant-guide.html",
+        headers: [
+          { key: "Content-Type", value: "text/html; charset=utf-8" },
+          { key: "Content-Disposition", value: 'attachment; filename="plant-guide.html"' },
+        ],
+      },
+      {
         source: "/spend/masaref.apk",
         headers: [
           { key: "Content-Type", value: "application/octet-stream" },

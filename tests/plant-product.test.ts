@@ -51,6 +51,8 @@ describe("plant purchase email", () => {
     assert.match(email.text, /نفس السيستم نسخة الموبايل/);
     assert.match(email.text, /ملف طريقة التثبيت على الموبايل/);
     assert.match(email.text, /ملف شرح استخدام السيستم كله/);
+    assert.match(email.text, /ملف HTML واحد/);
+    assert.match(email.text, /من غير فك ضغط/);
     assert.match(email.text, new RegExp(`${PLANT_GUIDE_COUNT} نبات`));
     assert.match(email.text, /دكتور النباتات/);
     assert.match(email.text, /بيتموس/);
@@ -90,6 +92,7 @@ describe("plant guide catalog", () => {
     assert.equal(existsSync("public/plants/ocimum-basilicum.jpg"), true);
     assert.equal(existsSync("public/products/plant/plants/nerium-oleander/index.html"), true);
     assert.equal(existsSync("deliverables/plant-guide.apk"), true);
-    assert.equal(existsSync("deliverables/plant-guide-offline.zip"), true);
+    assert.equal(existsSync("public/plant-guide.html"), true);
+    assert.match(readFileSync("public/plant-guide.html", "utf8").slice(0, 2000), new RegExp(`${PLANT_GUIDE_COUNT} نبات`));
   });
 });
