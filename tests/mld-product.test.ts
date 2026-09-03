@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { MLD_PURCHASE_EMAIL_SUBJECT, MLD_ZIP_URL, buildMldPurchaseEmail } from "../src/lib/mld-email";
+import { MLD_PURCHASE_EMAIL_SUBJECT, MLD_DRIVE_URL, buildMldPurchaseEmail } from "../src/lib/mld-email";
 import { deliveryUrlForProduct, mergePaymentConfig } from "../src/lib/config";
 import { getCatalogProduct, isProductSlug, productAdminLabel, resolveProductSlug } from "../src/lib/products";
 import { formatOrderMessage } from "../src/lib/telegram";
@@ -39,34 +39,51 @@ describe("mld catalog product", () => {
 });
 
 describe("mld delivery and purchase email", () => {
-  it("defaults delivery to the site ZIP until a custom URL is set", () => {
+  it("defaults delivery to the Drive folder", () => {
     const cfg = mergePaymentConfig({}, {});
-    assert.equal(deliveryUrlForProduct("mld", cfg), MLD_ZIP_URL);
+    assert.equal(deliveryUrlForProduct("mld", cfg), MLD_DRIVE_URL);
   });
 
-  it("prefers MLD_DELIVERY_URL for the download link", () => {
+  it("ignores a leftover ZIP download URL so the email stays on Drive", () => {
+    const cfg = mergePaymentConfig(
+      {},
+      { mld_delivery_url: "https://www.producthelpyou.online/downloads/meta-library-downloader.zip" }
+    );
+    assert.equal(deliveryUrlForProduct("mld", cfg), MLD_DRIVE_URL);
+  });
+
+  it("prefers MLD_DELIVERY_URL when it is a Drive folder", () => {
     const drive = "https://drive.google.com/drive/folders/mld-files";
     const cfg = mergePaymentConfig({ MLD_DELIVERY_URL: drive }, {});
     assert.equal(deliveryUrlForProduct("mld", cfg), drive);
     assert.equal(cfg.envOverrides.mldDeliveryUrl, true);
   });
 
-  it("writes an Arabic purchase email with install steps", () => {
-    const zip = "https://www.producthelpyou.online/downloads/meta-library-downloader.zip";
+  it("writes a short Arabic email with only the Drive link", () => {
     const email = buildMldPurchaseEmail({
       name: "أحمد",
-      deliveryUrl: zip,
+      deliveryUrl: MLD_DRIVE_URL,
       whatsappDisplay: "01017420379",
     });
     assert.equal(email.subject, MLD_PURCHASE_EMAIL_SUBJECT);
-    assert.match(email.text, /Meta Library Downloader/);
-    assert.match(email.text, /مدى الحياة/);
-    assert.equal(email.text.includes(zip), true);
-    assert.equal(email.html.includes(zip), true);
+    assert.match(email.text, /شكرا ليك على الشراء/);
+    assert.match(email.text, /فيديو شرح التسطيب/);
+    assert.equal(email.text.includes(MLD_DRIVE_URL), true);
+    assert.equal(email.html.includes(MLD_DRIVE_URL), true);
     assert.match(email.html, /dir="rtl"/);
-    assert.match(email.text, /01017420379/);
-    assert.match(email.text, /محمود القوصي/);
-    assert.match(email.text, /Load unpacked/);
+    assert.equal((email.text.match(/https?:\/\//g) || []).length, 1);
+    assert.equal(email.text.includes("01017420379"), false);
+    assert.equal(email.text.includes("Load unpacked"), false);
+    assert.equal(email.text.includes("producthelpyou.online/downloads"), false);
+  });
+
+  it("still sends the Drive folder if a ZIP URL is passed into the email builder", () => {
+    const email = buildMldPurchaseEmail({
+      deliveryUrl: "https://www.producthelpyou.online/downloads/meta-library-downloader.zip",
+      whatsappDisplay: "01017420379",
+    });
+    assert.equal(email.text.includes(MLD_DRIVE_URL), true);
+    assert.equal(email.text.includes("meta-library-downloader.zip"), false);
   });
 });
 

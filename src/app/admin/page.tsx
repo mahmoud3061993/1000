@@ -498,17 +498,15 @@ export default function AdminPage() {
                 </p>
               </div>
               <div className="field settings-wide">
-                <label>لينك تحميل Meta Library Downloader بعد الدفع (ZIP أو Drive)</label>
+                <label>لينك فولدر Meta Library Downloader بعد الدفع (Google Drive)</label>
                 <input
                   value={settings.mld_delivery_url}
                   onChange={(e) => setSettings({ ...settings, mld_delivery_url: e.target.value })}
-                  placeholder="https://www.producthelpyou.online/downloads/meta-library-downloader.zip"
+                  placeholder="https://drive.google.com/drive/u/0/folders/10_EfCwJTazW-d7n1IuJhk_BqcNyBJUJI"
                   dir="ltr"
                 />
                 <p style={{ marginTop: 8, color: "#94a3b8", fontSize: 13, lineHeight: 1.7 }}>
-                  لو فاضي، العميل هيتحوّل لنسخة الـ ZIP على الموقع.
-                  {" · "}
-                  <a href="/downloads/meta-library-downloader.zip">ZIP الحالي</a>
+                  الإيميل بيتبعت بعد تأكيد الدفع من الأدمن، وبيتحط فيه لينك الدرايف ده بس.
                 </p>
               </div>
               <div className="field settings-wide">
