@@ -93,11 +93,15 @@ const FAQS = [
 function Stars({ value, size = "md" }: { value: number; size?: "sm" | "md" }) {
   return (
     <span className={`mld-stars mld-stars-${size}`} aria-label={`${value} من 5`}>
-      {[1, 2, 3, 4, 5].map((n) => (
-        <i key={n} className={n <= value ? "is-on" : ""}>
-          ★
-        </i>
-      ))}
+      {[1, 2, 3, 4, 5].map((n) => {
+        const filled = value >= n;
+        const half = !filled && value >= n - 0.5;
+        return (
+          <i key={n} className={filled ? "is-on" : half ? "is-half" : ""}>
+            ★
+          </i>
+        );
+      })}
     </span>
   );
 }
@@ -316,7 +320,7 @@ export function MldLandingPage({
             <p className="mld-eyebrow">تقييم الناس</p>
             <h2>4.5 من 5 على النسخة الجديدة</h2>
             <div className="mld-rating-hero">
-              <Stars value={5} />
+              <Stars value={4.5} />
               <b>4.5 / 5</b>
               <span>من 9 تقييمات مختلفة</span>
             </div>

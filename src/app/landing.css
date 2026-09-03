@@ -3693,6 +3693,20 @@ html:has(.plant-sales) body {
     color: #ffd166;
 }
 
+.mld-stars i.is-half {
+    position: relative;
+    color: #3a3d4f;
+}
+
+.mld-stars i.is-half:after {
+    content: "★";
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 50%;
+    overflow: hidden;
+    color: #ffd166;
+}
+
 .mld-stars-sm {
     font-size: 15px;
 }
