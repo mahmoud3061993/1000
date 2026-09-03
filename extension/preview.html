@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Meta Ad Library preview</title>
+    <link rel="stylesheet" href="content.css" />
+    <style>
+      body {
+        margin: 0;
+        font-family: "Segoe UI", Tahoma, sans-serif;
+        background: #f0f2f5;
+        color: #050505;
+      }
+      .page {
+        max-width: 760px;
+        margin: 0 auto;
+        padding: 24px 24px 120px;
+      }
+      h1 { font-size: 22px; }
+      .card {
+        background: #fff;
+        border-radius: 16px;
+        padding: 16px;
+        margin: 0 0 18px;
+        box-shadow: 0 1px 2px rgba(0,0,0,.08);
+      }
+      .card img, .card video {
+        width: 100%;
+        max-height: 280px;
+        object-fit: cover;
+        border-radius: 12px;
+        background: #dbeafe;
+      }
+      .meta { color: #65676b; font-size: 13px; margin: 8px 0; }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <h1>Ad Library mock</h1>
+      <article class="card">
+        <a href="https://www.facebook.com/glowco">Glow Co</a>
+        <div class="meta">Started running on Jan 2, 2026 · Facebook · Instagram</div>
+        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='640' height='280'%3E%3Crect fill='%231877F2' width='640' height='280'/%3E%3Ctext x='40' y='150' fill='white' font-size='28' font-family='Arial'%3EGlow serum video ad%3C/text%3E%3C/svg%3E" alt="Glow serum" width="640" height="280" />
+        <p>Get glowing skin in 7 days.</p>
+        <div>50% off today</div>
+        <a href="https://glow.example/offer">Shop now</a>
+        <div>See ad details</div>
+        <div>Library ID: 111111111111</div>
+      </article>
+      <article class="card">
+        <a href="https://www.facebook.com/glowco">Glow Co</a>
+        <div class="meta">Started running on Aug 20, 2026 · Facebook</div>
+        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='640' height='280'%3E%3Crect fill='%230f766e' width='640' height='280'/%3E%3Ctext x='40' y='150' fill='white' font-size='28' font-family='Arial'%3ENew serum drop%3C/text%3E%3C/svg%3E" alt="New serum" width="640" height="280" />
+        <p>New serum drop. Test this angle next.</p>
+        <div>Fresh batch</div>
+        <a href="https://glow.example/serum">Learn more</a>
+        <div>See ad details</div>
+        <div>Library ID: 222222222222</div>
+      </article>
+      <article class="card">
+        <a href="https://www.facebook.com/otherbrand">Other Brand</a>
+        <div class="meta">Started running on Jan 15, 2026 · Instagram</div>
+        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='640' height='280'%3E%3Crect fill='%23f59e0b' width='640' height='280'/%3E%3Ctext x='40' y='150' fill='white' font-size='28' font-family='Arial'%3ELong-running winner%3C/text%3E%3C/svg%3E" alt="Winner" width="640" height="280" />
+        <p>Free shipping this week only.</p>
+        <div>Ships today</div>
+        <a href="https://other.example/sale">Shop now</a>
+        <div>See ad details</div>
+        <div>Library ID: 333333333333</div>
+      </article>
+    </div>
+    <script>
+      window.__MLD_CHROME__ = {
+        runtime: {
+          sendMessage: function (msg, cb) {
+            console.log("mld message", msg);
+            if (cb) cb({ ok: true, count: 1, recent: [] });
+          },
+          lastError: null
+        },
+        storage: {
+          local: {
+            get: function (defaults, cb) { cb(Object.assign({ mldNotes: {}, mldLabels: {} }, defaults)); },
+            set: function () {}
+          }
+        }
+      };
+    </script>
+    <script src="shared.js"></script>
+    <script src="content.js"></script>
+    <script>
+      var now = Math.floor(Date.now() / 1000);
+      window.postMessage({
+        source: "mld-interceptor",
+        ads: MLD.adsFromPayload({
+          collated_results: [
+            {
+              ad_archive_id: "111111111111",
+              page_name: "Glow Co",
+              page_id: "99",
+              start_date: now - 47 * 86400,
+              publisher_platform: ["FACEBOOK", "INSTAGRAM"],
+              snapshot: {
+                page_name: "Glow Co",
+                body: { text: "Get glowing skin in 7 days." },
+                title: "50% off today",
+                cta_text: "Shop now",
+                link_url: "https://glow.example/offer",
+                videos: [{ video_hd_url: "https://example.com/glow.mp4" }]
+              }
+            },
+            {
+              ad_archive_id: "222222222222",
+              page_name: "Glow Co",
+              page_id: "99",
+              start_date: now - 12 * 86400,
+              snapshot: {
+                page_name: "Glow Co",
+                body: { text: "New serum drop." },
+                images: [{ original_image_url: "https://example.com/serum.jpg" }]
+              }
+            },
+            {
+              ad_archive_id: "333333333333",
+              page_name: "Other Brand",
+              start_date: now - 40 * 86400,
+              snapshot: {
+                page_name: "Other Brand",
+                body: { text: "Free shipping this week only." },
+                images: [{ original_image_url: "https://example.com/winner.jpg" }]
+              }
+            }
+          ]
+        })
+      }, "*");
+    </script>
+  </body>
+</html>

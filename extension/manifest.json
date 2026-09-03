@@ -1,0 +1,51 @@
+{
+  "manifest_version": 3,
+  "name": "Meta Library Downloader",
+  "version": "2.4.0",
+  "description": "Download Meta Ad Library ads, spot 30-day winners, export ad copy to Google Sheets, and spy on advertisers.",
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "action": {
+    "default_title": "Meta Library Downloader",
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png"
+    }
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "permissions": ["downloads", "storage"],
+  "host_permissions": [
+    "https://www.facebook.com/*",
+    "https://web.facebook.com/*",
+    "*://*.fbcdn.net/*",
+    "*://*.fbsbx.com/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.facebook.com/ads/library*",
+        "https://web.facebook.com/ads/library*"
+      ],
+      "js": ["shared.js", "interceptor.js"],
+      "run_at": "document_start",
+      "world": "MAIN"
+    },
+    {
+      "matches": [
+        "https://www.facebook.com/ads/library*",
+        "https://web.facebook.com/ads/library*"
+      ],
+      "js": ["shared.js", "content.js"],
+      "css": ["content.css"],
+      "run_at": "document_idle"
+    }
+  ]
+}

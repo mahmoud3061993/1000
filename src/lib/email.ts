@@ -8,6 +8,7 @@ import {
 } from "./config";
 import { buildArabityPurchaseEmail } from "./arabity-email";
 import { buildMasarefPurchaseEmail } from "./masaref-email";
+import { buildMldPurchaseEmail } from "./mld-email";
 import { buildPlantPurchaseEmail } from "./plant-email";
 import { getCatalogProduct } from "./products";
 
@@ -214,6 +215,12 @@ export async function sendPurchaseEmail(order: Pick<Order, "name" | "email" | "p
           })
         : product.slug === "masaref"
           ? buildMasarefPurchaseEmail({
+              name: order.name,
+              deliveryUrl,
+              whatsappDisplay: displayWhatsapp(cfg.whatsapp),
+            })
+        : product.slug === "mld"
+          ? buildMldPurchaseEmail({
               name: order.name,
               deliveryUrl,
               whatsappDisplay: displayWhatsapp(cfg.whatsapp),
