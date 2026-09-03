@@ -43,6 +43,7 @@ export default async function MldLandingRoute() {
           productSlug={mld.slug}
           productTitle={mld.checkoutTitle}
           pixelName={mld.pixelName}
+          formNotice="بعد الدفع هتستلم على ايميلك لينك درايف موجود فيه ال extension ومعاها فيديو شرح طريقه اضافتها على chrome عشان تبدأ تستخدمها"
         />
       </section>
       <MldClosing price={mld.price} />
