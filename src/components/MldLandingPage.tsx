@@ -172,7 +172,7 @@ export function MldLandingPage({
                 احجز نسختك مدى الحياة
               </button>
               <button type="button" className="mld-btn mld-btn-ghost" onClick={() => scrollToId("mld-demo")}>
-                شوف الفيديو
+                اتفرج على ال extension قبل ما تشتريها
               </button>
             </div>
             <div className="mld-hero-meta">4.5 من 5 ★ · 9 تقييمات · النسخة الأولى كانت 4.6 على 9,000 مستخدم</div>
