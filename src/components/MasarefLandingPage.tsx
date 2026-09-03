@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, type ReactNode } from "react";
+import { DownloadLink, StaticPageLink } from "@/components/DownloadLink";
 
 function scrollToId(id: string) {
   const el = document.getElementById(id);
@@ -295,9 +296,9 @@ export function MasarefLandingPage({
               <button type="button" className="ms-btn" onClick={() => scrollToId("ms-preview")}>
                 شوف السيستم من جوه
               </button>
-              <a className="ms-btn ms-btn-ghost" href="/spend/files.html">
+              <StaticPageLink className="ms-btn ms-btn-ghost" href="/masaref/files">
                 حمّل الملفات
-              </a>
+              </StaticPageLink>
             </div>
             <div className="ms-hero-meta">يشتغل أوفلاين — مفيش اشتراك — بياناتك على جهازك</div>
           </div>
@@ -387,18 +388,18 @@ export function MasarefLandingPage({
             <h3>حمّل الملفات دلوقتي</h3>
             <p>السيستم للكمبيوتر ملف ZIP. الأندرويد APK، ولو المتصفح منعه نزّل النسخة المضغوطة.</p>
             <div className="ms-dl-grid">
-              <a className="ms-btn" href="/spend/masaref-html.zip" download="masaref-html.zip">
+              <DownloadLink className="ms-btn" href="/download/masaref-html" filename="masaref-html.zip">
                 نزّل السيستم HTML
-              </a>
-              <a className="ms-btn ms-btn-ghost" href="/spend/masaref.apk" download="masaref.apk">
+              </DownloadLink>
+              <DownloadLink className="ms-btn ms-btn-ghost" href="/spend/masaref.apk" filename="masaref.apk">
                 نزّل تطبيق أندرويد
-              </a>
-              <a className="ms-btn ms-btn-ghost" href="/spend/masaref-android.zip" download="masaref-android.zip">
+              </DownloadLink>
+              <DownloadLink className="ms-btn ms-btn-ghost" href="/spend/masaref-android.zip" filename="masaref-android.zip">
                 أندرويد ZIP
-              </a>
-              <a className="ms-btn ms-btn-ghost" href="/spend/files.html">
+              </DownloadLink>
+              <StaticPageLink className="ms-btn ms-btn-ghost" href="/masaref/files">
                 كل الملفات
-              </a>
+              </StaticPageLink>
             </div>
           </div>
           <div className="ms-center-cta">

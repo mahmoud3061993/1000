@@ -490,9 +490,9 @@ export default function AdminPage() {
                 <p style={{ marginTop: 8, color: "#94a3b8", fontSize: 13, lineHeight: 1.7 }}>
                   لو فاضي، العميل هيتحوّل لصفحة التحميل على الموقع.
                   <br />
-                  <a href="/spend/files.html" target="_blank" rel="noreferrer">صفحة الملفات</a>
+                  <a href="/masaref/files" target="_blank" rel="noreferrer">صفحة الملفات</a>
                   {" · "}
-                  <a href="/spend/masaref-html.zip">HTML ZIP</a>
+                  <a href="/download/masaref-html">HTML ZIP</a>
                   {" · "}
                   <a href="/spend/masaref.apk">APK</a>
                 </p>

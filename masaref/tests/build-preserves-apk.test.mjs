@@ -9,6 +9,7 @@ const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const webApk = join(root, "..", "public", "spend", "masaref.apk");
 const distApk = join(root, "dist", "masaref.apk");
 const htmlZip = join(root, "..", "public", "spend", "masaref-html.zip");
+const rootHtmlZip = join(root, "..", "public", "masaref-html.zip");
 const apkZip = join(root, "..", "public", "spend", "masaref-android.zip");
 const filesPage = join(root, "..", "public", "spend", "files.html");
 
@@ -26,6 +27,7 @@ test("masaref build keeps the APK and packs downloadable zips", () => {
   assert.deepEqual(readFileSync(webApk), marker);
   assert.deepEqual(readFileSync(distApk), marker);
   assert.equal(existsSync(htmlZip), true, "masaref-html.zip missing");
+  assert.equal(existsSync(rootHtmlZip), true, "public/masaref-html.zip missing");
   assert.equal(existsSync(apkZip), true, "masaref-android.zip missing");
   assert.equal(existsSync(filesPage), true, "files.html missing");
   const listing = execFileSync("python3", ["-m", "zipfile", "-l", htmlZip], { encoding: "utf8" });
