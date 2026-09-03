@@ -12,7 +12,7 @@ const product = getCatalogProduct("mld");
 export const metadata: Metadata = {
   title: product.arabicName,
   description:
-    "النسخة الاحترافية من Meta Library Downloader: نزّل الإعلان كامل، صدّر الكوبي، وحدّد الوينر. 499 جنيه — شراء مرة واحدة مدى الحياة لعدد محدود.",
+    "نزل كل الإعلانات من Meta Ads Library بدوسة واحدة. النسخة الاحترافية بتعرفك الـ winners قبل ما المنافس يشيلها. 499 جنيه — شراء مرة واحدة مدى الحياة.",
   openGraph: {
     title: product.arabicName,
     description: "عرض مدى الحياة: ادفع مرة واحدة قبل ما البيع يقف ويتحول لاشتراك شهري.",

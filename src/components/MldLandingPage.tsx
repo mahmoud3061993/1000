@@ -10,9 +10,9 @@ function scrollToId(id: string) {
 }
 
 function scrollToOrder() {
-  const el = document.getElementById("price") || document.getElementById("order-form");
+  const el = document.getElementById("order-form") || document.getElementById("price");
   if (!el) return;
-  const top = el.getBoundingClientRect().top + window.scrollY - 12;
+  const top = el.getBoundingClientRect().top + window.scrollY - 18;
   window.scrollTo({ top, behavior: "smooth" });
 }
 
@@ -52,6 +52,17 @@ const OUTCOMES = [
     title: "تتابع المنافس من غير لخبطة",
     text: "Spy on page و Open offer يفتحولك صفحة المعلن والعرض وهو شغال.",
   },
+];
+
+const CURRENT_EXTENSION = [
+  "تنزيل جميع الإعلانات الظاهرة بدوسة واحدة — مهما كان عددها",
+  "تصدير ملف إكسل فيه نصوص الإعلانات جاهز تفتحه على Google Sheets",
+  "تاج الوينر وعدد الأيام على كل إعلان (30 يوم+)",
+  "فلتر يعرض الـ winners اللي شغالين شهر أو أكتر بس",
+  "تحميل الإعلان الواحد: صورة أو فيديو MP4",
+  "Spy on page لمتابعة باقي إعلانات المعلن",
+  "Open offer لفتح لينك العرض مباشرة",
+  "إحصائيات الصفحة: عدد الإعلانات وعدد الوينرز",
 ];
 
 const FEATURES = [
@@ -150,13 +161,9 @@ export function MldLandingPage({
         <div className="mld-wrap mld-hero-grid">
           <div className="mld-hero-copy">
             <div className="mld-kicker">النسخة 2 — أقوى من الإضافة اللي 9,000 حد ثبّتوها</div>
-            <h1>انزل الإعلان الفائز كامل… مش صورة واحدة وخلاص</h1>
-            <p>
-              لو بتدور في مكتبة إعلانات ميتا كل يوم، النسخة دي بتخليك تنزّل الكرييتف، تصدّر الكوبي،
-              وتعرف الإعلان اللي شغال 30 يوم+ قبل ما المنافس يغيّره.
-            </p>
+            <h1>نزل كل الاعلانات من meta ads library بدوسة واحدة مهما كان عددها</h1>
+            <p>النسخة دي بتخليك تعرف كل الاعلانات ال winners قبل ما المنافس يشيلها او يغيرها</p>
             <ul className="mld-checks">
-              <li>تحميل صورة وفيديو MP4 بضغطة</li>
               <li>تاج الوينر + تصدير الشيت + Spy على المعلن</li>
               <li>{price} جنيه — شراء مرة واحدة مدى الحياة</li>
             </ul>
@@ -189,7 +196,7 @@ export function MldLandingPage({
         <div className="mld-wrap">
           <div className="mld-section-head">
             <p className="mld-eyebrow">الإضافة دي مفيدة لمين؟</p>
-            <h2>لو بتأكل عيش من إعلانات ميتا، الصفحة دي ليك</h2>
+            <h2>لو بتفتح meta ads library يوميا او بشكل عام شغال في اعلانات ميتا!</h2>
           </div>
           <div className="mld-card-grid">
             {AUDIENCE.map((item) => (
@@ -235,7 +242,26 @@ export function MldLandingPage({
             <img src="/images/mld-v1-chrome-store.png" alt="صفحة Chrome Store للنسخة القديمة من Meta Library Downloader وبها 9,000 مستخدم" />
             <figcaption>دي النسخة القديمة</figcaption>
           </figure>
-          <p className="mld-upgrade-line">دي فرصتك تاخد النسخه الاحدث تشتريا مره واحدة مدى الحياه</p>
+          <p className="mld-upgrade-line">دي فرصتك تاخد النسخه الاحدث تشتريها مره واحدة مدى الحياه</p>
+          <figure className="mld-old-shot mld-new-shot">
+            <img
+              src="/images/mld-v2-ads-library.png"
+              alt="النسخة الأحدث من Meta Library Downloader جوه Meta Ads Library: تحميل جماعي، تاج الوينر، وتصدير إكسل"
+            />
+            <figcaption>دي النسخة الأحدث وهي شغالة جوه المكتبة</figcaption>
+          </figure>
+          <ul className="mld-now-list">
+            {CURRENT_EXTENSION.map((item, index) => (
+              <li key={item} className={index < 2 ? "is-hot" : ""}>
+                {item}
+              </li>
+            ))}
+          </ul>
+          <div className="mld-center-cta">
+            <button type="button" className="mld-btn" onClick={scrollToOrder}>
+              اطلب النسخة الأحدث دلوقتي
+            </button>
+          </div>
         </div>
       </section>
 
