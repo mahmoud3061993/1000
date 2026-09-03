@@ -172,21 +172,20 @@ export function MldLandingPage({
                 احجز نسختك مدى الحياة
               </button>
               <button type="button" className="mld-btn mld-btn-ghost" onClick={() => scrollToId("mld-demo")}>
-                شوف مكان الفيديو
+                شوف الفيديو
               </button>
             </div>
             <div className="mld-hero-meta">4.5 من 5 ★ · 9 تقييمات · النسخة الأولى كانت 4.6 على 9,000 مستخدم</div>
           </div>
 
           <div id="mld-demo" className="mld-video-slot" data-track-section="SectionDemo">
-            <div className="mld-video-frame">
-              <div className="mld-video-empty">
-                <span className="mld-video-play" aria-hidden="true">
-                  ▶
-                </span>
-                <strong>مكان الفيديو</strong>
-                <p>ارفع فيديو الشرح هنا بعدين — الصندوق جاهز ومستني الملف.</p>
-              </div>
+            <div className="mld-video-frame mld-video-has-player">
+              <iframe
+                src="https://www.youtube.com/embed/4zpBFSBggho"
+                title="شرح Meta Library Downloader"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+              />
             </div>
           </div>
         </div>

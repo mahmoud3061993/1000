@@ -15,6 +15,7 @@ export function CheckoutForm({
   productSlug = "1000",
   productTitle = "+1000 winning conversion ads canva editable templates",
   pixelName = "+1000 Canva Ads",
+  formNotice = "",
 }: {
   instapayNumber: string;
   instapayName: string;
@@ -25,6 +26,7 @@ export function CheckoutForm({
   productSlug?: string;
   productTitle?: string;
   pixelName?: string;
+  formNotice?: string;
 }) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -129,6 +131,7 @@ export function CheckoutForm({
         {compareAtPrice > price ? <s>{compareAtPrice} ج.م</s> : null}
       </div>
       <div className="checkout-box">
+        {formNotice ? <p className="checkout-notice">{formNotice}</p> : null}
         <h3>يرجى ادخال معلوماتك لإكمال الطلب</h3>
         <form onSubmit={submit}>
           {error ? <div className="form-error">{error}</div> : null}

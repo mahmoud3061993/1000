@@ -60,6 +60,17 @@ a { color: inherit; }
   font-size: 18px;
 }
 
+.checkout-notice {
+  margin: 0 0 16px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: #ffd166;
+  color: #1a1200;
+  font-weight: 800;
+  line-height: 1.85;
+  border: 2px solid #e11d48;
+}
+
 .field {
   display: grid;
   gap: 6px;
