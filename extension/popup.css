@@ -1,0 +1,113 @@
+body {
+  margin: 0;
+  width: 320px;
+  font: 13px/1.4 "Segoe UI", Tahoma, system-ui, sans-serif;
+  color: #e2e8f0;
+  background: #0f172a;
+}
+
+header {
+  display: flex;
+  gap: 10px;
+  padding: 14px 14px 10px;
+  align-items: flex-start;
+}
+
+header p,
+footer,
+#empty {
+  margin: 4px 0 0;
+  color: #94a3b8;
+}
+
+.mark {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: #1877f2;
+  display: grid;
+  place-items: center;
+  font-size: 16px;
+  flex: 0 0 auto;
+}
+
+#open-library {
+  margin: 0 14px 12px;
+  width: calc(100% - 28px);
+  border: 0;
+  border-radius: 10px;
+  background: #1877f2;
+  color: #fff;
+  font-weight: 800;
+  padding: 10px;
+  cursor: pointer;
+}
+
+section {
+  padding: 0 14px 8px;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+h2 {
+  margin: 0;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #93c5fd;
+}
+
+#count {
+  font-size: 12px;
+  color: #cbd5e1;
+}
+
+#recent {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+}
+
+#recent li {
+  background: #1e293b;
+  border-radius: 10px;
+  padding: 8px 10px;
+  margin: 0 0 6px;
+}
+
+#recent b {
+  display: block;
+}
+
+#recent span {
+  color: #94a3b8;
+  font-size: 11px;
+}
+
+#empty[hidden],
+#recent:empty + #empty {
+  display: none;
+}
+
+#recent:empty + #empty {
+  display: block;
+}
+
+.tips {
+  margin: 0;
+  padding: 8px 28px 4px;
+  color: #cbd5e1;
+}
+
+.tips li {
+  margin: 0 0 4px;
+}
+
+footer {
+  padding: 8px 14px 14px;
+  font-size: 11px;
+}

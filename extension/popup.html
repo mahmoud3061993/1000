@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Meta Library Downloader</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <header>
+      <div class="mark" aria-hidden="true">⬇</div>
+      <div>
+        <strong>Meta Library Downloader</strong>
+        <p>Save ads, winners, and swipe-file notes from Meta Ad Library.</p>
+      </div>
+    </header>
+    <button id="open-library" type="button">Open Meta Ad Library</button>
+    <section>
+      <div class="row">
+        <h2>Recent downloads</h2>
+        <span id="count">0</span>
+      </div>
+      <ul id="recent"></ul>
+      <p id="empty">No downloads yet. Open Ad Library and click Download on any ad.</p>
+    </section>
+    <ul class="tips">
+      <li>👑 Ads running 30+ days get a gold outline</li>
+      <li>Bulk download every creative on screen</li>
+      <li>Spy on a page for runtime, formats, and winners</li>
+      <li>Export CSV, add notes, and color-label ads</li>
+    </ul>
+    <footer>v2.0.0 · Files save to Downloads/MetaAdLibrary</footer>
+    <script src="popup.js"></script>
+  </body>
+</html>
